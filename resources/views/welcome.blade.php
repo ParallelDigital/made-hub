@@ -52,10 +52,10 @@
                     <span class="text-xl font-bold text-primary">MADE RUNNING</span>
                 </div>
                 <div class="hidden md:flex space-x-6">
-                    <a href="#" class="text-white hover:text-primary transition-colors">THE WORKOUT</a>
+                    <a href="{{ route('home') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
+                    <a href="{{ route('purchase.index') }}" class="text-white hover:text-primary transition-colors">PURCHASE</a>
                     <a href="#" class="text-white hover:text-primary transition-colors">THE COMMUNITY</a>
                     <a href="#" class="text-white hover:text-primary transition-colors">OUR STUDIOS</a>
-                    <a href="#" class="text-white hover:text-primary transition-colors">EXPERIENCES</a>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
@@ -134,12 +134,12 @@
                             </button>
                             
                             <!-- Week Days -->
-                            <div class="flex space-x-2" id="week-days">
+                            <div class="flex space-x-2 flex-1" id="week-days">
                                 @foreach($weekDays as $day)
-                                <button onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-4 py-3 rounded-lg transition-colors cursor-pointer min-w-[80px]
-                                    {{ $day['is_selected'] ? 'bg-blue-600 text-white' : ($day['is_today'] ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-100') }}">
-                                    <div class="text-xs font-medium uppercase">{{ $day['day'] }}</div>
-                                    <div class="text-lg font-bold">{{ $day['date'] }}</div>
+                                <button onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-6 py-4 rounded-lg transition-colors cursor-pointer flex-1
+                                    {{ $day['is_selected'] ? 'bg-primary text-white' : ($day['is_today'] ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-100') }}">
+                                    <div class="text-sm font-medium uppercase">{{ $day['day'] }}</div>
+                                    <div class="text-xl font-bold">{{ $day['date'] }}</div>
                                 </button>
                                 @endforeach
                             </div>
@@ -324,9 +324,9 @@
                     const button = document.createElement('button');
                     button.onclick = () => loadDate(day.full_date);
                     
-                    let classes = 'text-center px-4 py-3 rounded-lg transition-colors cursor-pointer min-w-[80px] ';
+                    let classes = 'text-center px-6 py-4 rounded-lg transition-colors cursor-pointer flex-1 ';
                     if (day.is_selected) {
-                        classes += 'bg-blue-600 text-white';
+                        classes += 'bg-primary text-white';
                     } else if (day.is_today) {
                         classes += 'bg-blue-100 text-blue-600 font-semibold';
                     } else {
@@ -335,8 +335,8 @@
                     
                     button.className = classes;
                     button.innerHTML = `
-                        <div class="text-xs font-medium uppercase">${day.day}</div>
-                        <div class="text-lg font-bold">${day.date}</div>
+                        <div class="text-sm font-medium uppercase">${day.day}</div>
+                        <div class="text-xl font-bold">${day.date}</div>
                     `;
                     
                     weekDaysContainer.appendChild(button);
