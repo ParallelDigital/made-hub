@@ -76,7 +76,16 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="class_date" class="block text-sm font-medium text-gray-300">Class Date</label>
+                    <input type="date" name="class_date" id="class_date" value="{{ old('class_date', $class->class_date ? $class->class_date->format('Y-m-d') : '') }}"
+                           class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                    @error('class_date')
+                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <div>
                     <label for="start_time" class="block text-sm font-medium text-gray-300">Start Time</label>
                     <input type="time" name="start_time" id="start_time" value="{{ old('start_time', $class->start_time) }}"

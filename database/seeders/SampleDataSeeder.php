@@ -43,38 +43,155 @@ class SampleDataSeeder extends Seeder
             ],
         ];
 
-        foreach ($instructors as $instructorData) {
-            $instructor = \App\Models\Instructor::create($instructorData);
+        $instructors = \App\Models\Instructor::insert($instructors);
 
-            // Create sample classes for each instructor
-            $classes = [
-                [
-                    'name' => 'Morning HIIT Blast',
-                    'description' => 'High-intensity interval training to kickstart your day with energy and burn calories efficiently.',
-                    'duration' => 45,
-                    'max_spots' => 20,
-                    'price' => 25.00,
-                    'start_time' => '07:00',
-                    'end_time' => '07:45',
-                    'active' => true,
-                ],
-                [
-                    'name' => 'Strength & Power',
-                    'description' => 'Build lean muscle and increase strength with compound movements and progressive overload.',
-                    'duration' => 60,
-                    'max_spots' => 15,
-                    'price' => 30.00,
-                    'start_time' => '18:00',
-                    'end_time' => '19:00',
-                    'active' => true,
-                ],
-            ];
+        $instructor1 = \App\Models\Instructor::find(1);
+        $instructor2 = \App\Models\Instructor::find(2);
+        $instructor3 = \App\Models\Instructor::find(3);
 
-            foreach ($classes as $classData) {
-                $classData['instructor_id'] = $instructor->id;
-                \App\Models\FitnessClass::create($classData);
-            }
-        }
+        // Create sample classes for today and this week
+        $today = now()->format('Y-m-d');
+        $tomorrow = now()->addDay()->format('Y-m-d');
+
+        \App\Models\FitnessClass::create([
+            'name' => 'Full Body (Lower Focus)',
+            'description' => 'High-intensity interval training focusing on lower body',
+            'class_date' => $today,
+            'max_spots' => 20,
+            'price' => 25.00,
+            'instructor_id' => $instructor1->id,
+            'start_time' => '06:00',
+            'end_time' => '07:00',
+            'active' => true,
+        ]);
+
+        \App\Models\FitnessClass::create([
+            'name' => 'Full Body (Lower Focus)',
+            'description' => 'High-intensity interval training focusing on lower body',
+            'class_date' => $today,
+            'max_spots' => 20,
+            'price' => 25.00,
+            'instructor_id' => $instructor1->id,
+            'start_time' => '07:10',
+            'end_time' => '08:10',
+            'active' => true,
+        ]);
+
+        \App\Models\FitnessClass::create([
+            'name' => 'Full Body (Lower Focus)',
+            'description' => 'High-intensity interval training focusing on lower body',
+            'class_date' => $today,
+            'max_spots' => 20,
+            'price' => 25.00,
+            'instructor_id' => $instructor1->id,
+            'start_time' => '08:20',
+            'end_time' => '09:20',
+            'active' => true,
+        ]);
+
+        \App\Models\FitnessClass::create([
+            'name' => 'Strength & Conditioning',
+            'description' => 'Build strength and improve your conditioning',
+            'class_date' => $tomorrow,
+            'max_spots' => 15,
+            'price' => 30.00,
+            'instructor_id' => $instructor2->id,
+            'start_time' => '18:00',
+            'end_time' => '19:00',
+            'active' => true,
+        ]);
+
+        // Create sample memberships
+        \App\Models\Membership::create([
+            'name' => 'Basic Monthly',
+            'description' => 'Perfect for beginners. Includes 8 classes per month with access to all basic facilities.',
+            'price' => 49.99,
+            'duration_days' => 30,
+            'class_credits' => 8,
+            'unlimited' => false,
+            'active' => true,
+        ]);
+
+        \App\Models\Membership::create([
+            'name' => 'Premium Monthly',
+            'description' => 'Our most popular plan. Unlimited classes, priority booking, and access to premium facilities.',
+            'price' => 89.99,
+            'duration_days' => 30,
+            'class_credits' => null,
+            'unlimited' => true,
+            'active' => true,
+        ]);
+
+        \App\Models\Membership::create([
+            'name' => 'Annual Premium',
+            'description' => 'Best value! Unlimited classes for a full year with 2 months free. Includes personal training sessions.',
+            'price' => 899.99,
+            'duration_days' => 365,
+            'class_credits' => null,
+            'unlimited' => true,
+            'active' => true,
+        ]);
+
+        \App\Models\Membership::create([
+            'name' => 'Student Plan',
+            'description' => 'Special discounted rate for students. 12 classes per month with flexible scheduling.',
+            'price' => 35.99,
+            'duration_days' => 30,
+            'class_credits' => 12,
+            'unlimited' => false,
+            'active' => true,
+        ]);
+
+        // Create sample pricing tiers
+        \App\Models\PricingTier::create([
+            'name' => 'Early Bird Class Special',
+            'description' => 'Book classes before 6 AM and save 20%',
+            'type' => 'class',
+            'base_price' => 25.00,
+            'discount_percentage' => 20.00,
+            'final_price' => 20.00,
+            'valid_from' => now(),
+            'valid_until' => now()->addMonths(3),
+            'min_quantity' => 1,
+            'max_quantity' => 5,
+            'active' => true,
+        ]);
+
+        \App\Models\PricingTier::create([
+            'name' => 'Student Membership Discount',
+            'description' => 'Special pricing for students with valid ID',
+            'type' => 'membership',
+            'base_price' => 89.99,
+            'discount_percentage' => 30.00,
+            'final_price' => 62.99,
+            'min_quantity' => 1,
+            'active' => true,
+        ]);
+
+        \App\Models\PricingTier::create([
+            'name' => 'Class Bundle Package',
+            'description' => '10 classes for the price of 8 - great value!',
+            'type' => 'package',
+            'base_price' => 250.00,
+            'discount_percentage' => 20.00,
+            'final_price' => 200.00,
+            'min_quantity' => 1,
+            'max_quantity' => 2,
+            'active' => true,
+        ]);
+
+        \App\Models\PricingTier::create([
+            'name' => 'Black Friday Special',
+            'description' => 'Limited time offer - 50% off all memberships',
+            'type' => 'membership',
+            'base_price' => 89.99,
+            'discount_percentage' => 50.00,
+            'final_price' => 44.99,
+            'valid_from' => now()->addMonths(2),
+            'valid_until' => now()->addMonths(2)->addDays(7),
+            'min_quantity' => 1,
+            'active' => true,
+        ]);
 
         // Create some sample bookings
         $users = \App\Models\User::where('role', 'user')->get();

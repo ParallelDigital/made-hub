@@ -51,6 +51,7 @@ class FitnessClassController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'class_date' => 'nullable|date',
             'max_spots' => 'required|integer|min:1|max:50',
             'price' => 'required|numeric|min:0',
             'instructor_id' => 'required|exists:instructors,id',
@@ -98,6 +99,7 @@ class FitnessClassController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'class_date' => 'nullable|date',
             'max_spots' => 'required|integer|min:1|max:50',
             'price' => 'required|numeric|min:0',
             'instructor_id' => 'required|exists:instructors,id',

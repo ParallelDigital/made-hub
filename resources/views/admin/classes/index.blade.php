@@ -57,6 +57,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Instructor</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Spots</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Price</th>
@@ -75,6 +76,9 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                 {{ $class->instructor->name ?? 'No Instructor' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                {{ $class->class_date ? $class->class_date->format('M j, Y') : 'No Date' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                 {{ $class->start_time }} - {{ $class->end_time }}

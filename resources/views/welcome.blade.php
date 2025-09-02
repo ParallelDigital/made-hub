@@ -75,28 +75,21 @@
         </nav>
 
         <!-- Hero Section -->
-        <div class="relative min-h-screen flex items-center justify-center overflow-hidden">
-            <!-- Background Image Overlay -->
-            <div class="absolute inset-0 bg-gradient-to-r from-red-600/80 to-red-700/60 z-10"></div>
-            <div class="absolute inset-0 bg-black/40 z-20"></div>
-            
-            <!-- Background Pattern -->
-            <div class="absolute inset-0 opacity-10 z-5" style="background-image: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></g></svg>');"></div>
+        <div class="relative h-[500px] flex items-center justify-center overflow-hidden">
+            <!-- Background Image -->
+            <div class="absolute inset-0 bg-cover bg-center bg-no-repeat z-5" style="background-image: url('{{ asset('made-club.jpg') }}');"></div>
+            <div class="absolute inset-0 bg-black/70 z-20"></div>
 
             <!-- Content -->
             <div class="relative z-30 text-center px-6 max-w-4xl mx-auto">
                 <div class="mb-8">
-                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-20 w-20 mx-auto mb-4">
+                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="mx-auto mb-4">
                 </div>
                 
                 <h1 class="text-6xl md:text-8xl font-black mb-6 tracking-tight">
-                    <span class="block text-white">MANCHESTER</span>
-                    <span class="block text-primary">SCHEDULE</span>
+                    <span class="block text-white">MADE TO</span>
+                    <span class="block text-primary">ELEVATE</span>
                 </h1>
-                
-                <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                    High-intensity interval training that will push your limits and transform your fitness journey.
-                </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <a href="{{ route('register') }}" class="bg-primary text-black px-8 py-4 text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105">
@@ -110,136 +103,108 @@
         </div>
 
         <!-- Schedule Section -->
-        <div id="schedule" class="bg-gray-900 py-16">
+        <div id="schedule" class="bg-gray-100 py-16">
             <div class="max-w-6xl mx-auto px-6">
-                <h2 class="text-4xl font-bold text-center mb-12 text-white">Manchester</h2>
-                
-                <!-- Week Navigation -->
-                <div class="flex items-center justify-center mb-8">
-                    <button class="p-2 text-white hover:text-primary transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </button>
-                    
-                    <div class="grid grid-cols-7 gap-4 mx-8">
-                        <div class="text-center">
-                            <div class="text-sm text-gray-400 mb-1">MON</div>
-                            <div class="text-lg font-semibold text-white">4</div>
-                        </div>
-                        <div class="text-center bg-primary text-black rounded-lg p-2">
-                            <div class="text-sm mb-1">TUE</div>
-                            <div class="text-lg font-semibold">5</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-sm text-gray-400 mb-1">WED</div>
-                            <div class="text-lg font-semibold text-white">6</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-sm text-gray-400 mb-1">THU</div>
-                            <div class="text-lg font-semibold text-white">7</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-sm text-gray-400 mb-1">FRI</div>
-                            <div class="text-lg font-semibold text-white">8</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-sm text-gray-400 mb-1">SAT</div>
-                            <div class="text-lg font-semibold text-white">9</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-sm text-gray-400 mb-1">SUN</div>
-                            <div class="text-lg font-semibold text-white">10</div>
+                <!-- Calendar Card -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <!-- Calendar Header -->
+                    <div class="bg-white px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-2xl font-bold text-gray-900">Manchester</h2>
+                            <div class="flex items-center space-x-4">
+                                <select class="bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
+                                    <option>Instructor</option>
+                                </select>
+                                <select class="bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
+                                    <option>Class Type</option>
+                                </select>
+                                <button class="text-primary text-sm hover:underline">Clear All</button>
+                            </div>
                         </div>
                     </div>
-                    
-                    <button class="p-2 text-white hover:text-primary transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
-                </div>
 
-                <!-- Class Schedule -->
-                <div class="bg-black rounded-lg p-6">
-                    <div class="space-y-4">
-                        <!-- Class Item -->
-                        <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                            <div class="flex items-center space-x-4">
-                                <div class="text-white">
-                                    <div class="text-sm text-gray-400">6:00 AM</div>
-                                    <div class="font-semibold">HIIT BLAST</div>
-                                </div>
-                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                                    <img src="{{ asset('made-running.webp') }}" alt="Instructor" class="w-8 h-8 rounded-full">
-                                </div>
-                                <div class="text-white">
-                                    <div class="font-semibold">Full Body Power Blast (45 MIN)</div>
-                                    <div class="text-sm text-gray-400">with Alex Thompson</div>
-                                </div>
+                    <!-- Week Navigation -->
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <!-- Previous Week Arrow -->
+                            <button onclick="loadDate('{{ $prevWeek }}')" class="p-2 rounded-lg hover:bg-gray-200 text-gray-600 transition-colors" id="prev-week-btn">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Week Days -->
+                            <div class="flex space-x-2" id="week-days">
+                                @foreach($weekDays as $day)
+                                <button onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-4 py-3 rounded-lg transition-colors cursor-pointer min-w-[80px]
+                                    {{ $day['is_selected'] ? 'bg-blue-600 text-white' : ($day['is_today'] ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-100') }}">
+                                    <div class="text-xs font-medium uppercase">{{ $day['day'] }}</div>
+                                    <div class="text-lg font-bold">{{ $day['date'] }}</div>
+                                </button>
+                                @endforeach
                             </div>
-                            <button class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
-                                BOOK
+                            
+                            <!-- Next Week Arrow -->
+                            <button onclick="loadDate('{{ $nextWeek }}')" class="p-2 rounded-lg hover:bg-gray-200 text-gray-600 transition-colors" id="next-week-btn">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
                             </button>
                         </div>
+                    </div>
 
-                        <!-- More Classes -->
-                        <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                            <div class="flex items-center space-x-4">
-                                <div class="text-white">
-                                    <div class="text-sm text-gray-400">7:00 AM</div>
-                                    <div class="font-semibold">CARDIO BURN</div>
-                                </div>
-                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                                    <img src="{{ asset('made-running.webp') }}" alt="Instructor" class="w-8 h-8 rounded-full">
-                                </div>
-                                <div class="text-white">
-                                    <div class="font-semibold">Cardio Blast Bootcamp (30 MIN)</div>
-                                    <div class="text-sm text-gray-400">with Sarah Mitchell</div>
-                                </div>
-                            </div>
-                            <button class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
-                                BOOK
-                            </button>
+                    <!-- Selected Date Header -->
+                    <div class="px-6 py-4 bg-white border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900" id="selected-date-header">{{ $selectedDate->format('l, F j, Y') }}</h3>
+                            <span class="text-sm text-gray-500">Today</span>
                         </div>
+                    </div>
 
-                        <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                            <div class="flex items-center space-x-4">
-                                <div class="text-white">
-                                    <div class="text-sm text-gray-400">8:00 AM</div>
-                                    <div class="font-semibold">STRENGTH</div>
-                                </div>
-                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                                    <img src="{{ asset('made-running.webp') }}" alt="Instructor" class="w-8 h-8 rounded-full">
-                                </div>
-                                <div class="text-white">
-                                    <div class="font-semibold">Full Body Strength Focus (45 MIN)</div>
-                                    <div class="text-sm text-gray-400">with Mike Johnson</div>
-                                </div>
-                            </div>
-                            <button class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
-                                BOOK
-                            </button>
+                    <!-- Loading Spinner -->
+                    <div id="loading-spinner" class="hidden px-6 py-12">
+                        <div class="text-center">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <p class="mt-4 text-gray-600">Loading classes...</p>
                         </div>
+                    </div>
 
-                        <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                            <div class="flex items-center space-x-4">
-                                <div class="text-white">
-                                    <div class="text-sm text-gray-400">6:30 PM</div>
-                                    <div class="font-semibold">EVENING BURN</div>
+                    <!-- Selected Date Classes -->
+                    <div class="px-6 py-4" id="classes-container">
+                        @if($selectedDateClasses->count() > 0)
+                            <div class="space-y-3" id="classes-list">
+                                @foreach($selectedDateClasses as $class)
+                                <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <div class="flex-shrink-0 w-20">
+                                        <div class="text-sm font-semibold text-gray-900">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</div>
+                                        <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} min</div>
+                                    </div>
+                                    
+                                    <div class="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center ml-6">
+                                        <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" 
+                                             alt="{{ $class->instructor->name ?? 'Instructor' }}" 
+                                             class="w-12 h-12 rounded-full object-cover">
+                                    </div>
+                                    
+                                    <div class="flex-1 ml-4">
+                                        <div class="font-semibold text-gray-900">{{ $class->name }} ({{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} Min)</div>
+                                        <div class="text-sm text-gray-600">{{ $class->instructor->name ?? 'No Instructor' }}</div>
+                                        <div class="text-xs text-gray-500">Manchester Red Room</div>
+                                    </div>
                                 </div>
-                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                                    <img src="{{ asset('made-running.webp') }}" alt="Instructor" class="w-8 h-8 rounded-full">
-                                </div>
-                                <div class="text-white">
-                                    <div class="font-semibold">After Work Power Session (45 MIN)</div>
-                                    <div class="text-sm text-gray-400">with Emma Davis</div>
-                                </div>
+                                @endforeach
                             </div>
-                            <button class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
-                                BOOK
-                            </button>
-                        </div>
+                        @else
+                            <div class="text-center py-12" id="no-classes">
+                                <div class="text-gray-400 mb-4">
+                                    <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4v10m6-10v10m-6-4h6"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No classes scheduled</h3>
+                                <p class="text-gray-500">There are no classes scheduled for this date.</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -300,5 +265,143 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            let currentDate = '{{ $selectedDate->format("Y-m-d") }}';
+            let isLoading = false;
+
+            function loadDate(date) {
+                if (isLoading) return;
+                
+                isLoading = true;
+                currentDate = date;
+                
+                // Show loading spinner
+                document.getElementById('loading-spinner').classList.remove('hidden');
+                document.getElementById('classes-container').classList.add('hidden');
+                
+                // Update URL without page reload
+                const url = new URL(window.location);
+                url.searchParams.set('date', date);
+                window.history.pushState({}, '', url);
+                
+                // Fetch new data
+                fetch(`/api/classes?date=${date}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateUI(data);
+                        isLoading = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading classes:', error);
+                        isLoading = false;
+                        // Hide loading spinner on error
+                        document.getElementById('loading-spinner').classList.add('hidden');
+                        document.getElementById('classes-container').classList.remove('hidden');
+                    });
+            }
+
+            function updateUI(data) {
+                // Update date header
+                document.getElementById('selected-date-header').textContent = data.selectedDate;
+                
+                // Update week navigation
+                updateWeekNavigation(data.weekDays, data.prevWeek, data.nextWeek);
+                
+                // Update classes list
+                updateClassesList(data.classes);
+                
+                // Hide loading spinner and show content
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('classes-container').classList.remove('hidden');
+            }
+
+            function updateWeekNavigation(weekDays, prevWeek, nextWeek) {
+                const weekDaysContainer = document.getElementById('week-days');
+                weekDaysContainer.innerHTML = '';
+                
+                weekDays.forEach(day => {
+                    const button = document.createElement('button');
+                    button.onclick = () => loadDate(day.full_date);
+                    
+                    let classes = 'text-center px-4 py-3 rounded-lg transition-colors cursor-pointer min-w-[80px] ';
+                    if (day.is_selected) {
+                        classes += 'bg-blue-600 text-white';
+                    } else if (day.is_today) {
+                        classes += 'bg-blue-100 text-blue-600 font-semibold';
+                    } else {
+                        classes += 'text-gray-600 hover:bg-gray-100';
+                    }
+                    
+                    button.className = classes;
+                    button.innerHTML = `
+                        <div class="text-xs font-medium uppercase">${day.day}</div>
+                        <div class="text-lg font-bold">${day.date}</div>
+                    `;
+                    
+                    weekDaysContainer.appendChild(button);
+                });
+                
+                // Update arrow buttons
+                document.getElementById('prev-week-btn').setAttribute('onclick', `loadDate('${prevWeek}')`);
+                document.getElementById('next-week-btn').setAttribute('onclick', `loadDate('${nextWeek}')`);
+            }
+
+            function updateClassesList(classes) {
+                const container = document.getElementById('classes-container');
+                
+                if (classes.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="text-gray-400 mb-4">
+                                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4v10m6-10v10m-6-4h6"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No classes scheduled</h3>
+                            <p class="text-gray-500">There are no classes scheduled for this date.</p>
+                        </div>
+                    `;
+                } else {
+                    const classesHTML = classes.map(classItem => {
+                        const startTime = new Date(`2000-01-01T${classItem.start_time}`);
+                        const endTime = new Date(`2000-01-01T${classItem.end_time}`);
+                        const duration = Math.round((endTime - startTime) / (1000 * 60));
+                        
+                        return `
+                            <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <div class="flex-shrink-0 w-20">
+                                    <div class="text-sm font-semibold text-gray-900">${startTime.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true})}</div>
+                                    <div class="text-xs text-gray-500">${duration} min</div>
+                                </div>
+                                
+                                <div class="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center ml-6">
+                                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" 
+                                         alt="${classItem.instructor.name}" 
+                                         class="w-12 h-12 rounded-full object-cover">
+                                </div>
+                                
+                                <div class="flex-1 ml-4">
+                                    <div class="font-semibold text-gray-900">${classItem.name} (${duration} Min)</div>
+                                    <div class="text-sm text-gray-600">${classItem.instructor.name}</div>
+                                    <div class="text-xs text-gray-500">Manchester Red Room</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    container.innerHTML = `<div class="space-y-3">${classesHTML}</div>`;
+                }
+            }
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function(event) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const date = urlParams.get('date') || '{{ now()->format("Y-m-d") }}';
+                if (date !== currentDate) {
+                    loadDate(date);
+                }
+            });
+        </script>
     </body>
 </html>
