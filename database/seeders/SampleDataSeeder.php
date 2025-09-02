@@ -51,7 +51,6 @@ class SampleDataSeeder extends Seeder
                 [
                     'name' => 'Morning HIIT Blast',
                     'description' => 'High-intensity interval training to kickstart your day with energy and burn calories efficiently.',
-                    'type' => 'HIIT',
                     'duration' => 45,
                     'max_spots' => 20,
                     'price' => 25.00,
@@ -62,7 +61,6 @@ class SampleDataSeeder extends Seeder
                 [
                     'name' => 'Strength & Power',
                     'description' => 'Build lean muscle and increase strength with compound movements and progressive overload.',
-                    'type' => 'Strength',
                     'duration' => 60,
                     'max_spots' => 15,
                     'price' => 30.00,

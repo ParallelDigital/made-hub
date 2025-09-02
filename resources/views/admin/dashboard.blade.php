@@ -78,6 +78,131 @@
     </div>
 </div>
 
+<!-- Calendar View -->
+<div class="mb-8">
+    <div class="bg-gray-800 shadow rounded-lg border border-gray-700">
+        <div class="px-4 py-5 sm:p-6">
+            <!-- Calendar Header with Controls -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-white">
+                        @if($view === 'weekly')
+                            Week of {{ $currentWeekStart->format('M j, Y') }}
+                        @else
+                            {{ $currentWeekStart->format('F Y') }}
+                        @endif
+                    </h3>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- View Toggle -->
+                    <div class="flex bg-gray-700 rounded-lg p-1">
+                        <a href="{{ route('admin.dashboard', ['view' => 'weekly', 'week' => $weekOffset]) }}" 
+                           class="px-3 py-1 text-sm font-medium rounded-md transition-colors {{ $view === 'weekly' ? 'bg-primary text-white' : 'text-gray-300 hover:text-white' }}">
+                            Weekly
+                        </a>
+                        <a href="{{ route('admin.dashboard', ['view' => 'monthly', 'week' => $weekOffset]) }}" 
+                           class="px-3 py-1 text-sm font-medium rounded-md transition-colors {{ $view === 'monthly' ? 'bg-primary text-white' : 'text-gray-300 hover:text-white' }}">
+                            Monthly
+                        </a>
+                    </div>
+                    
+                    <!-- Navigation Controls -->
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('admin.dashboard', ['view' => $view, 'week' => $weekOffset - 1]) }}" 
+                           class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </a>
+                        
+                        <a href="{{ route('admin.dashboard', ['view' => $view, 'week' => 0]) }}" 
+                           class="px-3 py-1 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors">
+                            Today
+                        </a>
+                        
+                        <a href="{{ route('admin.dashboard', ['view' => $view, 'week' => $weekOffset + 1]) }}" 
+                           class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calendar Grid -->
+            @if($view === 'weekly')
+                <div class="grid grid-cols-7 gap-1 mb-4">
+                    @foreach($calendarDates as $index => $date)
+                    <div class="text-center {{ $date->isToday() ? 'bg-primary bg-opacity-10 border-primary border-2' : '' }} rounded-lg">
+                        <div class="text-sm font-medium text-gray-300 py-2 border-b border-gray-600">
+                            <div>{{ $date->format('D') }}</div>
+                            <div class="text-lg {{ $date->isToday() ? 'text-primary font-bold' : '' }}">{{ $date->format('j') }}</div>
+                        </div>
+                        <div class="min-h-[200px] p-2 space-y-1">
+                                @if(isset($calendarData[$index]))
+                                    @foreach($calendarData[$index] as $class)
+                                        <div class="bg-primary bg-opacity-20 border border-primary rounded p-2 text-xs cursor-pointer hover:bg-opacity-30 transition-colors"
+                                             onclick="window.location='{{ route('admin.classes.show', $class) }}'">
+                                            <div class="font-medium text-primary">{{ $class->start_time }}</div>
+                                            <div class="text-white font-medium">{{ $class->name }}</div>
+                                            <div class="text-gray-300">{{ $class->instructor->name ?? 'No Instructor' }}</div>
+                                            <div class="text-gray-400">{{ $class->type }} • {{ $class->duration }}min</div>
+                                            <div class="text-gray-400">£{{ number_format($class->price, 0) }}</div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <!-- Monthly View -->
+                <div class="grid grid-cols-7 gap-1 mb-4">
+                    @php $dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; @endphp
+                    @foreach($dayNames as $dayName)
+                        <div class="text-center text-sm font-medium text-gray-300 py-2 border-b border-gray-600">
+                            {{ $dayName }}
+                        </div>
+                    @endforeach
+                    
+                    @foreach($calendarDates as $index => $date)
+                        <div class="min-h-[120px] border border-gray-700 p-1 {{ $date->isToday() ? 'bg-primary bg-opacity-10 border-primary border-2' : '' }} rounded-lg">
+                            <div class="text-sm {{ $date->isToday() ? 'text-primary font-bold' : ($date->month !== $currentWeekStart->month ? 'text-gray-500' : 'text-gray-300') }}">
+                                {{ $date->format('j') }}
+                            </div>
+                            <div class="space-y-1 mt-1">
+                                @if(isset($calendarData[$index]))
+                                    @foreach($calendarData[$index]->take(2) as $class)
+                                        <div class="bg-primary bg-opacity-20 border border-primary rounded p-1 text-xs cursor-pointer hover:bg-opacity-30 transition-colors"
+                                             onclick="window.location='{{ route('admin.classes.show', $class) }}'">
+                                            <div class="font-medium text-primary">{{ $class->start_time }}</div>
+                                            <div class="text-white text-xs truncate">{{ $class->name }}</div>
+                                        </div>
+                                    @endforeach
+                                    @if(isset($calendarData[$index]) && $calendarData[$index]->count() > 2)
+                                        <div class="text-xs text-gray-400">+{{ $calendarData[$index]->count() - 2 }} more</div>
+                                    @endif
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+            
+            <div class="flex justify-between items-center pt-4 border-t border-gray-700">
+                <div class="text-sm text-gray-400">
+                    Showing {{ $calendarData->flatten()->count() }} active classes
+                </div>
+                <a href="{{ route('admin.classes.index') }}" class="text-primary hover:text-purple-400 text-sm font-medium">
+                    View all classes →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Quick Actions -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="bg-gray-800 shadow rounded-lg border border-gray-700">

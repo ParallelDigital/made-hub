@@ -40,10 +40,6 @@
                         <p class="mt-1 text-white">{{ $class->name }}</p>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-400">Type</label>
-                        <p class="mt-1 text-white">{{ $class->type }}</p>
-                    </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-400">Instructor</label>
@@ -62,7 +58,7 @@
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-400">Price</label>
-                        <p class="mt-1 text-white">${{ number_format($class->price, 2) }}</p>
+                        <p class="mt-1 text-white">£{{ number_format($class->price, 2) }}</p>
                     </div>
                     
                     <div>

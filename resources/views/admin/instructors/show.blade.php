@@ -115,7 +115,7 @@
                                     <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $class->active ? 'bg-green-800 text-green-100' : 'bg-red-800 text-red-100' }}">
                                         {{ $class->active ? 'Active' : 'Inactive' }}
                                     </span>
-                                    <p class="text-gray-400 text-xs mt-1">${{ number_format($class->price, 2) }}</p>
+                                    <p class="text-gray-400 text-xs mt-1">£{{ number_format($class->price, 2) }}</p>
                                 </div>
                             </div>
                         @endforeach

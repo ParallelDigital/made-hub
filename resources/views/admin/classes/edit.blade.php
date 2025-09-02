@@ -38,25 +38,7 @@
                 @enderror
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="type" class="block text-sm font-medium text-gray-300">Class Type</label>
-                    <select name="type" id="type" 
-                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
-                        <option value="">Select Type</option>
-                        <option value="HIIT" {{ old('type', $class->type) == 'HIIT' ? 'selected' : '' }}>HIIT</option>
-                        <option value="Strength" {{ old('type', $class->type) == 'Strength' ? 'selected' : '' }}>Strength Training</option>
-                        <option value="Cardio" {{ old('type', $class->type) == 'Cardio' ? 'selected' : '' }}>Cardio</option>
-                        <option value="Yoga" {{ old('type', $class->type) == 'Yoga' ? 'selected' : '' }}>Yoga</option>
-                        <option value="Pilates" {{ old('type', $class->type) == 'Pilates' ? 'selected' : '' }}>Pilates</option>
-                        <option value="Boxing" {{ old('type', $class->type) == 'Boxing' ? 'selected' : '' }}>Boxing</option>
-                        <option value="Running" {{ old('type', $class->type) == 'Running' ? 'selected' : '' }}>Running</option>
-                    </select>
-                    @error('type')
-                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
-                    @enderror
-                </div>
-
+            <div class="grid grid-cols-1 gap-6">
                 <div>
                     <label for="instructor_id" class="block text-sm font-medium text-gray-300">Instructor</label>
                     <select name="instructor_id" id="instructor_id" 
@@ -74,16 +56,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                    <label for="duration" class="block text-sm font-medium text-gray-300">Duration (minutes)</label>
-                    <input type="number" name="duration" id="duration" value="{{ old('duration', $class->duration) }}" min="15" max="180"
-                           class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
-                    @error('duration')
-                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
-                    @enderror
-                </div>
-
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="max_spots" class="block text-sm font-medium text-gray-300">Max Spots</label>
                     <input type="number" name="max_spots" id="max_spots" value="{{ old('max_spots', $class->max_spots) }}" min="1" max="50"
@@ -94,7 +67,7 @@
                 </div>
 
                 <div>
-                    <label for="price" class="block text-sm font-medium text-gray-300">Price ($)</label>
+                    <label for="price" class="block text-sm font-medium text-gray-300">Price (£)</label>
                     <input type="number" name="price" id="price" value="{{ old('price', $class->price) }}" min="0" step="0.01"
                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
                     @error('price')
@@ -123,13 +96,60 @@
                 </div>
             </div>
 
-            <div class="flex items-center">
-                <input type="checkbox" name="active" id="active" value="1" {{ old('active', $class->active) ? 'checked' : '' }}
-                       class="h-4 w-4 text-primary focus:ring-primary border-gray-600 bg-gray-700 rounded">
-                <label for="active" class="ml-2 block text-sm text-gray-300">
-                    Active (class is available for booking)
-                </label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex items-center">
+                    <input type="checkbox" name="active" id="active" value="1" {{ old('active', $class->active) ? 'checked' : '' }}
+                           class="h-4 w-4 text-primary focus:ring-primary border-gray-600 bg-gray-700 rounded">
+                    <label for="active" class="ml-2 block text-sm text-gray-300">
+                        Active Class
+                    </label>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" name="recurring_weekly" id="recurring_weekly" value="1" {{ old('recurring_weekly', $class->recurring_weekly) ? 'checked' : '' }}
+                           class="h-4 w-4 text-primary focus:ring-primary border-gray-600 bg-gray-700 rounded">
+                    <label for="recurring_weekly" class="ml-2 block text-sm text-gray-300">
+                        Recurring Weekly
+                    </label>
+                </div>
             </div>
+
+            <div id="recurring_days_section" class="{{ old('recurring_weekly', $class->recurring_weekly) ? '' : 'hidden' }}">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Select Days for Weekly Recurrence</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    @php
+                        $days = ['monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday', 'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday', 'sunday' => 'Sunday'];
+                        $selectedDays = old('recurring_days', $class->recurring_days ? explode(',', $class->recurring_days) : []);
+                    @endphp
+                    @foreach($days as $value => $label)
+                        <div class="flex items-center">
+                            <input type="checkbox" name="recurring_days[]" id="day_{{ $value }}" value="{{ $value }}"
+                                   {{ in_array($value, $selectedDays) ? 'checked' : '' }}
+                                   class="h-4 w-4 text-primary focus:ring-primary border-gray-600 bg-gray-700 rounded">
+                            <label for="day_{{ $value }}" class="ml-2 block text-sm text-gray-300">
+                                {{ $label }}
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+                @error('recurring_days')
+                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <script>
+                document.getElementById('recurring_weekly').addEventListener('change', function() {
+                    const recurringDaysSection = document.getElementById('recurring_days_section');
+                    if (this.checked) {
+                        recurringDaysSection.classList.remove('hidden');
+                    } else {
+                        recurringDaysSection.classList.add('hidden');
+                        // Uncheck all day checkboxes
+                        const dayCheckboxes = document.querySelectorAll('input[name="recurring_days[]"]');
+                        dayCheckboxes.forEach(checkbox => checkbox.checked = false);
+                    }
+                });
+            </script>
 
             <div class="flex justify-end space-x-3 pt-6 border-t border-gray-700">
                 <a href="{{ route('admin.classes.index') }}" 

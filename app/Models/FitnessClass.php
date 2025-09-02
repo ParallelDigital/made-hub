@@ -9,19 +9,20 @@ class FitnessClass extends Model
     protected $fillable = [
         'name',
         'description',
-        'type',
-        'duration',
+        'instructor_id',
         'max_spots',
         'price',
-        'instructor_id',
         'start_time',
         'end_time',
-        'active'
+        'active',
+        'recurring_weekly',
+        'recurring_days'
     ];
 
     protected $casts = [
         'active' => 'boolean',
         'price' => 'decimal:2',
+        'recurring_weekly' => 'boolean',
     ];
 
     public function instructor()

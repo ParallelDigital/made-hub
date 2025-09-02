@@ -12,10 +12,26 @@ class FitnessClassController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $classes = FitnessClass::with('instructor')->paginate(15);
-        return view('admin.classes.index', compact('classes'));
+        $query = FitnessClass::with('instructor');
+        
+        // Filter by instructor if provided
+        if ($request->filled('instructor')) {
+            $query->where('instructor_id', $request->instructor);
+        }
+        
+        // Filter by status if provided
+        if ($request->filled('status')) {
+            $query->where('active', $request->status === 'active');
+        }
+        
+        $classes = $query->paginate(15)->appends($request->query());
+        
+        // Get instructors for filter dropdown
+        $instructors = \App\Models\Instructor::where('active', true)->orderBy('name')->get();
+        
+        return view('admin.classes.index', compact('classes', 'instructors'));
     }
 
     /**
@@ -35,15 +51,21 @@ class FitnessClassController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|string|max:100',
-            'duration' => 'required|integer|min:15|max:180',
             'max_spots' => 'required|integer|min:1|max:50',
             'price' => 'required|numeric|min:0',
             'instructor_id' => 'required|exists:instructors,id',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
-            'active' => 'boolean'
+            'active' => 'boolean',
+            'recurring_weekly' => 'boolean',
+            'recurring_days' => 'nullable|array',
+            'recurring_days.*' => 'string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday'
         ]);
+
+        // Convert recurring_days array to comma-separated string
+        if (isset($validated['recurring_days'])) {
+            $validated['recurring_days'] = implode(',', $validated['recurring_days']);
+        }
 
         FitnessClass::create($validated);
 
@@ -76,15 +98,21 @@ class FitnessClassController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|string|max:100',
-            'duration' => 'required|integer|min:15|max:180',
             'max_spots' => 'required|integer|min:1|max:50',
             'price' => 'required|numeric|min:0',
             'instructor_id' => 'required|exists:instructors,id',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
-            'active' => 'boolean'
+            'active' => 'boolean',
+            'recurring_weekly' => 'boolean',
+            'recurring_days' => 'nullable|array',
+            'recurring_days.*' => 'string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday'
         ]);
+
+        // Convert recurring_days array to comma-separated string
+        if (isset($validated['recurring_days'])) {
+            $validated['recurring_days'] = implode(',', $validated['recurring_days']);
+        }
 
         $class->update($validated);
 
