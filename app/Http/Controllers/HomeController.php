@@ -99,6 +99,7 @@ class HomeController extends Controller
         $prevWeek = $startOfWeek->copy()->subWeek()->format('Y-m-d');
         $nextWeek = $startOfWeek->copy()->addWeek()->format('Y-m-d');
 
+
         return response()->json([
             'classes' => $selectedDateClasses->map(function($class) {
                 return [
@@ -109,7 +110,8 @@ class HomeController extends Controller
                     'price' => $class->price,
                     'instructor' => [
                         'name' => $class->instructor->name ?? 'No Instructor',
-                        'initials' => substr($class->instructor->name ?? 'IN', 0, 2)
+                        'initials' => substr($class->instructor->name ?? 'IN', 0, 2),
+                        'photo_url' => $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100'
                     ]
                 ];
             }),

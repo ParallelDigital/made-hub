@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Instructor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class InstructorController extends Controller
 {
@@ -34,11 +35,15 @@ class InstructorController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:instructors,email',
             'phone' => 'nullable|string|max:20',
-            'bio' => 'nullable|string',
-            'specialties' => 'nullable|string',
-            'photo' => 'nullable|string|max:255',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'active' => 'boolean'
         ]);
+
+        if ($request->hasFile('photo')) {
+            $validated['photo'] = $request->file('photo')->store('instructors', 'public');
+        }
+
+        $validated['active'] = $request->has('active');
 
         Instructor::create($validated);
 
@@ -71,11 +76,19 @@ class InstructorController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:instructors,email,' . $instructor->id,
             'phone' => 'nullable|string|max:20',
-            'bio' => 'nullable|string',
-            'specialties' => 'nullable|string',
-            'photo' => 'nullable|string|max:255',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'active' => 'boolean'
         ]);
+
+        if ($request->hasFile('photo')) {
+            // Delete old photo if it exists
+            if ($instructor->photo) {
+                Storage::disk('public')->delete($instructor->photo);
+            }
+            $validated['photo'] = $request->file('photo')->store('instructors', 'public');
+        }
+
+        $validated['active'] = $request->has('active');
 
         $instructor->update($validated);
 

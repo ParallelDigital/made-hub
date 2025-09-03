@@ -10,8 +10,6 @@ class Instructor extends Model
         'name',
         'email',
         'phone',
-        'bio',
-        'specialties',
         'photo',
         'active'
     ];

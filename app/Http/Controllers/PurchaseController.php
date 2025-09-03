@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
+use App\Models\FitnessClass;
 use Illuminate\Http\Request;
+use Stripe\Stripe;
+use Stripe\Checkout\Session;
 
 class PurchaseController extends Controller
 {
@@ -41,5 +45,99 @@ class PurchaseController extends Controller
         ];
 
         return view('purchase.index', compact('packages'));
+    }
+
+    public function showCheckoutForm($class_id)
+    {
+        $class = FitnessClass::findOrFail($class_id);
+        return view('checkout.index', compact('class'));
+    }
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate([
+            'coupon_code' => 'required|string',
+            'class_id' => 'required|exists:fitness_classes,id',
+        ]);
+
+        $coupon = Coupon::where('code', $request->coupon_code)->where('status', 'active')->first();
+        $class = FitnessClass::findOrFail($request->class_id);
+
+        if (!$coupon) {
+            return response()->json(['success' => false, 'message' => 'Invalid or inactive coupon code.']);
+        }
+
+        $originalPrice = $class->price;
+        $discount = 0;
+
+        if ($coupon->type === 'fixed') {
+            $discount = $coupon->value;
+        } elseif ($coupon->type === 'percentage') {
+            $discount = ($originalPrice * $coupon->value) / 100;
+        }
+
+        $newTotal = max(0, $originalPrice - $discount);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Coupon applied successfully!',
+            'discount_amount' => $discount,
+            'new_total' => $newTotal,
+        ]);
+    }
+
+    public function processCheckout(Request $request, $class_id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'coupon_code' => 'nullable|string',
+        ]);
+
+        $class = FitnessClass::findOrFail($class_id);
+        $price = $class->price;
+
+        if ($request->filled('coupon_code')) {
+            $coupon = Coupon::where('code', $request->coupon_code)->where('status', 'active')->first();
+            if ($coupon) {
+                if ($coupon->type === 'fixed') {
+                    $price -= $coupon->value;
+                } elseif ($coupon->type === 'percentage') {
+                    $price -= ($price * $coupon->value) / 100;
+                }
+                $price = max(0, $price);
+            }
+        }
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[ 
+                    'price_data' => [
+                        'currency' => 'gbp',
+                        'product_data' => [
+                            'name' => $class->name,
+                        ],
+                        'unit_amount' => $price * 100, // Amount in pence
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => route('booking.success'),
+                'cancel_url' => route('checkout.show', $class->id),
+                'customer_email' => $request->email,
+            ]);
+
+            return redirect($session->url);
+        } catch (\Exception $e) {
+            return back()->with('error', 'There was an error processing your payment. ' . $e->getMessage());
+        }
+    }
+
+    public function showSuccessPage()
+    {
+        return view('checkout.success');
     }
 }

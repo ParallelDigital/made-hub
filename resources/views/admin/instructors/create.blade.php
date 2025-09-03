@@ -14,7 +14,7 @@
     </div>
 
     <div class="bg-gray-800 shadow rounded-lg border border-gray-700">
-        <form action="{{ route('admin.instructors.store') }}" method="POST" class="px-6 py-6 space-y-6">
+        <form action="{{ route('admin.instructors.store') }}" method="POST" enctype="multipart/form-data" class="px-6 py-6 space-y-6">
             @csrf
 
             <div>
@@ -50,31 +50,10 @@
             </div>
 
             <div>
-                <label for="specialties" class="block text-sm font-medium text-gray-300">Specialties</label>
-                <input type="text" name="specialties" id="specialties" value="{{ old('specialties') }}" 
-                       class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
-                       placeholder="e.g., HIIT, Strength Training, Yoga">
-                @error('specialties')
-                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div>
-                <label for="photo" class="block text-sm font-medium text-gray-300">Photo URL</label>
-                <input type="url" name="photo" id="photo" value="{{ old('photo') }}" 
-                       class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
-                       placeholder="https://example.com/photo.jpg">
+                <label for="photo" class="block text-sm font-medium text-gray-300">Photo</label>
+                <input type="file" name="photo" id="photo"
+                       class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-gray-300 hover:file:bg-gray-600"/>
                 @error('photo')
-                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div>
-                <label for="bio" class="block text-sm font-medium text-gray-300">Biography</label>
-                <textarea name="bio" id="bio" rows="4" 
-                          class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
-                          placeholder="Tell us about the instructor's background, experience, and qualifications...">{{ old('bio') }}</textarea>
-                @error('bio')
                     <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                 @enderror
             </div>

@@ -19,8 +19,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Instructor</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contact</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Specialties</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Classes</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Classes</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -32,7 +31,7 @@
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
                                         @if($instructor->photo)
-                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ $instructor->photo }}" alt="{{ $instructor->name }}">
+                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ asset('storage/' . $instructor->photo) }}" alt="{{ $instructor->name }}">
                                         @else
                                             <div class="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
                                                 <span class="text-sm font-medium text-white">{{ substr($instructor->name, 0, 2) }}</span>
@@ -41,9 +40,6 @@
                                     </div>
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-white">{{ $instructor->name }}</div>
-                                        @if($instructor->bio)
-                                            <div class="text-sm text-gray-400">{{ Str::limit($instructor->bio, 40) }}</div>
-                                        @endif
                                     </div>
                                 </div>
                             </td>
@@ -52,9 +48,6 @@
                                 @if($instructor->phone)
                                     <div class="text-sm text-gray-400">{{ $instructor->phone }}</div>
                                 @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                {{ $instructor->specialties ?? 'Not specified' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                 {{ $instructor->fitness_classes_count }} classes
