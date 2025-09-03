@@ -15,7 +15,7 @@
         </div>
         <div class="flex space-x-3">
             <a href="{{ route('admin.instructors.edit', $instructor) }}" 
-               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+               class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
                 Edit Instructor
             </a>
             <form action="{{ route('admin.instructors.destroy', $instructor) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this instructor?')">

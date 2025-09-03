@@ -32,7 +32,58 @@ class MembershipController extends Controller
                 ];
             });
 
-        return view('admin.memberships.index', compact('users'));
+        // Stripe subscriptions (all)
+        $stripeMembers = collect();
+        $stripeTotalFetched = 0;
+
+        try {
+            $secret = $this->stripeSecret();
+            if ($secret) {
+                $stripe = new \Stripe\StripeClient($secret);
+
+                // List all subscriptions (paginated)
+                $allSubs = collect();
+                $params = [
+                    'limit' => 100,
+                    'expand' => ['data.customer', 'data.items.data.price.product'],
+                ];
+                do {
+                    $resp = $stripe->subscriptions->all($params);
+                    $data = collect($resp->data ?? []);
+                    $allSubs = $allSubs->merge($data);
+                    if (($resp->has_more ?? false) && $data->isNotEmpty()) {
+                        $params['starting_after'] = $data->last()->id;
+                    } else {
+                        unset($params['starting_after']);
+                        break;
+                    }
+                } while (true);
+
+                $stripeTotalFetched = $allSubs->count();
+
+                // Map to simplified rows
+                $stripeMembers = $allSubs->map(function($sub) {
+                    $customer = $sub->customer; // expanded
+                    $name = is_object($customer) ? ($customer->name ?? null) : null;
+                    $email = is_object($customer) ? ($customer->email ?? null) : null;
+                    $startTs = $sub->start_date ?? $sub->current_period_start ?? null;
+                    $monthsActive = $startTs ? \Carbon\Carbon::createFromTimestamp($startTs)->diffInMonths(now()) : null;
+                    return [
+                        'name' => $name ?: '—',
+                        'email' => $email ?: '—',
+                        'months_active' => $monthsActive ?? 0,
+                        'status' => $sub->status ?? 'unknown',
+                        'subscription_id' => $sub->id,
+                        'customer_id' => is_object($customer) ? ($customer->id ?? null) : (is_string($customer) ? $customer : null),
+                    ];
+                });
+            }
+        } catch (\Throwable $e) {
+            // Leave $stripeMembers empty on error; optionally log for debugging
+            \Log::warning('Stripe membership fetch failed: '.$e->getMessage());
+        }
+
+        return view('admin.memberships.index', compact('users', 'stripeMembers', 'stripeTotalFetched'));
     }
 
     /**
@@ -116,5 +167,13 @@ class MembershipController extends Controller
 
         return redirect()->route('admin.memberships.index')
                         ->with('success', 'Membership deleted successfully.');
+    }
+
+    // Helpers
+    private function stripeSecret(): ?string
+    {
+        $secret = config('services.stripe.secret') ?? env('STRIPE_SECRET');
+        $secret = is_string($secret) ? trim($secret) : null;
+        return $secret ?: null;
     }
 }

@@ -94,7 +94,7 @@
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{{ route('welcome') }}" 
-                   class="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors">
+                   class="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors">
                     Book Another Class
                 </a>
                 <a href="{{ route('purchase.index') }}" 

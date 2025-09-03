@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700">
+    <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700 cursor-pointer hover:border-primary transition-colors" onclick="window.location='{{ route('admin.bookings.index') }}'">
         <div class="p-5">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -73,6 +73,9 @@
                         <dd class="text-lg font-medium text-white">{{ $stats['total_bookings'] }}</dd>
                     </dl>
                 </div>
+            </div>
+            <div class="mt-3">
+                <a href="{{ route('admin.bookings.index') }}" class="text-primary text-sm hover:text-purple-400">View bookings →</a>
             </div>
         </div>
     </div>

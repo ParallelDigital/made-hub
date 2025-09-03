@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\BookingConfirmed;
 use App\Models\Booking;
 use App\Models\FitnessClass;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Stripe\StripeClient;
 
 class BookingController extends Controller
@@ -168,17 +171,36 @@ class BookingController extends Controller
             ->where('fitness_class_id', $classId)
             ->first();
         if (!$existing) {
-            Booking::create([
+            $booking = Booking::create([
                 'user_id' => $user->id,
                 'fitness_class_id' => $classId,
                 // 'booking_type' => 'purchase', // omit: column may not exist in current DB
                 'status' => 'confirmed',
                 'booked_at' => now(),
             ]);
+        } else {
+            $booking = $existing;
+        }
+
+        // Generate a signed check-in URL and email the QR to the user
+        $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $booking->id]);
+        try {
+            Mail::to($email)->send(new BookingConfirmed($booking, $qrUrl));
+        } catch (\Throwable $e) {
+            \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
         }
 
         return redirect()->route('booking.confirmation', ['classId' => $classId])
             ->with('success', 'Payment successful! Your class has been booked.');
+    }
+
+    /**
+     * Check-in endpoint (scannable QR target). Future: mark attendance.
+     */
+    public function checkin(Request $request, Booking $booking)
+    {
+        // The 'signed' middleware on the route ensures the URL hasn't been tampered with.
+        return view('booking.checkin', compact('booking'));
     }
 
     /**

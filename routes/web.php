@@ -13,6 +13,9 @@ Route::get('/checkout/{classId}', [App\Http\Controllers\BookingController::class
 Route::post('/checkout/{classId}', [App\Http\Controllers\BookingController::class, 'processCheckout'])->name('booking.process-checkout');
 Route::get('/checkout/{classId}/success', [App\Http\Controllers\BookingController::class, 'success'])->name('booking.success');
 Route::get('/booking/confirmation/{classId}', [App\Http\Controllers\BookingController::class, 'confirmation'])->name('booking.confirmation');
+Route::get('/booking/checkin/{booking}', [App\Http\Controllers\BookingController::class, 'checkin'])
+    ->name('booking.checkin')
+    ->middleware('signed');
 
 Route::get('/dashboard', function () {
     // Redirect admin users to admin dashboard
@@ -35,6 +38,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('classes', App\Http\Controllers\Admin\FitnessClassController::class);
     Route::resource('memberships', App\Http\Controllers\Admin\MembershipController::class);
     Route::resource('pricing', App\Http\Controllers\Admin\PricingController::class);
+    // Admin bookings list
+    Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show']);
     Route::get('users', [App\Http\Controllers\Admin\AdminController::class, 'users'])->name('users');
     Route::get('reports', [App\Http\Controllers\Admin\AdminController::class, 'reports'])->name('reports');
 });
