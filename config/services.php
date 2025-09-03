@@ -36,8 +36,13 @@ return [
     ],
 
     'stripe' => [
-        'key' => env('STRIPE_KEY'),
-        'secret' => env('STRIPE_SECRET'),
+        'key' => env('STRIPE_MODE') === 'live' 
+            ? env('STRIPE_KEY_LIVE') 
+            : (env('STRIPE_MODE') === 'test' ? env('STRIPE_KEY_TEST') : env('STRIPE_KEY')),
+        'secret' => env('STRIPE_MODE') === 'live' 
+            ? env('STRIPE_SECRET_LIVE') 
+            : (env('STRIPE_MODE') === 'test' ? env('STRIPE_SECRET_TEST') : env('STRIPE_SECRET')),
+        'mode' => env('STRIPE_MODE'),
     ],
 
 ];
