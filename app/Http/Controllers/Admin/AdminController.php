@@ -49,18 +49,75 @@ class AdminController extends Controller
 
     private function getWeeklyCalendarData($classes, $weekStart)
     {
-        // For demo: distribute classes across the week
-        return $classes->groupBy(function($class, $index) {
-            return $index % 7; // Distribute across 7 days
+        $calendarData = collect(range(0, 6))->mapWithKeys(function($day) {
+            return [$day => collect()];
         });
+
+        foreach ($classes as $class) {
+            if ($class->recurring) {
+                // Handle recurring classes
+                $recurringDays = json_decode($class->recurring_days, true) ?? [];
+                $dayMapping = [
+                    'sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3,
+                    'thursday' => 4, 'friday' => 5, 'saturday' => 6
+                ];
+                
+                foreach ($recurringDays as $dayName) {
+                    if (isset($dayMapping[$dayName])) {
+                        $dayIndex = $dayMapping[$dayName];
+                        $calendarData[$dayIndex]->push($class);
+                    }
+                }
+            } else {
+                // Handle one-time classes
+                $classDate = \Carbon\Carbon::parse($class->class_date);
+                if ($classDate->between($weekStart, $weekStart->copy()->addDays(6))) {
+                    $dayIndex = $classDate->dayOfWeek; // 0 = Sunday, 1 = Monday, etc.
+                    $calendarData[$dayIndex]->push($class);
+                }
+            }
+        }
+
+        return $calendarData;
     }
 
     private function getMonthlyCalendarData($classes, $monthStart)
     {
-        // For demo: distribute classes across the month
-        return $classes->groupBy(function($class, $index) {
-            return $index % 42; // Distribute across 42 days (6 weeks)
+        $calendarData = collect(range(0, 41))->mapWithKeys(function($day) {
+            return [$day => collect()];
         });
+
+        foreach ($classes as $class) {
+            if ($class->recurring) {
+                // Handle recurring classes
+                $recurringDays = json_decode($class->recurring_days, true) ?? [];
+                $dayMapping = [
+                    'sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3,
+                    'thursday' => 4, 'friday' => 5, 'saturday' => 6
+                ];
+                
+                // For each week in the month view (6 weeks)
+                for ($week = 0; $week < 6; $week++) {
+                    foreach ($recurringDays as $dayName) {
+                        if (isset($dayMapping[$dayName])) {
+                            $dayIndex = ($week * 7) + $dayMapping[$dayName];
+                            if ($dayIndex <= 41) {
+                                $calendarData[$dayIndex]->push($class);
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Handle one-time classes
+                $classDate = \Carbon\Carbon::parse($class->class_date);
+                $daysDiff = $monthStart->diffInDays($classDate);
+                if ($daysDiff >= 0 && $daysDiff <= 41) {
+                    $calendarData[$daysDiff]->push($class);
+                }
+            }
+        }
+
+        return $calendarData;
     }
 
     public function users()
