@@ -14,7 +14,7 @@
     </div>
 
     <div class="bg-gray-800 shadow rounded-lg border border-gray-700">
-        <form action="{{ route('admin.classes.update', $class) }}" method="POST" class="px-6 py-6 space-y-6">
+        <form id="class-form" action="{{ route('admin.classes.update', $class) }}" method="POST" class="px-6 py-6 space-y-6">
             @csrf
             @method('PUT')
 
@@ -87,18 +87,50 @@
                 </div>
 
                 <div>
-                    <label for="start_time" class="block text-sm font-medium text-gray-300">Start Time</label>
-                    <input type="time" name="start_time" id="start_time" value="{{ old('start_time', $class->start_time) }}"
-                           class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                    <label class="block text-sm font-medium text-gray-300">Start Time</label>
+                    <input type="hidden" name="start_time" id="start_time_hidden" value="{{ old('start_time', $class->start_time) }}">
+                    <div class="mt-1 grid grid-cols-3 gap-2">
+                        <input type="number" id="start_hour" min="1" max="12" placeholder="HH" class="block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
+                        <input type="number" id="start_minute" min="0" max="59" placeholder="MM" class="block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
+                        <select id="start_ampm" class="block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                        </select>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between">
+                        <div id="start_preview" class="font-mono text-lg text-gray-200">--:-- --</div>
+                        <div class="space-x-2">
+                            <button type="button" id="start_pick" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded">Pick</button>
+                            <button type="button" id="start_minus_15" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded">-15m</button>
+                            <button type="button" id="start_plus_15" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded">+15m</button>
+                            <button type="button" id="start_now" class="px-2 py-1 bg-primary hover:bg-purple-400 text-white rounded">Now</button>
+                        </div>
+                    </div>
                     @error('start_time')
                         <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="end_time" class="block text-sm font-medium text-gray-300">End Time</label>
-                    <input type="time" name="end_time" id="end_time" value="{{ old('end_time', $class->end_time) }}"
-                           class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                    <label class="block text-sm font-medium text-gray-300">End Time</label>
+                    <input type="hidden" name="end_time" id="end_time_hidden" value="{{ old('end_time', $class->end_time) }}">
+                    <div class="mt-1 grid grid-cols-3 gap-2">
+                        <input type="number" id="end_hour" min="1" max="12" placeholder="HH" class="block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
+                        <input type="number" id="end_minute" min="0" max="59" placeholder="MM" class="block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
+                        <select id="end_ampm" class="block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                        </select>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between">
+                        <div id="end_preview" class="font-mono text-lg text-gray-200">--:-- --</div>
+                        <div class="space-x-2">
+                            <button type="button" id="end_pick" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded">Pick</button>
+                            <button type="button" id="end_minus_15" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded">-15m</button>
+                            <button type="button" id="end_plus_15" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded">+15m</button>
+                            <button type="button" id="end_now" class="px-2 py-1 bg-primary hover:bg-purple-400 text-white rounded">Now</button>
+                        </div>
+                    </div>
                     @error('end_time')
                         <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                     @enderror
@@ -158,7 +190,121 @@
                         dayCheckboxes.forEach(checkbox => checkbox.checked = false);
                     }
                 });
+
+                // -------- Time Inputs (Manual HH:MM with AM/PM) --------
+                function prefillTime(hiddenId, hId, mId, apId) {
+                    const val = (document.getElementById(hiddenId)?.value || '').trim();
+                    if (!val) return;
+                    const [hh, mm] = val.split(':');
+                    if (hh === undefined || mm === undefined) return;
+                    let hour = parseInt(hh, 10);
+                    const minute = parseInt(mm, 10);
+                    let ampm = 'AM';
+                    if (hour === 0) { hour = 12; ampm = 'AM'; }
+                    else if (hour === 12) { ampm = 'PM'; }
+                    else if (hour > 12) { hour -= 12; ampm = 'PM'; }
+                    document.getElementById(hId).value = isNaN(hour) ? '' : hour;
+                    document.getElementById(mId).value = isNaN(minute) ? '' : String(minute).padStart(2, '0');
+                    document.getElementById(apId).value = ampm;
+                }
+
+                function compose24h(h, m, ap) {
+                    let hour = parseInt(h || '0', 10);
+                    let minute = parseInt(m || '0', 10);
+                    if (isNaN(hour) || isNaN(minute) || hour < 1 || hour > 12 || minute < 0 || minute > 59) return '';
+                    if (ap === 'AM') {
+                        if (hour === 12) hour = 0;
+                    } else {
+                        if (hour !== 12) hour += 12;
+                    }
+                    return `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+                }
+
+                // Prefill manual fields from existing hidden values
+                prefillTime('start_time_hidden', 'start_hour', 'start_minute', 'start_ampm');
+                prefillTime('end_time_hidden', 'end_hour', 'end_minute', 'end_ampm');
+
+                // Compose and set hidden values on submit
+                document.getElementById('class-form').addEventListener('submit', function() {
+                    const start = compose24h(
+                        document.getElementById('start_hour').value,
+                        document.getElementById('start_minute').value,
+                        document.getElementById('start_ampm').value
+                    );
+                    const end = compose24h(
+                        document.getElementById('end_hour').value,
+                        document.getElementById('end_minute').value,
+                        document.getElementById('end_ampm').value
+                    );
+                    document.getElementById('start_time_hidden').value = start;
+                    document.getElementById('end_time_hidden').value = end;
+                });
+
+                // -------- Modal Time Picker (like create view) --------
+                let pickerPrefix = null;
+                function qs(id){ return document.getElementById(id); }
+                function showPicker(prefix){
+                    pickerPrefix = prefix;
+                    qs('picker_hour').value = qs(`${prefix}_hour`).value || '';
+                    qs('picker_minute').value = qs(`${prefix}_minute`).value || '';
+                    const ap = qs(`${prefix}_ampm`).value || 'AM';
+                    setPickerAP(ap);
+                    qs('time_picker_modal').classList.remove('hidden');
+                    qs('picker_hour').focus();
+                }
+                function hidePicker(){ qs('time_picker_modal').classList.add('hidden'); }
+                function setPickerAP(val){
+                    qs('picker_ap_am').classList.toggle('bg-purple-200', val==='AM');
+                    qs('picker_ap_am').classList.toggle('text-purple-900', val==='AM');
+                    qs('picker_ap_pm').classList.toggle('bg-purple-200', val==='PM');
+                    qs('picker_ap_pm').classList.toggle('text-purple-900', val==='PM');
+                    qs('picker_ampm').value = val;
+                }
+                function applyPicker(){
+                    if(!pickerPrefix) return;
+                    let h = parseInt(qs('picker_hour').value||'');
+                    let m = parseInt(qs('picker_minute').value||'');
+                    if(isNaN(h) || h<1 || h>12) h = 12;
+                    if(isNaN(m) || m<0 || m>59) m = 0;
+                    qs(`${pickerPrefix}_hour`).value = h;
+                    qs(`${pickerPrefix}_minute`).value = String(m).padStart(2,'0');
+                    qs(`${pickerPrefix}_ampm`).value = qs('picker_ampm').value;
+                    updatePreview(pickerPrefix);
+                    hidePicker();
+                }
+                qs('start_pick').addEventListener('click', ()=>showPicker('start'));
+                qs('end_pick').addEventListener('click', ()=>showPicker('end'));
+                // Modal events
+                qs('picker_cancel').addEventListener('click', hidePicker);
+                qs('picker_ok').addEventListener('click', applyPicker);
+                qs('picker_ap_am').addEventListener('click', ()=>setPickerAP('AM'));
+                qs('picker_ap_pm').addEventListener('click', ()=>setPickerAP('PM'));
+                qs('time_picker_backdrop').addEventListener('click', hidePicker);
             </script>
+
+            <!-- Time Picker Modal -->
+            <div id="time_picker_modal" class="fixed inset-0 z-50 hidden">
+                <div id="time_picker_backdrop" class="absolute inset-0 bg-black/50"></div>
+                <div class="relative mx-auto mt-24 w-96 bg-white rounded-lg shadow-lg">
+                    <div class="p-5">
+                        <div class="text-xs tracking-widest text-gray-500 mb-3">ENTER TIME</div>
+                        <div class="flex items-center space-x-3">
+                            <input id="picker_hour" type="number" min="1" max="12" placeholder="7" class="w-24 text-4xl font-semibold border-2 border-purple-500 rounded-md px-3 py-2 focus:outline-none" />
+                            <div class="text-3xl font-bold">:</div>
+                            <input id="picker_minute" type="number" min="0" max="59" placeholder="15" class="w-24 text-4xl font-semibold bg-gray-100 rounded-md px-3 py-2 focus:outline-none" />
+                            <div class="flex flex-col ml-2">
+                                <input type="hidden" id="picker_ampm" value="AM" />
+                                <button type="button" id="picker_ap_am" class="px-3 py-2 rounded-t-md border border-gray-300">AM</button>
+                                <button type="button" id="picker_ap_pm" class="px-3 py-2 rounded-b-md border border-gray-300 border-t-0">PM</button>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-6 text-purple-600 font-medium">
+                            <button type="button" id="picker_cancel" class="hover:text-purple-800">CANCEL</button>
+                            <button type="button" id="picker_ok" class="hover:text-purple-800">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="flex justify-end space-x-3 pt-6 border-t border-gray-700">
                 <a href="{{ route('admin.classes.index') }}" 

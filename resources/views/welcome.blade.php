@@ -52,7 +52,7 @@
                     <span class="text-xl font-bold text-primary">MADE RUNNING</span>
                 </div>
                 <div class="hidden md:flex space-x-6">
-                    <a href="{{ route('home') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
+                    <a href="{{ route('welcome') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
                     <a href="{{ route('purchase.index') }}" class="text-white hover:text-primary transition-colors">PURCHASE</a>
                     <a href="{{ route('admin.memberships.index') }}" class="text-white hover:text-primary transition-colors">MEMBERSHIPS</a>
                     <a href="#" class="text-white hover:text-primary transition-colors">THE COMMUNITY</a>
@@ -110,7 +110,7 @@
                     <!-- Calendar Header -->
                     <div class="bg-white px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-2xl font-bold text-gray-900">Manchester</h2>
+                            <h2 class="text-2xl font-bold text-gray-900">Schedule</h2>
                             <div class="flex items-center space-x-4">
                                 <select class="bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
                                     <option>Instructor</option>
@@ -118,7 +118,7 @@
                                 <select class="bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
                                     <option>Class Type</option>
                                 </select>
-                                <button class="text-primary text-sm hover:underline">Clear All</button>
+                                <button class="text-primary text-sm hover:opacity-80">Clear All</button>
                             </div>
                         </div>
                     </div>
@@ -137,7 +137,7 @@
                             <div class="flex space-x-2 flex-1" id="week-days">
                                 @foreach($weekDays as $day)
                                 <button onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-6 py-4 rounded-lg transition-colors cursor-pointer flex-1
-                                    {{ $day['is_selected'] ? 'bg-primary text-white' : ($day['is_today'] ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-100') }}">
+                                    {{ $day['is_selected'] ? 'bg-primary text-white' : ($day['is_today'] ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-600 hover:bg-gray-100') }}">
                                     <div class="text-sm font-medium uppercase">{{ $day['day'] }}</div>
                                     <div class="text-xl font-bold">{{ $day['date'] }}</div>
                                 </button>
@@ -164,7 +164,7 @@
                     <!-- Loading Spinner -->
                     <div id="loading-spinner" class="hidden px-6 py-12">
                         <div class="text-center">
-                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                             <p class="mt-4 text-gray-600">Loading classes...</p>
                         </div>
                     </div>
@@ -189,7 +189,13 @@
                                     <div class="flex-1 ml-4">
                                         <div class="font-semibold text-gray-900">{{ $class->name }} ({{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} Min)</div>
                                         <div class="text-sm text-gray-600">{{ $class->instructor->name ?? 'No Instructor' }}</div>
-                                        <div class="text-xs text-gray-500">Manchester Red Room</div>
+                                    </div>
+                                    
+                                    <div class="flex-shrink-0 ml-4">
+                                        <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" 
+                                                class="px-6 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors hover:opacity-90">
+                                            Book Class
+                                        </button>
                                     </div>
                                 </div>
                                 @endforeach
@@ -206,6 +212,83 @@
                             </div>
                         @endif
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Modal -->
+        <div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Book This Class</h3>
+                    <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="text-sm text-gray-600 mb-4">
+                        <p>Choose how you'd like to book this class:</p>
+                    </div>
+                    
+                    @auth
+                        <button onclick="bookWithCredits(window.selectedClassId)" 
+                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <div class="font-medium text-gray-900">Use Credits</div>
+                                    <div class="text-sm text-gray-500">You have {{ auth()->user()->credits ?? 0 }} credits</div>
+                                </div>
+                            </div>
+                            <div class="text-green-600 font-semibold">1 Credit</div>
+                        </button>
+                    @else
+                        <button onclick="redirectToLogin()" 
+                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <div class="font-medium text-gray-900">Use Credits</div>
+                                    <div class="text-sm text-gray-500">Sign in to use credits</div>
+                                </div>
+                            </div>
+                            <div class="text-green-600 font-semibold">1 Credit</div>
+                        </button>
+                    @endauth
+                    
+                    <button onclick="buySpot(window.selectedClassId)" 
+                            class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <div class="font-medium text-gray-900">Reserve a spot</div>
+                                <div class="text-sm text-gray-500">Pay with card</div>
+                            </div>
+                        </div>
+                        <div class="text-gray-800 font-semibold" id="modalClassPrice">£0</div>
+                    </button>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <button onclick="closeBookingModal()" 
+                            class="w-full px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
                 </div>
             </div>
         </div>
@@ -328,7 +411,7 @@
                     if (day.is_selected) {
                         classes += 'bg-primary text-white';
                     } else if (day.is_today) {
-                        classes += 'bg-blue-100 text-blue-600 font-semibold';
+                        classes += 'bg-gray-200 text-gray-800 font-semibold';
                     } else {
                         classes += 'text-gray-600 hover:bg-gray-100';
                     }
@@ -364,33 +447,41 @@
                     `;
                 } else {
                     const classesHTML = classes.map(classItem => {
+                    // Ensure price is defined and a number
+                    classItem.price = classItem.price || 0;
                         const startTime = new Date(`2000-01-01T${classItem.start_time}`);
                         const endTime = new Date(`2000-01-01T${classItem.end_time}`);
                         const duration = Math.round((endTime - startTime) / (1000 * 60));
                         
                         return `
-                            <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                <div class="flex-shrink-0 w-20">
+                            <div class="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
+                                <div class="flex-shrink-0 w-16 text-center">
                                     <div class="text-sm font-semibold text-gray-900">${startTime.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true})}</div>
                                     <div class="text-xs text-gray-500">${duration} min</div>
                                 </div>
                                 
-                                <div class="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center ml-6">
+                                <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-4">
                                     <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" 
                                          alt="${classItem.instructor.name}" 
-                                         class="w-12 h-12 rounded-full object-cover">
+                                         class="w-10 h-10 rounded-full object-cover">
                                 </div>
                                 
-                                <div class="flex-1 ml-4">
-                                    <div class="font-semibold text-gray-900">${classItem.name} (${duration} Min)</div>
-                                    <div class="text-sm text-gray-600">${classItem.instructor.name}</div>
-                                    <div class="text-xs text-gray-500">Manchester Red Room</div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm font-semibold text-gray-900 truncate">${classItem.name}</h3>
+                                    <p class="text-xs text-gray-600">${classItem.instructor.name}</p>
+                                </div>
+                                
+                                <div class="flex-shrink-0 ml-4">
+                                    <button onclick="openBookingModal(${classItem.id}, ${classItem.price})" 
+                                            class="whitespace-nowrap px-4 py-2 bg-primary text-white text-xs font-medium rounded-md transition-colors hover:opacity-90">
+                                        Book Class
+                                    </button>
                                 </div>
                             </div>
                         `;
                     }).join('');
                     
-                    container.innerHTML = `<div class="space-y-3">${classesHTML}</div>`;
+                    container.innerHTML = `<div class="space-y-3" id="classes-list">${classesHTML}</div>`;
                 }
             }
 
@@ -400,6 +491,93 @@
                 const date = urlParams.get('date') || '{{ now()->format("Y-m-d") }}';
                 if (date !== currentDate) {
                     loadDate(date);
+                }
+            });
+        </script>
+
+        <script>
+            window.selectedClassId = null;
+            window.selectedClassPrice = 0;
+
+            function openBookingModal(classId, price) {
+                window.selectedClassId = classId;
+                window.selectedClassPrice = price || 0;
+                
+                // Ensure price is a valid number
+                const priceNum = parseInt(price) || 0;
+                // Update the price in the modal
+                document.getElementById('modalClassPrice').textContent = `£${priceNum.toLocaleString()}`;
+                
+                document.getElementById('bookingModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeBookingModal() {
+                document.getElementById('bookingModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                window.selectedClassId = null;
+            }
+
+            function bookWithCredits(classId) {
+                closeBookingModal();
+                
+                // Check if user is authenticated
+                @auth
+                    // User is logged in, proceed with credit booking
+                    if (confirm('Book this class using your credits?')) {
+                        fetch(`/book-with-credits/${classId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Class booked successfully with credits!');
+                                // Optionally refresh the page or update the UI
+                                location.reload();
+                            } else {
+                                alert(data.message || 'Booking failed. Please try again.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred. Please try again.');
+                        });
+                    }
+                @else
+                    // User not logged in, redirect to login
+                    if (confirm('You need to sign in to use credits. Redirect to login?')) {
+                        window.location.href = '/login?redirect=' + encodeURIComponent(`/book-with-credits/${classId}`);
+                    }
+                @endauth
+            }
+
+            function buySpot(classId) {
+                closeBookingModal();
+                // Redirect to checkout page
+                window.location.href = `/checkout/${classId}`;
+            }
+
+            function redirectToLogin() {
+                closeBookingModal();
+                window.location.href = '/login';
+            }
+
+            // Close modal when clicking outside
+            document.addEventListener('click', function(event) {
+                const modal = document.getElementById('bookingModal');
+                if (event.target === modal) {
+                    closeBookingModal();
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeBookingModal();
                 }
             });
         </script>

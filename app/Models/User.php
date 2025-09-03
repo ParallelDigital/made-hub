@@ -25,6 +25,7 @@ class User extends Authenticatable
         'stripe_subscription_id',
         'subscription_status',
         'subscription_expires_at',
+        'credits',
     ];
 
     /**

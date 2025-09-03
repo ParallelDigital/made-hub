@@ -22,12 +22,12 @@
     <nav class="bg-black text-white px-6 py-4">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-8">
-                <a href="{{ route('home') }}" class="flex items-center space-x-2">
+                <a href="{{ route('welcome') }}" class="flex items-center space-x-2">
                     <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-8 w-8">
                     <span class="text-xl font-bold">MADE</span>
                 </a>
                 <div class="hidden md:flex space-x-6">
-                    <a href="{{ route('home') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
+                    <a href="{{ route('welcome') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
                     <a href="{{ route('purchase.index') }}" class="text-primary font-semibold">PURCHASE</a>
                 </div>
             </div>

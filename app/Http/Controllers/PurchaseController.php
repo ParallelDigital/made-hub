@@ -14,29 +14,29 @@ class PurchaseController extends Controller
                 'name' => 'MADE NEWBIE 3 PACK',
                 'price' => 40,
                 'classes' => 3,
-                'description' => 'New to the Red Room? Try your first three classes at our lowest price! Experience the thrill of the Best Workout...',
+                'description' => 'New here? Try your first three classes at our lowest price! Experience the thrill of the workout and see what MADE is all about.',
                 'featured' => true
             ],
             [
                 'type' => 'single',
-                'name' => 'Manchester - 1 Class',
+                'name' => '1 Class',
                 'price' => 20,
                 'classes' => 1,
-                'description' => 'Manchester class credits are also valid in the following regions: Manchester and Liverpool. Class packages...'
+                'description' => 'Single class credit. Valid at participating locations. Terms apply.'
             ],
             [
                 'type' => 'package_5',
-                'name' => 'Manchester - 5 Classes',
+                'name' => '5 Classes',
                 'price' => 89,
                 'classes' => 5,
-                'description' => 'Manchester class credits are also valid in the following regions: Manchester and Liverpool. Class packages...'
+                'description' => 'Pack of 5 class credits. Flexible usage. Terms apply.'
             ],
             [
                 'type' => 'package_10',
-                'name' => 'Manchester - 10 Classes',
+                'name' => '10 Classes',
                 'price' => 157,
                 'classes' => 10,
-                'description' => 'Manchester class credits are also valid in the following regions: Manchester and Liverpool. Class packages...'
+                'description' => 'Pack of 10 class credits. Best value for regulars. Terms apply.'
             ]
         ];
 

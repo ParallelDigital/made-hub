@@ -106,6 +106,7 @@ class HomeController extends Controller
                     'name' => $class->name,
                     'start_time' => $class->start_time,
                     'end_time' => $class->end_time,
+                    'price' => $class->price,
                     'instructor' => [
                         'name' => $class->instructor->name ?? 'No Instructor',
                         'initials' => substr($class->instructor->name ?? 'IN', 0, 2)

@@ -10,7 +10,9 @@ class Booking extends Model
         'user_id',
         'fitness_class_id',
         'status',
-        'booked_at'
+        'booked_at',
+        'booking_type',
+        'amount_paid'
     ];
 
     protected $casts = [

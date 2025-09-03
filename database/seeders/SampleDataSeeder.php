@@ -193,6 +193,87 @@ class SampleDataSeeder extends Seeder
             'active' => true,
         ]);
 
+        // Add sample users with subscription data and credits
+        \App\Models\User::create([
+            'name' => 'John Smith',
+            'email' => 'john@example.com',
+            'password' => bcrypt('password'),
+            'subscription_status' => 'active',
+            'subscription_expires_at' => now()->addMonths(3),
+            'credits' => 5,
+            'created_at' => now()->subMonths(8),
+        ]);
+
+        \App\Models\User::create([
+            'name' => 'Sarah Johnson',
+            'email' => 'sarah@example.com',
+            'password' => bcrypt('password'),
+            'subscription_status' => 'active',
+            'subscription_expires_at' => now()->addMonths(1),
+            'credits' => 12,
+            'created_at' => now()->subMonths(12),
+        ]);
+
+        \App\Models\User::create([
+            'name' => 'Mike Wilson',
+            'email' => 'mike@example.com',
+            'password' => bcrypt('password'),
+            'subscription_status' => 'inactive',
+            'subscription_expires_at' => now()->subDays(15),
+            'credits' => 0,
+            'created_at' => now()->subMonths(6),
+        ]);
+
+        \App\Models\User::create([
+            'name' => 'Emma Davis',
+            'email' => 'emma@example.com',
+            'password' => bcrypt('password'),
+            'subscription_status' => 'active',
+            'subscription_expires_at' => now()->addMonths(2),
+            'credits' => 8,
+            'created_at' => now()->subMonths(4),
+        ]);
+
+        \App\Models\User::create([
+            'name' => 'David Brown',
+            'email' => 'david@example.com',
+            'password' => bcrypt('password'),
+            'subscription_status' => 'inactive',
+            'subscription_expires_at' => now()->subDays(30),
+            'credits' => 2,
+            'created_at' => now()->subMonths(10),
+        ]);
+
+        \App\Models\User::create([
+            'name' => 'Lisa Anderson',
+            'email' => 'lisa@example.com',
+            'password' => bcrypt('password'),
+            'subscription_status' => 'active',
+            'subscription_expires_at' => now()->addMonths(5),
+            'credits' => 15,
+            'created_at' => now()->subMonths(2),
+        ]);
+
+        \App\Models\User::create([
+            'name' => 'Tom Garcia',
+            'email' => 'tom@example.com',
+            'password' => bcrypt('password'),
+            'subscription_status' => 'inactive',
+            'subscription_expires_at' => now()->subDays(7),
+            'credits' => 1,
+            'created_at' => now()->subMonths(14),
+        ]);
+
+        \App\Models\User::create([
+            'name' => 'Rachel White',
+            'email' => 'rachel@example.com',
+            'password' => bcrypt('password'),
+            'subscription_status' => 'active',
+            'subscription_expires_at' => now()->addMonths(4),
+            'credits' => 10,
+            'created_at' => now()->subMonths(7),
+        ]);
+
         // Create sample users with subscription data
         $sampleUsers = [
             [

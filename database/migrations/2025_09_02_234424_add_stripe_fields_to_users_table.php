@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('stripe_subscription_id')->nullable()->after('stripe_customer_id');
             $table->string('subscription_status')->nullable()->after('stripe_subscription_id');
             $table->timestamp('subscription_expires_at')->nullable()->after('subscription_status');
+            $table->integer('credits')->default(0)->after('subscription_expires_at');
         });
     }
 
@@ -25,7 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['stripe_customer_id', 'stripe_subscription_id', 'subscription_status', 'subscription_expires_at']);
+            $table->dropColumn(['stripe_customer_id', 'stripe_subscription_id', 'subscription_status', 'subscription_expires_at', 'credits']);
         });
     }
 };

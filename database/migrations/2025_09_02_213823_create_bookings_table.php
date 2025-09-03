@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('fitness_class_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['confirmed', 'cancelled', 'waitlist'])->default('confirmed');
+            $table->enum('booking_type', ['credit', 'purchase'])->default('purchase');
+            $table->decimal('amount_paid', 8, 2)->nullable();
             $table->timestamp('booked_at');
             $table->timestamps();
         });

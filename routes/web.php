@@ -3,9 +3,16 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
 Route::get('/api/classes', [App\Http\Controllers\HomeController::class, 'getClasses']);
 Route::get('/purchase', [App\Http\Controllers\PurchaseController::class, 'index'])->name('purchase.index');
+
+// Booking Routes
+Route::post('/book-with-credits/{classId}', [App\Http\Controllers\BookingController::class, 'bookWithCredits'])->name('booking.credits');
+Route::get('/checkout/{classId}', [App\Http\Controllers\BookingController::class, 'checkout'])->name('booking.checkout');
+Route::post('/checkout/{classId}', [App\Http\Controllers\BookingController::class, 'processCheckout'])->name('booking.process-checkout');
+Route::get('/checkout/{classId}/success', [App\Http\Controllers\BookingController::class, 'success'])->name('booking.success');
+Route::get('/booking/confirmation/{classId}', [App\Http\Controllers\BookingController::class, 'confirmation'])->name('booking.confirmation');
 
 Route::get('/dashboard', function () {
     // Redirect admin users to admin dashboard
