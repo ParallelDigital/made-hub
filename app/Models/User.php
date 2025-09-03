@@ -21,6 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'stripe_customer_id',
+        'stripe_subscription_id',
+        'subscription_status',
+        'subscription_expires_at',
     ];
 
     /**
@@ -43,6 +47,37 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'subscription_expires_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * Check if user has an active subscription
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscription_status === 'active' && 
+               $this->subscription_expires_at && 
+               $this->subscription_expires_at->isFuture();
+    }
+
+    /**
+     * Get subscription status from Stripe
+     */
+    public function getStripeSubscriptionStatus()
+    {
+        if (!$this->stripe_subscription_id) {
+            return ['active' => false, 'status' => 'no_subscription'];
+        }
+
+        // This would integrate with Stripe API
+        // Example: $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+        // $subscription = $stripe->subscriptions->retrieve($this->stripe_subscription_id);
+        
+        return [
+            'active' => $this->hasActiveSubscription(),
+            'status' => $this->subscription_status,
+            'expires_at' => $this->subscription_expires_at
         ];
     }
 }

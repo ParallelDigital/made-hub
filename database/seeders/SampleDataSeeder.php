@@ -193,6 +193,69 @@ class SampleDataSeeder extends Seeder
             'active' => true,
         ]);
 
+        // Create sample users with subscription data
+        $sampleUsers = [
+            [
+                'name' => 'John Smith',
+                'email' => 'john.smith@example.com',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+                'stripe_customer_id' => 'cus_sample123',
+                'stripe_subscription_id' => 'sub_sample123',
+                'subscription_status' => 'active',
+                'subscription_expires_at' => now()->addMonth(),
+                'created_at' => now()->subMonths(6),
+            ],
+            [
+                'name' => 'Emma Wilson',
+                'email' => 'emma.wilson@example.com',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+                'stripe_customer_id' => 'cus_sample456',
+                'stripe_subscription_id' => 'sub_sample456',
+                'subscription_status' => 'active',
+                'subscription_expires_at' => now()->addDays(15),
+                'created_at' => now()->subMonths(3),
+            ],
+            [
+                'name' => 'David Brown',
+                'email' => 'david.brown@example.com',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+                'stripe_customer_id' => 'cus_sample789',
+                'stripe_subscription_id' => null,
+                'subscription_status' => 'inactive',
+                'subscription_expires_at' => null,
+                'created_at' => now()->subMonths(12),
+            ],
+            [
+                'name' => 'Sophie Taylor',
+                'email' => 'sophie.taylor@example.com',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+                'stripe_customer_id' => 'cus_sample101',
+                'stripe_subscription_id' => 'sub_sample101',
+                'subscription_status' => 'active',
+                'subscription_expires_at' => now()->addWeeks(2),
+                'created_at' => now()->subMonths(8),
+            ],
+            [
+                'name' => 'Michael Davis',
+                'email' => 'michael.davis@example.com',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+                'stripe_customer_id' => null,
+                'stripe_subscription_id' => null,
+                'subscription_status' => 'inactive',
+                'subscription_expires_at' => null,
+                'created_at' => now()->subMonths(2),
+            ],
+        ];
+
+        foreach ($sampleUsers as $userData) {
+            \App\Models\User::create($userData);
+        }
+
         // Create some sample bookings
         $users = \App\Models\User::where('role', 'user')->get();
         $classes = \App\Models\FitnessClass::all();

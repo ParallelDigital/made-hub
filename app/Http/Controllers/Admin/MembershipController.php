@@ -13,8 +13,26 @@ class MembershipController extends Controller
      */
     public function index()
     {
-        $memberships = Membership::orderBy('created_at', 'desc')->get();
-        return view('admin.memberships.index', compact('memberships'));
+        // Get users with subscription data
+        $users = \App\Models\User::select('id', 'name', 'email', 'stripe_customer_id', 'stripe_subscription_id', 'subscription_status', 'subscription_expires_at', 'created_at')
+            ->get()
+            ->map(function($user) {
+                // Calculate months active (dummy data for now)
+                $monthsActive = now()->diffInMonths($user->created_at);
+                
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'months_active' => $monthsActive,
+                    'subscription_status' => $user->subscription_status ?? 'inactive',
+                    'subscription_expires_at' => $user->subscription_expires_at,
+                    'stripe_customer_id' => $user->stripe_customer_id,
+                    'stripe_subscription_id' => $user->stripe_subscription_id,
+                ];
+            });
+
+        return view('admin.memberships.index', compact('users'));
     }
 
     /**

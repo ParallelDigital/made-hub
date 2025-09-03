@@ -54,8 +54,8 @@
                 <div class="hidden md:flex space-x-6">
                     <a href="{{ route('home') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
                     <a href="{{ route('purchase.index') }}" class="text-white hover:text-primary transition-colors">PURCHASE</a>
+                    <a href="{{ route('admin.memberships.index') }}" class="text-white hover:text-primary transition-colors">MEMBERSHIPS</a>
                     <a href="#" class="text-white hover:text-primary transition-colors">THE COMMUNITY</a>
-                    <a href="#" class="text-white hover:text-primary transition-colors">OUR STUDIOS</a>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
