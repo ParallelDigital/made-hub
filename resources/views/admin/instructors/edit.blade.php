@@ -14,7 +14,7 @@
     </div>
 
     <div class="bg-gray-800 shadow rounded-lg border border-gray-700">
-        <form action="{{ route('admin.instructors.update', $instructor) }}" method="POST" enctype="multipart/form-data" class="px-6 py-6 space-y-6">
+        <form id="instructor-form" action="{{ route('admin.instructors.update', $instructor) }}" method="POST" enctype="multipart/form-data" class="px-6 py-6 space-y-6">
             @csrf
             @method('PUT')
 
@@ -47,6 +47,24 @@
                     @error('phone')
                         <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                     @enderror
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-700">
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300">New Password</label>
+                    <input type="password" name="password" id="password"
+                           class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <p class="mt-2 text-sm text-gray-400">Leave blank to keep the current password.</p>
+                    @error('password')
+                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-300">Confirm New Password</label>
+                    <input type="password" name="password_confirmation" id="password_confirmation"
+                           class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                 </div>
             </div>
 
@@ -87,3 +105,39 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('instructor-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        let form = e.target;
+        let formData = new FormData(form);
+        formData.append('_method', 'PUT'); // Explicitly set the method
+
+        fetch(form.action, {
+            method: 'POST', // Use POST, as the method is spoofed in the body
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+            },
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '{{ route("admin.instructors.index") }}';
+            } else {
+                response.json().then(data => {
+                    // Handle validation errors or other issues
+                    console.error('Submission failed:', data);
+                    alert('An error occurred. Please check the console for details.');
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('A network error occurred. Please try again.');
+        });
+    });
+</script>
+@endpush

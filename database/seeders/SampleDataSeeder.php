@@ -13,41 +13,26 @@ class SampleDataSeeder extends Seeder
     public function run(): void
     {
         // Create sample instructors
-        $instructors = [
-            [
-                'name' => 'Sarah Johnson',
-                'email' => 'sarah@maderunning.com',
-                'phone' => '+1 (555) 123-4567',
-                'bio' => 'Certified personal trainer with 8+ years of experience in HIIT and strength training. Former competitive athlete passionate about helping others reach their fitness goals.',
-                'specialties' => 'HIIT, Strength Training, Functional Fitness',
-                'photo' => 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&h=400&fit=crop&crop=face',
-                'active' => true,
-            ],
-            [
-                'name' => 'Mike Chen',
-                'email' => 'mike@maderunning.com',
-                'phone' => '+1 (555) 234-5678',
-                'bio' => 'Yoga instructor and mindfulness coach with expertise in both traditional and power yoga. Believes in the mind-body connection for optimal wellness.',
-                'specialties' => 'Yoga, Pilates, Meditation',
-                'photo' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-                'active' => true,
-            ],
-            [
-                'name' => 'Emma Rodriguez',
-                'email' => 'emma@maderunning.com',
-                'phone' => '+1 (555) 345-6789',
-                'bio' => 'Former professional boxer turned fitness instructor. Specializes in high-energy cardio workouts and boxing techniques for all fitness levels.',
-                'specialties' => 'Boxing, Cardio, HIIT',
-                'photo' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
-                'active' => true,
-            ],
-        ];
+        $instructor1 = \App\Models\Instructor::updateOrCreate(['email' => 'sarah@maderunning.com'], [
+            'name' => 'Sarah Johnson',
+            'phone' => '+1 (555) 123-4567',
+            'photo' => 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&h=400&fit=crop&crop=face',
+            'active' => true,
+        ]);
 
-        $instructors = \App\Models\Instructor::insert($instructors);
+        $instructor2 = \App\Models\Instructor::updateOrCreate(['email' => 'mike@maderunning.com'], [
+            'name' => 'Mike Chen',
+            'phone' => '+1 (555) 234-5678',
+            'photo' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+            'active' => true,
+        ]);
 
-        $instructor1 = \App\Models\Instructor::find(1);
-        $instructor2 = \App\Models\Instructor::find(2);
-        $instructor3 = \App\Models\Instructor::find(3);
+        $instructor3 = \App\Models\Instructor::updateOrCreate(['email' => 'emma@maderunning.com'], [
+            'name' => 'Emma Rodriguez',
+            'phone' => '+1 (555) 345-6789',
+            'photo' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
+            'active' => true,
+        ]);
 
         // Create sample classes for today and this week
         $today = now()->format('Y-m-d');
@@ -193,148 +178,29 @@ class SampleDataSeeder extends Seeder
             'active' => true,
         ]);
 
-        // Add sample users with subscription data and credits
-        \App\Models\User::create([
-            'name' => 'John Smith',
-            'email' => 'john@example.com',
-            'password' => bcrypt('password'),
-            'subscription_status' => 'active',
-            'subscription_expires_at' => now()->addMonths(3),
-            'credits' => 5,
-            'created_at' => now()->subMonths(8),
-        ]);
-
-        \App\Models\User::create([
-            'name' => 'Sarah Johnson',
-            'email' => 'sarah@example.com',
-            'password' => bcrypt('password'),
-            'subscription_status' => 'active',
-            'subscription_expires_at' => now()->addMonths(1),
-            'credits' => 12,
-            'created_at' => now()->subMonths(12),
-        ]);
-
-        \App\Models\User::create([
-            'name' => 'Mike Wilson',
-            'email' => 'mike@example.com',
-            'password' => bcrypt('password'),
-            'subscription_status' => 'inactive',
-            'subscription_expires_at' => now()->subDays(15),
-            'credits' => 0,
-            'created_at' => now()->subMonths(6),
-        ]);
-
-        \App\Models\User::create([
-            'name' => 'Emma Davis',
-            'email' => 'emma@example.com',
-            'password' => bcrypt('password'),
-            'subscription_status' => 'active',
-            'subscription_expires_at' => now()->addMonths(2),
-            'credits' => 8,
-            'created_at' => now()->subMonths(4),
-        ]);
-
-        \App\Models\User::create([
-            'name' => 'David Brown',
-            'email' => 'david@example.com',
-            'password' => bcrypt('password'),
-            'subscription_status' => 'inactive',
-            'subscription_expires_at' => now()->subDays(30),
-            'credits' => 2,
-            'created_at' => now()->subMonths(10),
-        ]);
-
-        \App\Models\User::create([
-            'name' => 'Lisa Anderson',
-            'email' => 'lisa@example.com',
-            'password' => bcrypt('password'),
-            'subscription_status' => 'active',
-            'subscription_expires_at' => now()->addMonths(5),
-            'credits' => 15,
-            'created_at' => now()->subMonths(2),
-        ]);
-
-        \App\Models\User::create([
-            'name' => 'Tom Garcia',
-            'email' => 'tom@example.com',
-            'password' => bcrypt('password'),
-            'subscription_status' => 'inactive',
-            'subscription_expires_at' => now()->subDays(7),
-            'credits' => 1,
-            'created_at' => now()->subMonths(14),
-        ]);
-
-        \App\Models\User::create([
-            'name' => 'Rachel White',
-            'email' => 'rachel@example.com',
-            'password' => bcrypt('password'),
-            'subscription_status' => 'active',
-            'subscription_expires_at' => now()->addMonths(4),
-            'credits' => 10,
-            'created_at' => now()->subMonths(7),
-        ]);
-
-        // Create sample users with subscription data
+        // Create sample users
         $sampleUsers = [
-            [
-                'name' => 'John Smith',
-                'email' => 'john.smith@example.com',
-                'password' => bcrypt('password'),
-                'role' => 'user',
-                'stripe_customer_id' => 'cus_sample123',
-                'stripe_subscription_id' => 'sub_sample123',
-                'subscription_status' => 'active',
-                'subscription_expires_at' => now()->addMonth(),
-                'created_at' => now()->subMonths(6),
-            ],
-            [
-                'name' => 'Emma Wilson',
-                'email' => 'emma.wilson@example.com',
-                'password' => bcrypt('password'),
-                'role' => 'user',
-                'stripe_customer_id' => 'cus_sample456',
-                'stripe_subscription_id' => 'sub_sample456',
-                'subscription_status' => 'active',
-                'subscription_expires_at' => now()->addDays(15),
-                'created_at' => now()->subMonths(3),
-            ],
-            [
-                'name' => 'David Brown',
-                'email' => 'david.brown@example.com',
-                'password' => bcrypt('password'),
-                'role' => 'user',
-                'stripe_customer_id' => 'cus_sample789',
-                'stripe_subscription_id' => null,
-                'subscription_status' => 'inactive',
-                'subscription_expires_at' => null,
-                'created_at' => now()->subMonths(12),
-            ],
-            [
-                'name' => 'Sophie Taylor',
-                'email' => 'sophie.taylor@example.com',
-                'password' => bcrypt('password'),
-                'role' => 'user',
-                'stripe_customer_id' => 'cus_sample101',
-                'stripe_subscription_id' => 'sub_sample101',
-                'subscription_status' => 'active',
-                'subscription_expires_at' => now()->addWeeks(2),
-                'created_at' => now()->subMonths(8),
-            ],
-            [
-                'name' => 'Michael Davis',
-                'email' => 'michael.davis@example.com',
-                'password' => bcrypt('password'),
-                'role' => 'user',
-                'stripe_customer_id' => null,
-                'stripe_subscription_id' => null,
-                'subscription_status' => 'inactive',
-                'subscription_expires_at' => null,
-                'created_at' => now()->subMonths(2),
-            ],
+            ['name' => 'John Smith', 'email' => 'john.smith@example.com'],
+            ['name' => 'Emma Wilson', 'email' => 'emma.wilson@example.com'],
+            ['name' => 'David Brown', 'email' => 'david.brown@example.com'],
+            ['name' => 'Sophie Taylor', 'email' => 'sophie.taylor@example.com'],
+            ['name' => 'Michael Davis', 'email' => 'michael.davis@example.com'],
+            ['name' => 'John Smith', 'email' => 'john@example.com'],
+            ['name' => 'Sarah Johnson', 'email' => 'sarah@example.com'],
+            ['name' => 'Mike Wilson', 'email' => 'mike@example.com'],
+            ['name' => 'Emma Davis', 'email' => 'emma@example.com'],
+            ['name' => 'David Brown', 'email' => 'david-2@example.com'], // Renamed to avoid duplicate
+            ['name' => 'Lisa Anderson', 'email' => 'lisa@example.com'],
+            ['name' => 'Tom Garcia', 'email' => 'tom@example.com'],
+            ['name' => 'Rachel White', 'email' => 'rachel@example.com'],
         ];
 
         foreach ($sampleUsers as $userData) {
-            \App\Models\User::create($userData);
+            \App\Models\User::updateOrCreate(['email' => $userData['email']], [
+                'name' => $userData['name'],
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'email_verified_at' => now(),
+            ]);
         }
 
         // Create some sample bookings

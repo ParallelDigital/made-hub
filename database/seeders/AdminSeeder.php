@@ -12,9 +12,8 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::create([
+        \App\Models\User::updateOrCreate(['email' => 'admin@admin.com'], [
             'name' => 'Admin User',
-            'email' => 'admin@admin.com',
             'password' => \Illuminate\Support\Facades\Hash::make('password'),
             'role' => 'admin',
             'email_verified_at' => now(),

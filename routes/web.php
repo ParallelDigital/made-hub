@@ -19,9 +19,13 @@ Route::get('/booking/checkin/{booking}', [App\Http\Controllers\BookingController
     ->middleware('signed');
 
 Route::get('/dashboard', function () {
-    // Redirect admin users to admin dashboard
-    if (auth()->check() && auth()->user()->role === 'admin') {
-        return redirect()->route('admin.dashboard');
+    if (auth()->check()) {
+        if (auth()->user()->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+        if (auth()->user()->role === 'instructor') {
+            return redirect()->route('instructor.dashboard');
+        }
     }
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -43,6 +47,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show']);
     Route::get('users', [App\Http\Controllers\Admin\AdminController::class, 'users'])->name('users');
     Route::get('reports', [App\Http\Controllers\Admin\AdminController::class, 'reports'])->name('reports');
+});
+
+// Instructor Routes
+Route::middleware(['auth', 'instructor'])->prefix('instructor')->name('instructor.')->group(function () {
+    Route::get('dashboard', [App\Http\Controllers\InstructorDashboardController::class, 'index'])->name('dashboard');
 });
 
 require __DIR__.'/auth.php';

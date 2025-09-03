@@ -65,6 +65,14 @@ class User extends Authenticatable
     /**
      * Get subscription status from Stripe
      */
+    public function instructor()
+    {
+        return $this->hasOne(Instructor::class, 'email', 'email');
+    }
+
+    /**
+     * Get subscription status from Stripe
+     */
     public function getStripeSubscriptionStatus()
     {
         if (!$this->stripe_subscription_id) {
