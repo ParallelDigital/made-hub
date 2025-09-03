@@ -15,7 +15,7 @@
                 </div>
                 <div class="ml-5 w-0 flex-1">
                     <dl>
-                        <dt class="text-sm font-medium text-gray-400 truncate">Total Users</dt>
+                        <dt class="text-sm font-medium text-gray-400 truncate">Total Members</dt>
                         <dd class="text-lg font-medium text-white">{{ $stats['total_users'] }}</dd>
                     </dl>
                 </div>
