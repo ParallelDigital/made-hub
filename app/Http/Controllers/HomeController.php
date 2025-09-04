@@ -22,7 +22,7 @@ class HomeController extends Controller
         $dayOfWeek = $selectedDate->dayOfWeek; // 0 = Sunday, 1 = Monday, etc.
         
         // Get both exact date matches and recurring classes for this day of week
-        $selectedDateClasses = FitnessClass::with('instructor')
+        $selectedDateClasses = FitnessClass::with(['instructor', 'bookings'])
             ->where('active', 1)
             ->where(function($query) use ($selectedDateString, $dayOfWeek) {
                 // Exact date match
@@ -68,7 +68,7 @@ class HomeController extends Controller
         $dayOfWeek = $selectedDate->dayOfWeek; // 0 = Sunday, 1 = Monday, etc.
         
         // Get both exact date matches and recurring classes for this day of week
-        $selectedDateClasses = FitnessClass::with('instructor')
+        $selectedDateClasses = FitnessClass::with(['instructor', 'bookings'])
             ->where('active', 1)
             ->where(function($query) use ($selectedDateString, $dayOfWeek) {
                 // Exact date match
@@ -102,12 +102,18 @@ class HomeController extends Controller
 
         return response()->json([
             'classes' => $selectedDateClasses->map(function($class) {
+                $bookedCount = $class->bookings()->count();
+                $availableSpots = $class->max_spots - $bookedCount;
+                
                 return [
                     'id' => $class->id,
                     'name' => $class->name,
                     'start_time' => $class->start_time,
                     'end_time' => $class->end_time,
                     'price' => $class->price,
+                    'max_spots' => $class->max_spots,
+                    'booked_count' => $bookedCount,
+                    'available_spots' => $availableSpots,
                     'instructor' => [
                         'name' => $class->instructor->name ?? 'No Instructor',
                         'initials' => substr($class->instructor->name ?? 'IN', 0, 2),

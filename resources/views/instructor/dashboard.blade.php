@@ -27,6 +27,7 @@
                                 <th scope="col" class="px-6 py-3">Class Name</th>
                                 <th scope="col" class="px-6 py-3">Date</th>
                                 <th scope="col" class="px-6 py-3">Time</th>
+                                <th scope="col" class="px-6 py-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -35,6 +36,9 @@
                                     <td class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $class->name }}</td>
                                     <td class="px-6 py-4">{{ \Carbon\Carbon::parse($class->class_date)->format('D, M j, Y') }}</td>
                                     <td class="px-6 py-4">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($class->end_time)->format('g:i A') }}</td>
+                                    <td class="px-6 py-4">
+                                        <a href="{{ route('instructor.classes.members', $class) }}" class="text-indigo-400 hover:text-indigo-600">View Members</a>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

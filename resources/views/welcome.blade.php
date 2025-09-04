@@ -503,6 +503,7 @@
                                 <div class="flex-1 min-w-0">
                                     <h3 class="text-sm font-semibold text-gray-900 truncate">${classItem.name}</h3>
                                     <p class="text-xs text-gray-600">${classItem.instructor.name}</p>
+                                    <p class="text-xs text-gray-500">${classItem.available_spots} spots available</p>
                                 </div>
                                 
                                 <div class="flex-shrink-0 ml-4">

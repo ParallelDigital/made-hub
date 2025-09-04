@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
@@ -19,15 +20,28 @@ Route::get('/booking/checkin/{booking}', [App\Http\Controllers\BookingController
     ->middleware('signed');
 
 Route::get('/dashboard', function () {
-    if (auth()->check()) {
-        if (auth()->user()->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-        if (auth()->user()->role === 'instructor') {
-            return redirect()->route('instructor.dashboard');
-        }
+    $user = Auth::user();
+
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
     }
-    return view('dashboard');
+
+    if ($user->role === 'instructor') {
+        return redirect()->route('instructor.dashboard');
+    }
+
+    // For regular users, fetch their upcoming bookings
+    $upcomingBookings = $user->bookings()
+        ->whereHas('fitnessClass', function ($query) {
+            $query->where('class_date', '>=', now()->toDateString());
+        })
+        ->with('fitnessClass.instructor')
+        ->get()
+        ->sortBy(function($booking) {
+            return $booking->fitnessClass->class_date . ' ' . $booking->fitnessClass->start_time;
+        });
+
+    return view('dashboard', ['upcomingBookings' => $upcomingBookings]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -52,6 +66,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 // Instructor Routes
 Route::middleware(['auth', 'instructor'])->prefix('instructor')->name('instructor.')->group(function () {
     Route::get('dashboard', [App\Http\Controllers\InstructorDashboardController::class, 'index'])->name('dashboard');
+    Route::get('classes/{class}/members', [App\Http\Controllers\InstructorDashboardController::class, 'showMembers'])->name('classes.members');
 });
 
 require __DIR__.'/auth.php';
