@@ -26,7 +26,12 @@ class User extends Authenticatable
         'stripe_subscription_id',
         'subscription_status',
         'subscription_expires_at',
-        'credits',
+        'user_login',
+        'first_name',
+        'last_name',
+        'nickname',
+        'display_name',
+        'role',
     ];
 
     /**
@@ -50,6 +55,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'subscription_expires_at' => 'datetime',
+            'user_registered' => 'datetime',
         ];
     }
 

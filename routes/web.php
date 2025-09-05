@@ -57,9 +57,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('classes', App\Http\Controllers\Admin\FitnessClassController::class);
     Route::resource('memberships', App\Http\Controllers\Admin\MembershipController::class);
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);
+    Route::resource('pricing', App\Http\Controllers\Admin\PricingController::class);
     // Admin bookings list
     Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show']);
-    Route::get('users', [App\Http\Controllers\Admin\AdminController::class, 'users'])->name('users');
+    Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::get('reports', [App\Http\Controllers\Admin\AdminController::class, 'reports'])->name('reports');
 });
 

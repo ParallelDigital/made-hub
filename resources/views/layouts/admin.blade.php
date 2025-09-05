@@ -56,7 +56,7 @@
                             <a href="{{ route('admin.pricing.index') }}" class="border-transparent text-gray-300 hover:text-white hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
                                 Pricing
                             </a>
-                            <a href="{{ route('admin.users') }}" class="border-transparent text-gray-300 hover:text-white hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
+                            <a href="{{ route('admin.users.index') }}" class="border-transparent text-gray-300 hover:text-white hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
                                 Users
                             </a>
                         </div>
