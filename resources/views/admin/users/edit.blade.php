@@ -114,10 +114,14 @@
     <!-- User Information Card -->
     <div class="mt-6 bg-gray-800 shadow rounded-lg border border-gray-700 p-6">
         <h3 class="text-lg font-semibold text-white mb-4">User Information</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
                 <span class="text-gray-400">User ID:</span>
                 <span class="text-white ml-2">{{ $user->id }}</span>
+            </div>
+            <div>
+                <span class="text-gray-400">QR Code:</span>
+                <span class="text-white ml-2 font-mono">{{ $user->qr_code }}</span>
             </div>
             <div>
                 <span class="text-gray-400">Registered:</span>

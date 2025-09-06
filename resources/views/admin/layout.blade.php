@@ -124,7 +124,7 @@
                             <span class="text-sm text-gray-300">Welcome, {{ auth()->user()->name }}</span>
                             <form method="POST" action="{{ route('logout') }}" class="inline">
                                 @csrf
-                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                                <button type="submit" onclick="return confirm('Are you sure you want to log out?')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
                                     Logout
                                 </button>
                             </form>

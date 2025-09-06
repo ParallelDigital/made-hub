@@ -214,7 +214,7 @@ class BookingController extends Controller
         }
 
         // Generate a signed check-in URL and email the QR to the user
-        $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $booking->id]);
+        $qrUrl = URL::signedRoute('user.checkin', ['user' => $user->id, 'qr_code' => $user->qr_code]);
         try {
             Mail::to($email)->send(new BookingConfirmed($booking, $qrUrl));
             \Log::info('Confirmation email sent', ['email' => $email]);
@@ -233,6 +233,30 @@ class BookingController extends Controller
     {
         // The 'signed' middleware on the route ensures the URL hasn't been tampered with.
         return view('booking.checkin', compact('booking'));
+    }
+
+    /**
+     * User check-in endpoint using user's unique QR code.
+     */
+    public function userCheckin(Request $request, User $user, string $qr_code)
+    {
+        // Verify the QR code matches the user's QR code
+        if ($user->qr_code !== $qr_code) {
+            abort(403, 'Invalid QR code');
+        }
+
+        // Get user's upcoming bookings for today
+        $today = now()->toDateString();
+        $upcomingBookings = $user->bookings()
+            ->with('fitnessClass')
+            ->whereHas('fitnessClass', function ($query) use ($today) {
+                $query->where('class_date', '>=', $today);
+            })
+            ->where('status', 'confirmed')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('user.checkin', compact('user', 'upcomingBookings'));
     }
 
     /**

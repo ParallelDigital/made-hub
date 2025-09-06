@@ -32,6 +32,7 @@ class User extends Authenticatable
         'nickname',
         'display_name',
         'role',
+        'qr_code',
     ];
 
     /**
@@ -59,14 +60,27 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Check if user has an active subscription
-     */
-    public function hasActiveSubscription(): bool
+    protected static function boot()
     {
-        return $this->subscription_status === 'active' && 
-               $this->subscription_expires_at && 
-               $this->subscription_expires_at->isFuture();
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->qr_code)) {
+                $user->qr_code = self::generateUniqueQrCode();
+            }
+        });
+    }
+
+    /**
+     * Generate a unique QR code for the user
+     */
+    public static function generateUniqueQrCode(): string
+    {
+        do {
+            $qrCode = 'QR' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
+        } while (self::where('qr_code', $qrCode)->exists());
+
+        return $qrCode;
     }
 
     /**

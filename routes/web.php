@@ -18,6 +18,9 @@ Route::get('/booking/confirmation/{classId}', [App\Http\Controllers\BookingContr
 Route::get('/booking/checkin/{booking}', [App\Http\Controllers\BookingController::class, 'checkin'])
     ->name('booking.checkin')
     ->middleware('signed');
+Route::get('/user/checkin/{user}/{qr_code}', [App\Http\Controllers\BookingController::class, 'userCheckin'])
+    ->name('user.checkin')
+    ->middleware('signed');
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
@@ -60,7 +63,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);
     Route::resource('pricing', App\Http\Controllers\Admin\PricingController::class);
     // Admin bookings list
-    Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show']);
+    Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show', 'update']);
     Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::get('users/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
     Route::put('users/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');

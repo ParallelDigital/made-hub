@@ -33,11 +33,11 @@
             </thead>
             <tbody class="bg-gray-800 divide-y divide-gray-700" id="bookings-table">
                 @forelse($bookings as $booking)
-                    <tr class="hover:bg-gray-700/50">
+                    <tr class="hover:bg-gray-700/50 cursor-pointer" onclick="window.location.href='{{ route('admin.bookings.show', $booking) }}'">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ optional($booking->booked_at)->format('M j, Y g:i A') ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white">{{ $booking->user->name ?? 'Unknown' }} <span class="text-gray-400">({{ $booking->user->email ?? 'no-email' }})</span></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <a class="text-primary hover:text-purple-400" href="{{ route('admin.classes.show', $booking->fitnessClass) }}">{{ $booking->fitnessClass->name ?? 'Class #' . $booking->fitness_class_id }}</a>
+                            <a class="text-primary hover:text-purple-400" href="{{ route('admin.classes.show', $booking->fitnessClass) }}" onclick="event.stopPropagation()">{{ $booking->fitnessClass->name ?? 'Class #' . $booking->fitness_class_id }}</a>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             @if($booking->stripe_session_id)
