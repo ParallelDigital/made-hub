@@ -52,4 +52,36 @@ class UserController extends Controller
 
         return view('admin.users.index', compact('users', 'roles'));
     }
+
+    /**
+     * Show the form for editing the specified user.
+     */
+    public function edit(User $user)
+    {
+        $roles = ['subscriber', 'administrator', 'editor', 'author', 'contributor', 'wpamelia-customer'];
+        return view('admin.users.edit', compact('user', 'roles'));
+    }
+
+    /**
+     * Update the specified user in storage.
+     */
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'role' => 'required|string|max:255',
+            'user_login' => 'nullable|string|max:255|unique:users,user_login,' . $user->id,
+            'nickname' => 'nullable|string|max:255',
+        ]);
+
+        $user->update($request->only([
+            'name', 'first_name', 'last_name', 'email', 'role', 'user_login', 'nickname'
+        ]));
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User updated successfully.');
+    }
 }

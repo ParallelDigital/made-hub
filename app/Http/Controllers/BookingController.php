@@ -44,7 +44,7 @@ class BookingController extends Controller
         }
 
         // Create booking and deduct credit
-        Booking::create([
+        $booking = Booking::create([
             'user_id' => $user->id,
             'fitness_class_id' => $classId,
             // 'booking_type' => 'credit', // omit: column may not exist in current DB
@@ -55,7 +55,15 @@ class BookingController extends Controller
         // Deduct credit from user
         $user->decrement('credits');
 
-        return response()->json(['success' => true, 'message' => 'Class booked successfully with credits!']);
+        // Send confirmation email
+        $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $booking->id]);
+        try {
+            Mail::to($user->email)->send(new BookingConfirmed($booking, $qrUrl));
+        } catch (\Throwable $e) {
+            \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
+        }
+
+        return response()->json(['success' => true, 'message' => 'Class booked successfully with credits! Confirmation email sent.']);
     }
 
     public function checkout($classId)

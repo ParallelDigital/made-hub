@@ -1,4 +1,4 @@
-@extends('admin.layout')
+@extends('layouts.admin')
 
 @section('title', 'Classes Management')
 
@@ -59,7 +59,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Instructor</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Spots</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Price</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Recurrence</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
@@ -84,9 +83,6 @@
                                 {{ $class->start_time }} - {{ $class->end_time }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                {{ $class->max_spots }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                 £{{ number_format($class->price, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -109,14 +105,7 @@
                                 <div class="flex space-x-2">
                                     <a href="{{ route('admin.classes.show', $class) }}" class="text-primary hover:text-purple-400">View</a>
                                     <a href="{{ route('admin.classes.edit', $class) }}" class="text-blue-400 hover:text-blue-300">Edit</a>
-                                    @if($class->isRecurring() && !$class->isChildClass())
-                                        <button onclick="showDeleteAfterDateModal({{ $class->id }}, '{{ $class->name }}')" class="text-yellow-400 hover:text-yellow-300">Delete After</button>
-                                    @endif
-                                    <form action="{{ route('admin.classes.destroy', $class) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this class?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-400 hover:text-red-300">Delete</button>
-                                    </form>
+                                    <button onclick="showDeleteOptionsModal({{ $class->id }}, '{{ $class->name }}', {{ $class->isRecurring() && !$class->isChildClass() ? 'true' : 'false' }})" class="text-red-400 hover:text-red-300">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -148,52 +137,76 @@
     </div>
 </div>
 
-<!-- Delete After Date Modal -->
-<div id="deleteAfterDateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+<!-- Delete Options Modal -->
+<div id="deleteOptionsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-gray-800">
         <div class="mt-3 text-center">
-            <h3 class="text-lg font-medium text-white" id="modalTitle">Delete Class Instances After Date</h3>
+            <h3 class="text-lg font-medium text-white" id="deleteOptionsModalTitle">Delete Class Options</h3>
             <div class="mt-2 px-7 py-3">
-                <p class="text-sm text-gray-300" id="modalMessage">
-                    Select a date to delete all recurring instances of this class after that date.
+                <p class="text-sm text-gray-300" id="deleteOptionsModalMessage">
+                    Choose how you want to delete this class.
                 </p>
-                <form id="deleteAfterDateForm" method="POST" class="mt-4">
-                    @csrf
-                    <div class="mb-4">
-                        <label for="delete_after_date" class="block text-sm font-medium text-gray-300 mb-2">Delete After Date</label>
-                        <input type="date" name="delete_after_date" id="delete_after_date" required
-                               class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    </div>
-                    <div class="items-center px-4 py-3">
-                        <button type="submit" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
-                            Delete Instances
+                <div class="mt-4 space-y-3">
+                    <!-- Delete This Class Only -->
+                    <form id="deleteSingleForm" method="POST" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+                            Delete This Class Only
                         </button>
-                        <button type="button" onclick="hideDeleteAfterDateModal()" class="mt-3 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                            Cancel
-                        </button>
+                    </form>
+
+                    <!-- Delete After Date (for recurring classes) -->
+                    <div id="deleteAfterSection" class="hidden">
+                        <form id="deleteAfterForm" method="POST" class="mt-3">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="delete_after_date" class="block text-sm font-medium text-gray-300 mb-2">Delete After Date</label>
+                                <input type="date" name="delete_after_date" id="delete_after_date" required
+                                       class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <button type="submit" class="w-full px-4 py-2 bg-orange-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">
+                                Delete All Future Instances
+                            </button>
+                        </form>
                     </div>
-                </form>
+                </div>
+                <div class="mt-4">
+                    <button type="button" onclick="hideDeleteOptionsModal()" class="w-full px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function showDeleteAfterDateModal(classId, className) {
-    document.getElementById('modalTitle').textContent = `Delete "${className}" Instances After Date`;
-    document.getElementById('deleteAfterDateForm').action = `/admin/classes/${classId}/delete-after-date`;
-    document.getElementById('deleteAfterDateModal').classList.remove('hidden');
+function showDeleteOptionsModal(classId, className, isRecurring) {
+    document.getElementById('deleteOptionsModalTitle').textContent = `Delete "${className}"`;
+    document.getElementById('deleteSingleForm').action = `/admin/classes/${classId}`;
+
+    // Show delete after section only for recurring classes
+    const deleteAfterSection = document.getElementById('deleteAfterSection');
+    if (isRecurring) {
+        deleteAfterSection.classList.remove('hidden');
+        document.getElementById('deleteAfterForm').action = `/admin/classes/${classId}/delete-after-date`;
+    } else {
+        deleteAfterSection.classList.add('hidden');
+    }
+
+    document.getElementById('deleteOptionsModal').classList.remove('hidden');
 }
 
-function hideDeleteAfterDateModal() {
-    document.getElementById('deleteAfterDateModal').classList.add('hidden');
+function hideDeleteOptionsModal() {
+    document.getElementById('deleteOptionsModal').classList.add('hidden');
     document.getElementById('delete_after_date').value = '';
 }
 
 // Close modal when clicking outside
-document.getElementById('deleteAfterDateModal').addEventListener('click', function(e) {
+document.getElementById('deleteOptionsModal').addEventListener('click', function(e) {
     if (e.target === this) {
-        hideDeleteAfterDateModal();
+        hideDeleteOptionsModal();
     }
 });
 </script>

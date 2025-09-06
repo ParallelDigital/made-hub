@@ -113,7 +113,8 @@ class FitnessClassController extends Controller
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'active' => 'boolean',
-            'recurring_weekly' => 'boolean',
+            'recurring_frequency' => 'required|string|in:none,weekly,biweekly,monthly',
+            'recurring_until' => 'nullable|date|required_if:recurring_frequency,weekly,biweekly,monthly',
             'recurring_days' => 'nullable|array',
             'recurring_days.*' => 'string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday'
         ]);

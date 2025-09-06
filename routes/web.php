@@ -62,6 +62,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Admin bookings list
     Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show']);
     Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('users/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
+    Route::put('users/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
     Route::get('reports', [App\Http\Controllers\Admin\AdminController::class, 'reports'])->name('reports');
 });
 

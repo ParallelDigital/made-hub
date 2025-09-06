@@ -1,4 +1,4 @@
-@extends('admin.layout')
+@extends('layouts.admin')
 
 @section('title', 'Edit Class')
 
@@ -114,50 +114,76 @@
                     </label>
                 </div>
 
-                <div class="flex items-center">
-                    <input type="checkbox" name="recurring_weekly" id="recurring_weekly" value="1" {{ old('recurring_weekly', $class->recurring_weekly) ? 'checked' : '' }}
-                           class="h-4 w-4 text-primary focus:ring-primary border-gray-600 bg-gray-700 rounded">
-                    <label for="recurring_weekly" class="ml-2 block text-sm text-gray-300">
-                        Recurring Weekly
-                    </label>
+                <div>
+                    <label for="recurring_frequency" class="block text-sm font-medium text-gray-300">Recurring Frequency</label>
+                    <select name="recurring_frequency" id="recurring_frequency"
+                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="none" {{ old('recurring_frequency', $class->recurring_frequency ?? 'none') == 'none' ? 'selected' : '' }}>No Recurring</option>
+                        <option value="weekly" {{ old('recurring_frequency', $class->recurring_frequency) == 'weekly' ? 'selected' : '' }}>Weekly</option>
+                        <option value="biweekly" {{ old('recurring_frequency', $class->recurring_frequency) == 'biweekly' ? 'selected' : '' }}>Biweekly</option>
+                        <option value="monthly" {{ old('recurring_frequency', $class->recurring_frequency) == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                    </select>
+                    @error('recurring_frequency')
+                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
-            <div id="recurring_days_section" class="{{ old('recurring_weekly', $class->recurring_weekly) ? '' : 'hidden' }}">
-                <label class="block text-sm font-medium text-gray-300 mb-2">Select Days for Weekly Recurrence</label>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    @php
-                        $days = ['monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday', 'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday', 'sunday' => 'Sunday'];
-                        $selectedDays = old('recurring_days', $class->recurring_days ? explode(',', $class->recurring_days) : []);
-                    @endphp
-                    @foreach($days as $value => $label)
-                        <div class="flex items-center">
-                            <input type="checkbox" name="recurring_days[]" id="day_{{ $value }}" value="{{ $value }}"
-                                   {{ in_array($value, $selectedDays) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-primary focus:ring-primary border-gray-600 bg-gray-700 rounded">
-                            <label for="day_{{ $value }}" class="ml-2 block text-sm text-gray-300">
-                                {{ $label }}
-                            </label>
-                        </div>
-                    @endforeach
+            <div id="recurring_options_section" class="{{ old('recurring_frequency', $class->recurring_frequency ?? 'none') !== 'none' ? '' : 'hidden' }}">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="recurring_until" class="block text-sm font-medium text-gray-300">Recurring Until</label>
+                        <input type="date" name="recurring_until" id="recurring_until" value="{{ old('recurring_until', $class->recurring_until ? $class->recurring_until->format('Y-m-d') : '') }}"
+                               class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        @error('recurring_until')
+                            <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
-                @error('recurring_days')
-                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
-                @enderror
+
+                <div id="recurring_days_section" class="mt-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Select Days for Recurrence</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        @php
+                            $days = ['monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday', 'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday', 'sunday' => 'Sunday'];
+                            $selectedDays = old('recurring_days', $class->recurring_days ? explode(',', $class->recurring_days) : []);
+                        @endphp
+                        @foreach($days as $value => $label)
+                            <div class="flex items-center">
+                                <input type="checkbox" name="recurring_days[]" id="day_{{ $value }}" value="{{ $value }}"
+                                       {{ in_array($value, $selectedDays) ? 'checked' : '' }}
+                                       class="h-4 w-4 text-primary focus:ring-primary border-gray-600 bg-gray-700 rounded">
+                                <label for="day_{{ $value }}" class="ml-2 block text-sm text-gray-300">
+                                    {{ $label }}
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                    @error('recurring_days')
+                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
             <script>
-                document.getElementById('recurring_weekly').addEventListener('change', function() {
-                    const recurringDaysSection = document.getElementById('recurring_days_section');
-                    if (this.checked) {
-                        recurringDaysSection.classList.remove('hidden');
+                document.getElementById('recurring_frequency').addEventListener('change', function() {
+                    const recurringOptionsSection = document.getElementById('recurring_options_section');
+                    if (this.value !== 'none') {
+                        recurringOptionsSection.classList.remove('hidden');
                     } else {
-                        recurringDaysSection.classList.add('hidden');
+                        recurringOptionsSection.classList.add('hidden');
+                        // Clear recurring until date
+                        document.getElementById('recurring_until').value = '';
                         // Uncheck all day checkboxes
                         const dayCheckboxes = document.querySelectorAll('input[name="recurring_days[]"]');
                         dayCheckboxes.forEach(checkbox => checkbox.checked = false);
                     }
                 });
+
+                // Show/hide on page load if already selected
+                if (document.getElementById('recurring_frequency').value !== 'none') {
+                    document.getElementById('recurring_options_section').classList.remove('hidden');
+                }
             </script>
 
 

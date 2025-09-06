@@ -1,4 +1,4 @@
-@extends('admin.layout')
+@extends('layouts.admin')
 
 @section('content')
 <div class="flex items-center justify-between mb-8">
@@ -92,7 +92,7 @@
             </thead>
             <tbody class="bg-gray-800 divide-y divide-gray-700">
                 @forelse($users as $user)
-                    <tr class="hover:bg-gray-700/50">
+                    <tr class="hover:bg-gray-700/50 cursor-pointer" onclick="window.location.href='{{ route('admin.users.edit', $user) }}'">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10">
