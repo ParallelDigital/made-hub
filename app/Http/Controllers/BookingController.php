@@ -129,41 +129,54 @@ class BookingController extends Controller
         return view('booking.confirmation', compact('class'));
     }
 
-    public function success(Request $request, $classId)
+    public function success(Request $request)
     {
+        $classId = $request->query('classId');
         $sessionId = $request->query('session_id');
+        
+        \Log::info('Booking success method called', ['classId' => $classId, 'session_id' => $sessionId]);
+
         if (!$sessionId) {
-            return redirect()->route('booking.checkout', ['classId' => $classId])
-                ->with('error', 'Missing session.');
+            \Log::warning('Booking success: Missing session_id');
+            return redirect()->route('welcome')->with('error', 'Missing session.');
+        }
+
+        if (!$classId) {
+            \Log::warning('Booking success: Missing classId');
+            return redirect()->route('welcome')->with('error', 'Missing class information.');
         }
 
         $stripe = new StripeClient($this->stripeSecret());
         try {
             $session = $stripe->checkout->sessions->retrieve($sessionId);
+            \Log::info('Stripe session retrieved', ['session_id' => $sessionId, 'payment_status' => $session->payment_status ?? 'unknown']);
         } catch (\Exception $e) {
-            return redirect()->route('booking.checkout', ['classId' => $classId])
-                ->with('error', 'Unable to verify payment.');
+            \Log::error('Stripe session retrieval failed', ['error' => $e->getMessage()]);
+            return redirect()->route('welcome')->with('error', 'Unable to verify payment.');
         }
 
         if (($session->payment_status ?? null) !== 'paid') {
-            return redirect()->route('booking.checkout', ['classId' => $classId])
-                ->with('error', 'Payment not completed.');
+            \Log::warning('Payment not completed', ['payment_status' => $session->payment_status ?? 'unknown']);
+            return redirect()->route('welcome')->with('error', 'Payment not completed.');
         }
 
         // Ensure class still exists and not overbooked
         $class = FitnessClass::findOrFail($classId);
         $currentBookings = Booking::where('fitness_class_id', $classId)->count();
         if ($currentBookings >= $class->max_spots) {
-            return redirect()->route('booking.checkout', ['classId' => $classId])
-                ->with('error', 'This class is now fully booked.');
+            \Log::warning('Class is fully booked', ['classId' => $classId, 'currentBookings' => $currentBookings, 'maxSpots' => $class->max_spots]);
+            return redirect()->route('welcome')->with('error', 'This class is now fully booked.');
         }
 
         // Find or create user from session/customer_email
         $email = $session->customer_details->email ?? $session->customer_email ?? null;
         $name = $session->metadata->name ?? 'Guest';
+
+        \Log::info('Processing guest booking', ['email' => $email, 'name' => $name]);
+
         if (!$email) {
-            return redirect()->route('booking.checkout', ['classId' => $classId])
-                ->with('error', 'No email found for payment.');
+            \Log::error('No email found in Stripe session');
+            return redirect()->route('welcome')->with('error', 'No email found for payment.');
         }
 
         $user = User::firstOrCreate(
@@ -174,6 +187,8 @@ class BookingController extends Controller
             ]
         );
 
+        \Log::info('User created/found', ['user_id' => $user->id, 'email' => $user->email]);
+
         // Avoid duplicate booking if user refreshes
         $existing = Booking::where('user_id', $user->id)
             ->where('fitness_class_id', $classId)
@@ -182,18 +197,27 @@ class BookingController extends Controller
             $booking = Booking::create([
                 'user_id' => $user->id,
                 'fitness_class_id' => $classId,
-                // 'booking_type' => 'purchase', // omit: column may not exist in current DB
+                'stripe_session_id' => $session->id,
                 'status' => 'confirmed',
                 'booked_at' => now(),
             ]);
+
+            \Log::info('Booking created', ['booking_id' => $booking->id, 'user_id' => $user->id, 'class_id' => $classId]);
         } else {
             $booking = $existing;
+            // Update existing booking with Stripe session ID if not present
+            if (!$existing->stripe_session_id) {
+                $existing->update(['stripe_session_id' => $session->id]);
+                \Log::info('Updated existing booking with Stripe session ID', ['booking_id' => $existing->id]);
+            }
+            \Log::info('Existing booking found', ['booking_id' => $booking->id]);
         }
 
         // Generate a signed check-in URL and email the QR to the user
         $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $booking->id]);
         try {
             Mail::to($email)->send(new BookingConfirmed($booking, $qrUrl));
+            \Log::info('Confirmation email sent', ['email' => $email]);
         } catch (\Throwable $e) {
             \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
         }

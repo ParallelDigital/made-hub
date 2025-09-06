@@ -125,9 +125,13 @@ class PurchaseController extends Controller
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'success_url' => route('booking.success'),
+                'success_url' => route('booking.success') . '?classId=' . $class_id . '&session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('checkout.show', $class->id),
                 'customer_email' => $request->email,
+                'metadata' => [
+                    'class_id' => $class_id,
+                    'name' => $request->name,
+                ],
             ]);
 
             return redirect($session->url);

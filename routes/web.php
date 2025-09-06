@@ -13,7 +13,7 @@ Route::post('/book-with-credits/{classId}', [App\Http\Controllers\BookingControl
 Route::get('/checkout/{class_id}', [App\Http\Controllers\PurchaseController::class, 'showCheckoutForm'])->name('checkout.show');
 Route::post('/checkout/{class_id}', [App\Http\Controllers\PurchaseController::class, 'processCheckout'])->name('booking.process-checkout');
 Route::post('/apply-coupon', [App\Http\Controllers\PurchaseController::class, 'applyCoupon'])->name('booking.apply-coupon');
-Route::get('/booking/success', [App\Http\Controllers\PurchaseController::class, 'showSuccessPage'])->name('booking.success');
+Route::get('/booking/success', [App\Http\Controllers\BookingController::class, 'success'])->name('booking.success');
 Route::get('/booking/confirmation/{classId}', [App\Http\Controllers\BookingController::class, 'confirmation'])->name('booking.confirmation');
 Route::get('/booking/checkin/{booking}', [App\Http\Controllers\BookingController::class, 'checkin'])
     ->name('booking.checkin')

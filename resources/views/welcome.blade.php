@@ -226,10 +226,23 @@
                                     </div>
                                     
                                     <div class="flex-shrink-0 w-full sm:w-auto ml-0 sm:ml-4 mt-4 sm:mt-0">
-                                        <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" 
-                                                class="w-full sm:w-auto px-6 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors hover:opacity-90">
-                                            Book Class
-                                        </button>
+                                        @php
+                                            $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
+                                            $availableSpots = max(0, $class->max_spots - $currentBookings);
+                                            $isFull = $availableSpots <= 0;
+                                        @endphp
+                                        
+                                        @if($isFull)
+                                            <button disabled 
+                                                    class="w-full sm:w-auto px-6 py-2 bg-gray-400 text-white text-sm font-medium rounded-md cursor-not-allowed">
+                                                Class Full
+                                            </button>
+                                        @else
+                                            <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" 
+                                                    class="w-full sm:w-auto px-6 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors hover:opacity-90">
+                                                Book Class ({{ $availableSpots }} left)
+                                            </button>
+                                        @endif
                                     </div>
                                 </div>
                                 @endforeach
@@ -507,10 +520,15 @@
                                 </div>
                                 
                                 <div class="flex-shrink-0 ml-4">
-                                    <button onclick="openBookingModal(${classItem.id}, ${classItem.price})" 
-                                            class="whitespace-nowrap px-4 py-2 bg-primary text-white text-xs font-medium rounded-md transition-colors hover:opacity-90">
-                                        Book Class
-                                    </button>
+                                    ${classItem.available_spots <= 0 ? 
+                                        `<button disabled class="whitespace-nowrap px-4 py-2 bg-gray-400 text-white text-xs font-medium rounded-md cursor-not-allowed">
+                                            Class Full
+                                        </button>` :
+                                        `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" 
+                                                class="whitespace-nowrap px-4 py-2 bg-primary text-white text-xs font-medium rounded-md transition-colors hover:opacity-90">
+                                            Book Class (${classItem.available_spots} left)
+                                        </button>`
+                                    }
                                 </div>
                             </div>
                         `;

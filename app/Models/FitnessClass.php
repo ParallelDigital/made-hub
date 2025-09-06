@@ -43,6 +43,23 @@ class FitnessClass extends Model
         return $this->hasMany(Booking::class);
     }
 
+    /**
+     * Get available spots for this class
+     */
+    public function getAvailableSpotsAttribute()
+    {
+        $currentBookings = $this->bookings()->count();
+        return max(0, $this->max_spots - $currentBookings);
+    }
+
+    /**
+     * Check if class is full
+     */
+    public function isFull()
+    {
+        return $this->available_spots <= 0;
+    }
+
     public function parentClass()
     {
         return $this->belongsTo(FitnessClass::class, 'parent_class_id');
