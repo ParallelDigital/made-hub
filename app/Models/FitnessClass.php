@@ -18,7 +18,10 @@ class FitnessClass extends Model
         'active',
         'recurring',
         'recurring_weekly',
-        'recurring_days'
+        'recurring_days',
+        'recurring_frequency',
+        'recurring_until',
+        'parent_class_id'
     ];
 
     protected $casts = [
@@ -27,6 +30,7 @@ class FitnessClass extends Model
         'price' => 'decimal:2',
         'recurring_weekly' => 'boolean',
         'class_date' => 'date',
+        'recurring_until' => 'date',
     ];
 
     public function instructor()
@@ -37,5 +41,25 @@ class FitnessClass extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function parentClass()
+    {
+        return $this->belongsTo(FitnessClass::class, 'parent_class_id');
+    }
+
+    public function childClasses()
+    {
+        return $this->hasMany(FitnessClass::class, 'parent_class_id');
+    }
+
+    public function isRecurring()
+    {
+        return $this->recurring_frequency !== 'none';
+    }
+
+    public function isChildClass()
+    {
+        return !is_null($this->parent_class_id);
     }
 }

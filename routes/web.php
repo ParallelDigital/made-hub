@@ -55,6 +55,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
     Route::resource('instructors', App\Http\Controllers\Admin\InstructorController::class);
     Route::resource('classes', App\Http\Controllers\Admin\FitnessClassController::class);
+    Route::post('classes/{class}/delete-after-date', [App\Http\Controllers\Admin\FitnessClassController::class, 'deleteAfterDate'])->name('classes.delete-after-date');
     Route::resource('memberships', App\Http\Controllers\Admin\MembershipController::class);
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);
     Route::resource('pricing', App\Http\Controllers\Admin\PricingController::class);

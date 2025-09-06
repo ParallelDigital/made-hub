@@ -58,7 +58,8 @@ class FitnessClassController extends Controller
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'active' => 'boolean',
-            'recurring_weekly' => 'boolean',
+            'recurring_frequency' => 'required|in:none,weekly,biweekly,monthly',
+            'recurring_until' => 'nullable|date|after:class_date',
             'recurring_days' => 'nullable|array',
             'recurring_days.*' => 'string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday'
         ]);
@@ -68,7 +69,13 @@ class FitnessClassController extends Controller
             $validated['recurring_days'] = implode(',', $validated['recurring_days']);
         }
 
-        FitnessClass::create($validated);
+        // Create the main class
+        $class = FitnessClass::create($validated);
+
+        // Create recurring instances if needed
+        if ($validated['recurring_frequency'] !== 'none' && !empty($validated['recurring_days']) && $validated['recurring_until']) {
+            $this->createRecurringInstances($class, $validated);
+        }
 
         return redirect()->route('admin.classes.index')->with('success', 'Class created successfully.');
     }
@@ -128,5 +135,85 @@ class FitnessClassController extends Controller
     {
         $class->delete();
         return redirect()->route('admin.classes.index')->with('success', 'Class deleted successfully.');
+    }
+
+    /**
+     * Delete all class instances after a specific date
+     */
+    public function deleteAfterDate(Request $request, FitnessClass $class)
+    {
+        $request->validate([
+            'delete_after_date' => 'required|date'
+        ]);
+
+        $deleteAfterDate = $request->delete_after_date;
+        
+        // Delete child instances after the specified date
+        $deletedCount = FitnessClass::where('parent_class_id', $class->id)
+            ->where('class_date', '>', $deleteAfterDate)
+            ->delete();
+
+        return redirect()->route('admin.classes.index')
+            ->with('success', "Deleted {$deletedCount} class instances after {$deleteAfterDate}.");
+    }
+
+    /**
+     * Create recurring instances based on frequency and selected days
+     */
+    private function createRecurringInstances(FitnessClass $parentClass, array $validated)
+    {
+        $startDate = \Carbon\Carbon::parse($validated['class_date']);
+        $endDate = \Carbon\Carbon::parse($validated['recurring_until']);
+        $frequency = $validated['recurring_frequency'];
+        $selectedDays = explode(',', $validated['recurring_days']);
+        
+        // Map day names to Carbon day numbers
+        $dayMap = [
+            'monday' => 1, 'tuesday' => 2, 'wednesday' => 3, 'thursday' => 4,
+            'friday' => 5, 'saturday' => 6, 'sunday' => 0
+        ];
+
+        $currentDate = $startDate->copy();
+        $instances = [];
+
+        while ($currentDate->lte($endDate)) {
+            $dayName = strtolower($currentDate->format('l'));
+            
+            if (in_array($dayName, $selectedDays) && !$currentDate->eq($startDate)) {
+                $instances[] = [
+                    'name' => $parentClass->name,
+                    'description' => $parentClass->description,
+                    'class_date' => $currentDate->format('Y-m-d'),
+                    'instructor_id' => $parentClass->instructor_id,
+                    'max_spots' => $parentClass->max_spots,
+                    'price' => $parentClass->price,
+                    'start_time' => $parentClass->start_time,
+                    'end_time' => $parentClass->end_time,
+                    'active' => $parentClass->active,
+                    'recurring_frequency' => 'none',
+                    'recurring_days' => null,
+                    'parent_class_id' => $parentClass->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            // Increment based on frequency
+            switch ($frequency) {
+                case 'weekly':
+                    $currentDate->addWeek();
+                    break;
+                case 'biweekly':
+                    $currentDate->addWeeks(2);
+                    break;
+                case 'monthly':
+                    $currentDate->addMonth();
+                    break;
+            }
+        }
+
+        if (!empty($instances)) {
+            FitnessClass::insert($instances);
+        }
     }
 }

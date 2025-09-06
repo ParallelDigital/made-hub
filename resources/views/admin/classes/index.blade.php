@@ -90,10 +90,15 @@
                                 £{{ number_format($class->price, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                @if($class->recurring_weekly)
+                                @if($class->recurring_frequency !== 'none')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        Weekly
+                                        {{ ucfirst($class->recurring_frequency) }}
                                     </span>
+                                    @if($class->isChildClass())
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-1">
+                                            Instance
+                                        </span>
+                                    @endif
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                         One-time
@@ -104,6 +109,9 @@
                                 <div class="flex space-x-2">
                                     <a href="{{ route('admin.classes.show', $class) }}" class="text-primary hover:text-purple-400">View</a>
                                     <a href="{{ route('admin.classes.edit', $class) }}" class="text-blue-400 hover:text-blue-300">Edit</a>
+                                    @if($class->isRecurring() && !$class->isChildClass())
+                                        <button onclick="showDeleteAfterDateModal({{ $class->id }}, '{{ $class->name }}')" class="text-yellow-400 hover:text-yellow-300">Delete After</button>
+                                    @endif
                                     <form action="{{ route('admin.classes.destroy', $class) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this class?')">
                                         @csrf
                                         @method('DELETE')
@@ -139,4 +147,54 @@
         @endif
     </div>
 </div>
+
+<!-- Delete After Date Modal -->
+<div id="deleteAfterDateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-gray-800">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg font-medium text-white" id="modalTitle">Delete Class Instances After Date</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-300" id="modalMessage">
+                    Select a date to delete all recurring instances of this class after that date.
+                </p>
+                <form id="deleteAfterDateForm" method="POST" class="mt-4">
+                    @csrf
+                    <div class="mb-4">
+                        <label for="delete_after_date" class="block text-sm font-medium text-gray-300 mb-2">Delete After Date</label>
+                        <input type="date" name="delete_after_date" id="delete_after_date" required
+                               class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button type="submit" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+                            Delete Instances
+                        </button>
+                        <button type="button" onclick="hideDeleteAfterDateModal()" class="mt-3 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDeleteAfterDateModal(classId, className) {
+    document.getElementById('modalTitle').textContent = `Delete "${className}" Instances After Date`;
+    document.getElementById('deleteAfterDateForm').action = `/admin/classes/${classId}/delete-after-date`;
+    document.getElementById('deleteAfterDateModal').classList.remove('hidden');
+}
+
+function hideDeleteAfterDateModal() {
+    document.getElementById('deleteAfterDateModal').classList.add('hidden');
+    document.getElementById('delete_after_date').value = '';
+}
+
+// Close modal when clicking outside
+document.getElementById('deleteAfterDateModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideDeleteAfterDateModal();
+    }
+});
+</script>
 @endsection
