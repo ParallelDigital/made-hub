@@ -121,7 +121,14 @@
             </div>
             <div>
                 <span class="text-gray-400">QR Code:</span>
-                <span class="text-white ml-2 font-mono">{{ $user->qr_code }}</span>
+                <div class="mt-2">
+                    <img src="{{ route('user.qr-code', $user) }}"
+                         alt="User QR Code"
+                         class="w-24 h-24 border border-gray-600 rounded">
+                    <div class="mt-1">
+                        <span class="text-white font-mono text-sm">{{ $user->qr_code }}</span>
+                    </div>
+                </div>
             </div>
             <div>
                 <span class="text-gray-400">Registered:</span>

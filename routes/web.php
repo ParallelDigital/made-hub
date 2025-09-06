@@ -21,6 +21,9 @@ Route::get('/booking/checkin/{booking}', [App\Http\Controllers\BookingController
 Route::get('/user/checkin/{user}/{qr_code}', [App\Http\Controllers\BookingController::class, 'userCheckin'])
     ->name('user.checkin')
     ->middleware('signed');
+Route::get('/qr-code/{user}', [App\Http\Controllers\UserController::class, 'generateQrCode'])
+    ->name('user.qr-code')
+    ->middleware('auth');
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
