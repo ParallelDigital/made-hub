@@ -1,5 +1,49 @@
 @extends('admin.layout')
 
+@push('head')
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <style>
+        @supports (-webkit-touch-callout: none) {
+            /* Fix for iOS viewport units */
+            .ios-fix {
+                height: -webkit-fill-available !important;
+            }
+            /* Force portrait orientation for iOS */
+            @media screen and (max-width: 768px) {
+                #scanner-container {
+                    transform: rotate(0deg);
+                    -webkit-transform: rotate(0deg);
+                }
+            }
+        }
+        /* Ensure scanner container maintains aspect ratio */
+        #scanner-container {
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* 1:1 Aspect Ratio */
+            overflow: hidden;
+        }
+        #qr-reader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
+        /* Scanner overlay */
+        #scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+@endpush
+
 @section('title', 'QR Scanner - ' . $class->name)
 
 @section('content')
@@ -34,10 +78,10 @@
             <h2 class="text-xl font-bold text-white mb-4">Scan QR Code</h2>
             
             <!-- Camera Preview (Html5Qrcode requires a container div, not a video tag) -->
-            <div class="relative mb-4">
-                <div id="qr-reader" class="w-full h-64 bg-gray-900 rounded-lg overflow-hidden"></div>
-                <div id="scanner-overlay" class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div class="w-48 h-48 border-2 border-indigo-500 rounded-lg"></div>
+            <div id="scanner-container" class="relative bg-black rounded-lg overflow-hidden mb-4">
+                <div id="qr-reader" class="w-full h-full"></div>
+                <div id="scanner-overlay" class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-64 h-64 border-4 border-indigo-500 rounded-lg"></div>
                 </div>
             </div>
 
@@ -122,29 +166,69 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function startScanner() {
         if (scanning) return;
+        
+        // Check if iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        
+        // Clear any existing scanner
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear().catch(console.error);
+        }
+        
         html5QrcodeScanner = new Html5Qrcode("qr-reader");
         
         Html5Qrcode.getCameras().then(devices => {
             if (devices && devices.length) {
-                // Try to use back camera first (better for scanning)
                 let cameraId = devices[0].id;
-                for (let device of devices) {
-                    if (device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear')) {
-                        cameraId = device.id;
-                        break;
+                let facingMode = { ideal: "environment" };
+                
+                // Try to use back camera on mobile devices
+                if (isIOS || /Android/i.test(navigator.userAgent)) {
+                    for (let device of devices) {
+                        const label = device.label.toLowerCase();
+                        if (label.includes('back') || label.includes('rear') || 
+                            (label.includes('camera') && !label.includes('front'))) {
+                            cameraId = device.id;
+                            break;
+                        }
                     }
                 }
                 
+                // iOS-specific configuration
+                const config = isIOS ? {
+                    fps: 5,  // Slower FPS for better performance
+                    qrbox: { width: 200, height: 200 },
+                    aspectRatio: 1.0,
+                    disableFlip: true,  // Disable flip on iOS to prevent orientation issues
+                    experimentalFeatures: {
+                        useBarCodeDetectorIfSupported: true
+                    },
+                    videoConstraints: {
+                        deviceId: cameraId ? { exact: cameraId } : undefined,
+                        facingMode: facingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 1280 },
+                        frameRate: { ideal: 10, max: 15 }
+                    }
+                } : {
+                    // Default config for other devices
+                    fps: 10,
+                    qrbox: { width: 220, height: 220 },
+                    aspectRatio: 1.0,
+                    disableFlip: false,
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    videoConstraints: {
+                        deviceId: cameraId ? { exact: cameraId } : undefined,
+                        facingMode: facingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+                
                 html5QrcodeScanner.start(
                     cameraId,
-                    {
-                        fps: 10,
-                        qrbox: { width: 220, height: 220 },
-                        aspectRatio: 1.0,
-                        disableFlip: false,
-                        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-                        videoConstraints: { facingMode: { ideal: "environment" } }
-                    },
+                    config,
                     onScanSuccess,
                     onScanFailure
                 ).then(() => {
