@@ -39,6 +39,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'qr_code' => 'QR' . strtoupper(substr(md5(uniqid()), 0, 8)),
         ]);
 
         event(new Registered($user));
