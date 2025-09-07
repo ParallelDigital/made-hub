@@ -36,9 +36,15 @@
                                         <p class="text-gray-900 whitespace-no-wrap">{{ $booking->user->email }}</p>
                                     </td>
                                      <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        <span class="relative inline-block px-3 py-1 font-semibold leading-tight {{ $booking->checked_in ? 'text-green-900' : 'text-yellow-900' }}">
-                                            <span aria-hidden class="absolute inset-0 {{ $booking->checked_in ? 'bg-green-200' : 'bg-yellow-200' }} opacity-50 rounded-full"></span>
-                                            <span class="relative">{{ $booking->checked_in ? 'Checked In' : 'Not Checked In' }}</span>
+                                        @php
+                                            $isCheckedIn = (bool)($booking->attended ?? false);
+                                            $time = $booking->checked_in_at ? $booking->checked_in_at->format('g:i A') : null;
+                                        @endphp
+                                        <span class="relative inline-block px-3 py-1 font-semibold leading-tight {{ $isCheckedIn ? 'text-green-900' : 'text-yellow-900' }}">
+                                            <span aria-hidden class="absolute inset-0 {{ $isCheckedIn ? 'bg-green-200' : 'bg-yellow-200' }} opacity-50 rounded-full"></span>
+                                            <span class="relative">
+                                                {{ $isCheckedIn ? ('Checked In' . ($time ? ' at ' . $time : '')) : 'Not Checked In' }}
+                                            </span>
                                         </span>
                                     </td>
                                 </tr>
