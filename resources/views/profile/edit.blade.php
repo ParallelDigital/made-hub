@@ -1,30 +1,39 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-white leading-tight">{{ __('Profile') }}</h2>
+                <p class="text-gray-400 text-sm">Manage your account information and security</p>
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
+    <div class="py-8">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <!-- Grid: Profile + Password -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Profile Information Card -->
+                <div class="p-6 bg-gray-800/80 border border-gray-700 rounded-xl shadow-lg">
+                    <div class="max-w-xl">
+                        @include('profile.partials.update-profile-information-form')
+                    </div>
+                </div>
+
+                <!-- Update Password Card -->
+                <div class="p-6 bg-gray-800/80 border border-gray-700 rounded-xl shadow-lg">
+                    <div class="max-w-xl">
+                        @include('profile.partials.update-password-form')
+                    </div>
                 </div>
             </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+            <!-- QR Code Card -->
+            <div class="p-6 bg-gray-800/80 border border-gray-700 rounded-xl shadow-lg">
                 <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
-            </div>
-
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Your QR Code</h3>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <p class="text-sm text-gray-600 mb-4">Your unique QR code for check-ins:</p>
-                        <div class="bg-white p-4 rounded border-2 border-gray-200 text-center mb-4">
+                    <h3 class="text-lg font-medium text-white mb-4">Your QR Code</h3>
+                    <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                        <p class="text-sm text-gray-400 mb-4">Your unique QR code for check-ins:</p>
+                        <div class="bg-gray-800 p-4 rounded border border-gray-700 text-center mb-4">
                             <img src="{{ route('user.qr-code', auth()->user()) }}"
                                  alt="Your QR Code"
                                  class="mx-auto mb-2"
@@ -32,8 +41,8 @@
                             <p class="text-xs text-gray-500">Scan this QR code for check-ins</p>
                         </div>
                         <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-1">QR Code Text:</p>
-                            <span class="font-mono text-sm font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded">
+                            <p class="text-sm text-gray-400 mb-1">QR Code Text:</p>
+                            <span class="font-mono text-sm font-bold text-white bg-gray-800 px-2 py-1 rounded border border-gray-700">
                                 {{ auth()->user()->qr_code }}
                             </span>
                         </div>
