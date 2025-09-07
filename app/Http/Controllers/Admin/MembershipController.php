@@ -4,14 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Membership;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class MembershipController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         // Get users with subscription data
         $users = \App\Models\User::select('id', 'name', 'email', 'stripe_customer_id', 'stripe_subscription_id', 'subscription_status', 'subscription_expires_at', 'created_at')
@@ -32,7 +34,102 @@ class MembershipController extends Controller
                 ];
             });
 
-        return view('admin.memberships.index', compact('users'));
+        $stripeError = null;
+        $stripeMembers = collect();
+        $totalMembers = 0;
+        $monthlyRevenue = 0;
+        $stripeMode = config('services.stripe.mode') ?: 'default';
+        $statusFilter = $request->input('status', 'all');
+
+        try {
+            $secret = config('services.stripe.secret');
+            if ($secret) {
+                $stripe = new \Stripe\StripeClient($secret);
+
+                // Fetch all subscriptions, expanding only the customer.
+                $allSubs = collect();
+                $params = ['limit' => 100, 'expand' => ['data.customer']];
+                do {
+                    $resp = $stripe->subscriptions->all($params);
+                    $data = collect($resp->data ?? []);
+                    $allSubs = $allSubs->merge($data);
+                    if (($resp->has_more ?? false) && $data->isNotEmpty()) {
+                        $params['starting_after'] = $data->last()->id;
+                    } else {
+                        break;
+                    }
+                } while (true);
+
+                // Map and filter subscriptions
+                $stripeMembers = $allSubs->map(function($sub) {
+                    $status = $sub->status;
+                    if ($status === 'past_due') {
+                        $status = 'inactive';
+                    }
+
+                    $startTs = $sub->start_date ?? $sub->current_period_start ?? null;
+                    $monthsActive = 0;
+                    if ($startTs) {
+                        $startDate = \Carbon\Carbon::createFromTimestamp($startTs);
+                        $monthsActive = (int) $startDate->diffInMonths(now());
+                        if ($monthsActive === 0) {
+                            $monthsActive = 1;
+                        }
+                    }
+                    
+                    $customer = $sub->customer;
+                    return [
+                        'name' => is_object($customer) ? ($customer->name ?? '—') : '—',
+                        'email' => is_object($customer) ? ($customer->email ?? '—') : '—',
+                        'months_active' => $monthsActive,
+                        'status' => $status,
+                        'subscription_id' => $sub->id,
+                    ];
+                });
+
+                // Calculate metrics on the complete, unfiltered list of members
+                $stripeMembersBeforeFilter = $stripeMembers;
+                $activeMembers = $stripeMembers->filter(function ($member) {
+                    return $member['status'] === 'active' || $member['status'] === 'trialing';
+                });
+                $activeMembersCount = $activeMembers->count();
+                $totalMembers = $stripeMembersBeforeFilter->count();
+                $monthlyRevenue = $activeMembersCount * 30;
+
+                // Now, filter the list for display based on the user's selection
+                if ($statusFilter !== 'all') {
+                    $stripeMembers = $stripeMembers->where('status', $statusFilter);
+                }
+            }
+        } catch (\Throwable $e) {
+            $stripeError = $e->getMessage();
+            \Log::warning('Stripe membership fetch failed: '.$e->getMessage());
+        }
+
+        $statusOptions = [
+            'all' => 'All Statuses',
+            'active' => 'Active',
+            'trialing' => 'Trialing',
+            'inactive' => 'Inactive',
+            'canceled' => 'Canceled',
+        ];
+
+        // Paginate the results
+        $perPage = $request->input('per_page', 20);
+        $currentPage = $request->input('page', 1);
+        $paginatedItems = $stripeMembers->slice(($currentPage - 1) * $perPage, $perPage);
+        $stripeMembers = new LengthAwarePaginator(
+            $paginatedItems,
+            $stripeMembers->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('admin.memberships.index', compact(
+            'users', 'stripeMembers', 'totalMembers', 'monthlyRevenue', 'activeMembersCount',
+            'stripeMode', 'stripeError', 'statusFilter', 'statusOptions', 'perPage'
+        ));
     }
 
     /**
@@ -117,4 +214,5 @@ class MembershipController extends Controller
         return redirect()->route('admin.memberships.index')
                         ->with('success', 'Membership deleted successfully.');
     }
+
 }

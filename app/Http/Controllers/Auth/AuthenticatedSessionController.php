@@ -28,12 +28,23 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirect admin users to admin dashboard
-        if (auth()->user()->role === 'admin') {
-            return redirect()->intended(route('admin.dashboard'));
+        // Get the intended URL and validate it
+        $intendedUrl = $request->session()->get('url.intended');
+        
+        // If the intended URL contains book-with-credits, redirect to dashboard instead
+        if ($intendedUrl && str_contains($intendedUrl, 'book-with-credits')) {
+            $request->session()->forget('url.intended');
+            $intendedUrl = null;
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirect based on user role
+        if (auth()->user()->role === 'admin') {
+            return $intendedUrl ? redirect($intendedUrl) : redirect()->route('admin.dashboard');
+        } elseif (auth()->user()->role === 'instructor') {
+            return $intendedUrl ? redirect($intendedUrl) : redirect()->route('instructor.dashboard');
+        }
+
+        return $intendedUrl ? redirect($intendedUrl) : redirect()->route('dashboard', absolute: false);
     }
 
     /**

@@ -1,0 +1,87 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class UserController extends Controller
+{
+    /**
+     * Display a listing of the users.
+     */
+    public function index(Request $request)
+    {
+        $query = User::query();
+
+        // Filter by search term (name, email, user_login)
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('email', 'like', "%{$searchTerm}%")
+                  ->orWhere('user_login', 'like', "%{$searchTerm}%")
+                  ->orWhere('first_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Filter by role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Filter by registration date range
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        $users = $query->orderByDesc('created_at')
+            ->paginate(20)
+            ->appends($request->query());
+
+        // Get unique roles for filter dropdown
+        $roles = User::whereNotNull('role')
+            ->distinct()
+            ->pluck('role')
+            ->sort();
+
+        return view('admin.users.index', compact('users', 'roles'));
+    }
+
+    /**
+     * Show the form for editing the specified user.
+     */
+    public function edit(User $user)
+    {
+        $roles = ['subscriber', 'administrator', 'editor', 'author', 'contributor', 'wpamelia-customer'];
+        return view('admin.users.edit', compact('user', 'roles'));
+    }
+
+    /**
+     * Update the specified user in storage.
+     */
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'role' => 'required|string|max:255',
+            'user_login' => 'nullable|string|max:255|unique:users,user_login,' . $user->id,
+            'nickname' => 'nullable|string|max:255',
+        ]);
+
+        $user->update($request->only([
+            'name', 'first_name', 'last_name', 'email', 'role', 'user_login', 'nickname'
+        ]));
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User updated successfully.');
+    }
+}

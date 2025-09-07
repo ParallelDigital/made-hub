@@ -13,6 +13,7 @@
 
         <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script>
           tailwind.config = {
             theme: {
@@ -45,59 +46,146 @@
     </head>
     <body class="bg-black text-white font-inter min-h-screen">
         <!-- Navigation -->
-        <nav class="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-            <div class="flex items-center space-x-8">
-                <div class="flex items-center space-x-2">
-                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-8 w-8">
-                    <span class="text-xl font-bold text-primary">MADE RUNNING</span>
+        <div x-data="{ open: false }" class="relative bg-black border-b border-gray-800">
+            <nav class="flex items-center justify-between px-4 sm:px-6 py-4">
+                <div class="flex items-center space-x-8">
+                    <div class="flex items-center space-x-2">
+                        <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20">
+                    </div>
+                    <div class="hidden lg:flex space-x-6">
+                        <a href="{{ route('welcome') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
+                        <a href="{{ route('purchase.index') }}" class="text-white hover:text-primary transition-colors">PURCHASE</a>
+                        <a href="{{ route('admin.memberships.index') }}" class="text-white hover:text-primary transition-colors">MEMBERSHIPS</a>
+                        <a href="#" class="text-white hover:text-primary transition-colors">THE COMMUNITY</a>
+                    </div>
                 </div>
-                <div class="hidden md:flex space-x-6">
-                    <a href="{{ route('welcome') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
-                    <a href="{{ route('purchase.index') }}" class="text-white hover:text-primary transition-colors">PURCHASE</a>
-                    <a href="{{ route('admin.memberships.index') }}" class="text-white hover:text-primary transition-colors">MEMBERSHIPS</a>
-                    <a href="#" class="text-white hover:text-primary transition-colors">THE COMMUNITY</a>
-                </div>
-            </div>
-            <div class="flex items-center space-x-4">
-                @auth
-                    <a href="{{ url('/dashboard') }}" class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
-                        DASHBOARD
-                    </a>
-                @else
-                    <a href="{{ route('login') }}" class="text-white hover:text-primary transition-colors">LOG IN</a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
-                            JOIN NOW
+                <div class="hidden lg:flex items-center space-x-4">
+                    @auth
+                        <a href="{{ url('/dashboard') }}" class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
+                            DASHBOARD
                         </a>
-                    @endif
-                @endauth
+                    @else
+                        <a href="{{ route('login') }}" class="text-white hover:text-primary transition-colors">LOG IN</a>
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
+                                JOIN NOW
+                            </a>
+                        @endif
+                    @endauth
+                </div>
+                <!-- Mobile menu button -->
+                <div class="lg:hidden">
+                    <button @click="open = !open" class="text-white hover:text-primary focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                            <path x-show="open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Mobile Menu -->
+            <div x-show="open" @click.away="open = false" class="lg:hidden bg-black border-b border-gray-800 absolute w-full z-40" x-transition>
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="{{ route('welcome') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-primary hover:bg-gray-900">SCHEDULE</a>
+                    <a href="{{ route('purchase.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-primary hover:bg-gray-900">PURCHASE</a>
+                    <a href="{{ route('admin.memberships.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-primary hover:bg-gray-900">MEMBERSHIPS</a>
+                    <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-primary hover:bg-gray-900">THE COMMUNITY</a>
+                </div>
+                <div class="pt-4 pb-3 border-t border-gray-700">
+                    <div class="px-2 space-y-2">
+                        @auth
+                            <a href="{{ url('/dashboard') }}" class="block w-full text-left bg-primary text-black px-4 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">DASHBOARD</a>
+                        @else
+                            <a href="{{ route('login') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-primary hover:bg-gray-900">LOG IN</a>
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}" class="block w-full text-center bg-primary text-black px-4 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">JOIN NOW</a>
+                            @endif
+                        @endauth
+                    </div>
+                </div>
             </div>
-        </nav>
+        </div>
 
         <!-- Hero Section -->
-        <div class="relative h-[500px] flex items-center justify-center overflow-hidden">
+        <div class="relative h-[550px] md:h-[550px] flex items-center overflow-hidden">
             <!-- Background Image -->
             <div class="absolute inset-0 bg-cover bg-center bg-no-repeat z-5" style="background-image: url('{{ asset('made-club.jpg') }}');"></div>
             <div class="absolute inset-0 bg-black/70 z-20"></div>
 
             <!-- Content -->
-            <div class="relative z-30 text-center px-6 max-w-4xl mx-auto">
-                <div class="mb-8">
-                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="mx-auto mb-4">
-                </div>
+            <div class="relative z-30 px-6 max-w-6xl container mx-auto">
                 
-                <h1 class="text-6xl md:text-8xl font-black mb-6 tracking-tight">
+                <h1 class="text-5xl md:text-8xl font-black mb-6 tracking-tight">
                     <span class="block text-white">MADE TO</span>
                     <span class="block text-primary">ELEVATE</span>
                 </h1>
                 
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <a href="{{ route('register') }}" class="bg-primary text-black px-8 py-4 text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105">
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <a href="{{ route('register') }}" class="w-full sm:w-auto bg-primary text-black px-8 py-4 text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">
                         BOOK YOUR CLASS
                     </a>
-                    <a href="#schedule" class="border-2 border-white text-white px-8 py-4 text-lg font-bold rounded hover:bg-white hover:text-black transition-all">
+                    <a href="#schedule" class="w-full sm:w-auto border-2 border-white text-white px-8 py-4 text-lg font-bold rounded hover:bg-white hover:text-black transition-all text-center">
                         VIEW SCHEDULE
                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Membership Section -->
+        <div id="membership" class="bg-white text-black py-12 sm:py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <!-- Image Column -->
+                    <div>
+                        <img src="{{ asset('made-club.jpg') }}" alt="Group fitness class" class="rounded-lg shadow-lg w-full h-full object-cover">
+                    </div>
+                    <!-- Content Column -->
+                    <div class="text-left">
+                        <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">ARE YOU READY <br>TO ELEVATE</h2>
+                        <p class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">PERKS OF MEMBERSHIP</p>
+                        <ul class="space-y-4 mb-8">
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Personal Accountability Adviser</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Access to Co working Spaces (Free Wi-fi)</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Seminars – marketing, personal finance, plus more</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Access to the Made Gym</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Exclusive networking Group Chat</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">5 classes a month (HIIT, Yoga, Dance)</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Early access to Events</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">1 Free Physio Consultation</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">50% off Room Hire</span>
+                            </li>
+                        </ul>
+                        <a href="#" class="inline-block bg-black text-white px-10 py-4 text-sm font-bold uppercase tracking-widest rounded hover:bg-gray-800 transition-all">
+                            SIGN UP NOW
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,23 +196,23 @@
                 <!-- Calendar Card -->
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                     <!-- Calendar Header -->
-                    <div class="bg-white px-6 py-4 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-2xl font-bold text-gray-900">Schedule</h2>
-                            <div class="flex items-center space-x-4">
-                                <select class="bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
+                    <div class="bg-white px-4 sm:px-6 py-4 border-b border-gray-200">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Schedule</h2>
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                                <select class="w-full sm:w-auto bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
                                     <option>Instructor</option>
                                 </select>
-                                <select class="bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
+                                <select class="w-full sm:w-auto bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
                                     <option>Class Type</option>
                                 </select>
-                                <button class="text-primary text-sm hover:opacity-80">Clear All</button>
+                                <button class="text-primary text-sm hover:opacity-80 hidden sm:block">Clear All</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Week Navigation -->
-                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <div class="bg-gray-50 px-2 sm:px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center justify-between">
                             <!-- Previous Week Arrow -->
                             <button onclick="loadDate('{{ $prevWeek }}')" class="p-2 rounded-lg hover:bg-gray-200 text-gray-600 transition-colors" id="prev-week-btn">
@@ -134,12 +222,12 @@
                             </button>
                             
                             <!-- Week Days -->
-                            <div class="flex space-x-2 flex-1" id="week-days">
+                            <div class="flex space-x-1 sm:space-x-2 flex-1 overflow-x-auto" id="week-days">
                                 @foreach($weekDays as $day)
-                                <button onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-6 py-4 rounded-lg transition-colors cursor-pointer flex-1
+                                <button onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-3 sm:px-6 py-4 rounded-lg transition-colors cursor-pointer flex-1 min-w-[80px]
                                     {{ $day['is_selected'] ? 'bg-primary text-white' : ($day['is_today'] ? 'bg-gray-200 text-gray-800 font-semibold' : 'text-gray-600 hover:bg-gray-100') }}">
                                     <div class="text-sm font-medium uppercase">{{ $day['day'] }}</div>
-                                    <div class="text-xl font-bold">{{ $day['date'] }}</div>
+                                    <div class="text-lg sm:text-xl font-bold">{{ $day['date'] }}</div>
                                 </button>
                                 @endforeach
                             </div>
@@ -174,28 +262,41 @@
                         @if($selectedDateClasses->count() > 0)
                             <div class="space-y-3" id="classes-list">
                                 @foreach($selectedDateClasses as $class)
-                                <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                    <div class="flex-shrink-0 w-20">
+                                <div class="flex flex-col sm:flex-row items-start sm:items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <div class="flex-shrink-0 w-full sm:w-20 mb-2 sm:mb-0">
                                         <div class="text-sm font-semibold text-gray-900">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</div>
                                         <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} min</div>
                                     </div>
                                     
                                     <div class="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center ml-6">
-                                        <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" 
+                                        <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
                                              alt="{{ $class->instructor->name ?? 'Instructor' }}" 
                                              class="w-12 h-12 rounded-full object-cover">
                                     </div>
                                     
-                                    <div class="flex-1 ml-4">
+                                    <div class="flex-1 ml-0 sm:ml-4">
                                         <div class="font-semibold text-gray-900">{{ $class->name }} ({{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} Min)</div>
                                         <div class="text-sm text-gray-600">{{ $class->instructor->name ?? 'No Instructor' }}</div>
                                     </div>
                                     
-                                    <div class="flex-shrink-0 ml-4">
-                                        <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" 
-                                                class="px-6 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors hover:opacity-90">
-                                            Book Class
-                                        </button>
+                                    <div class="flex-shrink-0 w-full sm:w-auto ml-0 sm:ml-4 mt-4 sm:mt-0">
+                                        @php
+                                            $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
+                                            $availableSpots = max(0, $class->max_spots - $currentBookings);
+                                            $isFull = $availableSpots <= 0;
+                                        @endphp
+                                        
+                                        @if($isFull)
+                                            <button disabled 
+                                                    class="w-full sm:w-auto px-6 py-2 bg-gray-400 text-white text-sm font-medium rounded-md cursor-not-allowed">
+                                                Class Full
+                                            </button>
+                                        @else
+                                            <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" 
+                                                    class="w-full sm:w-auto px-6 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors hover:opacity-90">
+                                                Book Class ({{ $availableSpots }} left)
+                                            </button>
+                                        @endif
                                     </div>
                                 </div>
                                 @endforeach
@@ -244,7 +345,7 @@
                                 </div>
                                 <div class="text-left">
                                     <div class="font-medium text-gray-900">Use Credits</div>
-                                    <div class="text-sm text-gray-500">You have {{ auth()->user()->credits ?? 0 }} credits</div>
+                                    <div class="text-sm text-gray-500">You have {{ auth()->user()->getAvailableCredits() }} {{ auth()->user()->hasActiveMembership() ? 'monthly credits' : 'credits' }}</div>
                                 </div>
                             </div>
                             <div class="text-green-600 font-semibold">1 Credit</div>
@@ -296,11 +397,10 @@
         <!-- Footer -->
         <footer class="bg-black border-t border-gray-800 py-12">
             <div class="max-w-6xl mx-auto px-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
                     <div>
-                        <div class="flex items-center space-x-2 mb-4">
-                            <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-8 w-8">
-                            <span class="text-xl font-bold text-primary">MADE RUNNING</span>
+                        <div class="flex items-center justify-center md:justify-start space-x-2 mb-4">
+                            <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20">
                         </div>
                         <p class="text-gray-400 text-sm">
                             Transform your fitness journey with our high-intensity training programs designed to push your limits.
@@ -327,7 +427,7 @@
                     
                     <div>
                         <h3 class="text-white font-semibold mb-4">CONNECT</h3>
-                        <div class="flex space-x-4">
+                        <div class="flex space-x-4 justify-center md:justify-start">
                             <a href="#" class="text-gray-400 hover:text-white transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
@@ -461,7 +561,7 @@
                                 </div>
                                 
                                 <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-4">
-                                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" 
+                                    <img src="${classItem.instructor.photo_url}" 
                                          alt="${classItem.instructor.name}" 
                                          class="w-10 h-10 rounded-full object-cover">
                                 </div>
@@ -469,13 +569,19 @@
                                 <div class="flex-1 min-w-0">
                                     <h3 class="text-sm font-semibold text-gray-900 truncate">${classItem.name}</h3>
                                     <p class="text-xs text-gray-600">${classItem.instructor.name}</p>
+                                    <p class="text-xs text-gray-500">${classItem.available_spots} spots available</p>
                                 </div>
                                 
                                 <div class="flex-shrink-0 ml-4">
-                                    <button onclick="openBookingModal(${classItem.id}, ${classItem.price})" 
-                                            class="whitespace-nowrap px-4 py-2 bg-primary text-white text-xs font-medium rounded-md transition-colors hover:opacity-90">
-                                        Book Class
-                                    </button>
+                                    ${classItem.available_spots <= 0 ? 
+                                        `<button disabled class="whitespace-nowrap px-4 py-2 bg-gray-400 text-white text-xs font-medium rounded-md cursor-not-allowed">
+                                            Class Full
+                                        </button>` :
+                                        `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" 
+                                                class="whitespace-nowrap px-4 py-2 bg-primary text-white text-xs font-medium rounded-md transition-colors hover:opacity-90">
+                                            Book Class (${classItem.available_spots} left)
+                                        </button>`
+                                    }
                                 </div>
                             </div>
                         `;
@@ -550,7 +656,7 @@
                 @else
                     // User not logged in, redirect to login
                     if (confirm('You need to sign in to use credits. Redirect to login?')) {
-                        window.location.href = '/login?redirect=' + encodeURIComponent(`/book-with-credits/${classId}`);
+                        window.location.href = '/login';
                     }
                 @endauth
             }

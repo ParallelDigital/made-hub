@@ -1,4 +1,4 @@
-@extends('admin.layout')
+@extends('layouts.admin')
 
 @section('title', 'Dashboard')
 
@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700">
+    <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700 cursor-pointer hover:border-primary transition-colors" onclick="window.location='{{ route('admin.bookings.index') }}'">
         <div class="p-5">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -74,7 +74,93 @@
                     </dl>
                 </div>
             </div>
+            <div class="mt-3">
+                <a href="{{ route('admin.bookings.index') }}" class="text-primary text-sm hover:text-purple-400">View bookings →</a>
+            </div>
         </div>
+    </div>
+</div>
+
+<!-- Recent Bookings -->
+<div class="bg-gray-800 shadow rounded-lg border border-gray-700 mb-8">
+    <div class="px-4 py-5 sm:p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg leading-6 font-medium text-white">Recent Bookings</h3>
+            <a href="{{ route('admin.bookings.index') }}" class="text-primary hover:text-purple-400 text-sm font-medium">
+                View all bookings →
+            </a>
+        </div>
+
+        @if($recentBookings->count() > 0)
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Member</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date & Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Booked</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-gray-800 divide-y divide-gray-700">
+                        @foreach($recentBookings as $booking)
+                        <tr class="hover:bg-gray-700/50 cursor-pointer" onclick="window.location='{{ route('admin.bookings.show', $booking) }}'">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-8 w-8">
+                                        <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                                            <span class="text-xs font-medium text-white">
+                                                {{ strtoupper(substr($booking->user->name ?? 'U', 0, 1)) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-white">{{ $booking->user->name ?? 'Unknown User' }}</div>
+                                        <div class="text-sm text-gray-400">{{ $booking->user->email ?? '' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-white">{{ $booking->fitnessClass->name ?? 'Unknown Class' }}</div>
+                                <div class="text-sm text-gray-400">{{ $booking->fitnessClass->instructor->name ?? 'No Instructor' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                @if($booking->fitnessClass)
+                                    <div>{{ $booking->fitnessClass->class_date ? $booking->fitnessClass->class_date->format('M j, Y') : 'No Date' }}</div>
+                                    <div class="text-gray-400">{{ $booking->fitnessClass->start_time }} - {{ $booking->fitnessClass->end_time }}</div>
+                                @else
+                                    <div class="text-gray-400">Class not found</div>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    @if($booking->status === 'confirmed') bg-green-100 text-green-800
+                                    @elseif($booking->status === 'cancelled') bg-red-100 text-red-800
+                                    @elseif($booking->status === 'waitlist') bg-yellow-100 text-yellow-800
+                                    @else bg-gray-100 text-gray-800
+                                    @endif">
+                                    {{ ucfirst($booking->status ?? 'pending') }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                {{ $booking->created_at->format('M j, Y') }}
+                                <div class="text-xs text-gray-500">{{ $booking->created_at->format('g:i A') }}</div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-300">No recent bookings</h3>
+                <p class="mt-1 text-sm text-gray-400">Recent bookings will appear here once classes are booked.</p>
+            </div>
+        @endif
     </div>
 </div>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Instructor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class InstructorController extends Controller
 {
@@ -32,15 +33,35 @@ class InstructorController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:instructors,email',
+            'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
-            'bio' => 'nullable|string',
-            'specialties' => 'nullable|string',
-            'photo' => 'nullable|string|max:255',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'password' => 'required|string|min:8|confirmed',
             'active' => 'boolean'
         ]);
 
-        Instructor::create($validated);
+        // Create the User record for authentication
+        $user = \App\Models\User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'role' => 'instructor',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $validated['photo'] = $request->file('photo')->store('instructors', 'public');
+        }
+
+        $validated['active'] = $request->has('active');
+
+        // Create the Instructor record
+        Instructor::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'photo' => $validated['photo'] ?? null,
+            'active' => $validated['active'],
+        ]);
 
         return redirect()->route('admin.instructors.index')->with('success', 'Instructor created successfully.');
     }
@@ -67,17 +88,61 @@ class InstructorController extends Controller
      */
     public function update(Request $request, Instructor $instructor)
     {
+        // Find the user by the instructor's current email to correctly handle email changes.
+        $user = \App\Models\User::where('email', $instructor->email)->first();
+
+        $emailValidationRule = 'required|email|unique:users,email';
+        if ($user) {
+            $emailValidationRule .= ',' . $user->id;
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:instructors,email,' . $instructor->id,
+            'email' => $emailValidationRule,
             'phone' => 'nullable|string|max:20',
-            'bio' => 'nullable|string',
-            'specialties' => 'nullable|string',
-            'photo' => 'nullable|string|max:255',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'password' => 'nullable|string|min:8|confirmed',
             'active' => 'boolean'
         ]);
 
-        $instructor->update($validated);
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $instructor, $validated, $user) {
+                $userData = [
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'role' => 'instructor',
+                ];
+
+                if (!empty($validated['password'])) {
+                    $userData['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+                }
+
+                // Update or create the user record.
+                \App\Models\User::updateOrCreate(['email' => $instructor->email], $userData);
+
+                // Handle photo upload within the transaction.
+                $photoPath = $instructor->photo;
+                if ($request->hasFile('photo')) {
+                    if ($instructor->photo) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($instructor->photo);
+                    }
+                    $photoPath = $request->file('photo')->store('instructors', 'public');
+                }
+
+                // Update the Instructor record.
+                $instructor->update([
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'phone' => $validated['phone'] ?? null,
+                    'photo' => $photoPath,
+                    'active' => $request->has('active'),
+                ]);
+            });
+        } catch (\Exception $e) {
+            // Log the error and redirect back with an error message.
+            logger()->error('Failed to update instructor: ' . $e->getMessage());
+            return back()->with('error', 'Failed to update instructor. Please try again.');
+        }
 
         return redirect()->route('admin.instructors.index')->with('success', 'Instructor updated successfully.');
     }
@@ -87,7 +152,18 @@ class InstructorController extends Controller
      */
     public function destroy(Instructor $instructor)
     {
+        // Find and delete the associated User record
+        if ($user = \App\Models\User::where('email', $instructor->email)->first()) {
+            $user->delete();
+        }
+
+        // Delete the instructor's photo if it exists
+        if ($instructor->photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($instructor->photo);
+        }
+
         $instructor->delete();
-        return redirect()->route('admin.instructors.index')->with('success', 'Instructor deleted successfully.');
+
+        return redirect()->route('admin.instructors.index')->with('success', 'Instructor and associated user account deleted successfully.');
     }
 }

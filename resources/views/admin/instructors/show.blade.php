@@ -1,4 +1,4 @@
-@extends('admin.layout')
+@extends('layouts.admin')
 
 @section('title', 'Instructor Details')
 
@@ -15,7 +15,7 @@
         </div>
         <div class="flex space-x-3">
             <a href="{{ route('admin.instructors.edit', $instructor) }}" 
-               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+               class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
                 Edit Instructor
             </a>
             <form action="{{ route('admin.instructors.destroy', $instructor) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this instructor?')">
@@ -35,7 +35,7 @@
                 <div class="flex items-start space-x-6 mb-6">
                     <div class="flex-shrink-0">
                         @if($instructor->photo)
-                            <img class="h-20 w-20 rounded-full object-cover" src="{{ $instructor->photo }}" alt="{{ $instructor->name }}">
+                            <img class="h-20 w-20 rounded-full object-cover" src="{{ asset('storage/' . $instructor->photo) }}" alt="{{ $instructor->name }}">
                         @else
                             <div class="h-20 w-20 rounded-full bg-primary flex items-center justify-center">
                                 <span class="text-2xl font-medium text-white">{{ substr($instructor->name, 0, 2) }}</span>
@@ -49,9 +49,6 @@
                                 {{ $instructor->active ? 'Active' : 'Inactive' }}
                             </span>
                         </div>
-                        @if($instructor->specialties)
-                            <p class="text-gray-300 text-sm">{{ $instructor->specialties }}</p>
-                        @endif
                     </div>
                 </div>
 
@@ -69,12 +66,6 @@
                     @endif
                 </div>
                 
-                @if($instructor->bio)
-                    <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-2">Biography</label>
-                        <p class="text-white leading-relaxed">{{ $instructor->bio }}</p>
-                    </div>
-                @endif
             </div>
         </div>
 

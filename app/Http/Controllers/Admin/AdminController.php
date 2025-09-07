@@ -16,6 +16,12 @@ class AdminController extends Controller
             'total_bookings' => \App\Models\Booking::count(),
         ];
 
+        // Get recent bookings for dashboard
+        $recentBookings = \App\Models\Booking::with(['user', 'fitnessClass'])
+            ->orderByDesc('created_at')
+            ->take(10)
+            ->get();
+
         // Calendar parameters
         $view = $request->get('view', 'weekly'); // weekly or monthly
         $weekOffset = (int) $request->get('week', 0); // weeks from current week
@@ -44,7 +50,7 @@ class AdminController extends Controller
             });
         }
 
-        return view('admin.dashboard', compact('stats', 'calendarData', 'calendarDates', 'view', 'weekOffset', 'currentWeekStart'));
+        return view('admin.dashboard', compact('stats', 'calendarData', 'calendarDates', 'view', 'weekOffset', 'currentWeekStart', 'recentBookings'));
     }
 
     private function getWeeklyCalendarData($classes, $weekStart)

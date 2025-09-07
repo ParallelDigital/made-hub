@@ -1,4 +1,4 @@
-@extends('admin.layout')
+@extends('layouts.admin')
 
 @section('title', 'Classes Management')
 
@@ -59,7 +59,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Instructor</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Spots</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Price</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Recurrence</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
@@ -84,16 +83,18 @@
                                 {{ $class->start_time }} - {{ $class->end_time }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                {{ $class->max_spots }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                 £{{ number_format($class->price, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                @if($class->recurring_weekly)
+                                @if($class->recurring_frequency !== 'none')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        Weekly
+                                        {{ ucfirst($class->recurring_frequency) }}
                                     </span>
+                                    @if($class->isChildClass())
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-1">
+                                            Instance
+                                        </span>
+                                    @endif
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                         One-time
@@ -104,11 +105,7 @@
                                 <div class="flex space-x-2">
                                     <a href="{{ route('admin.classes.show', $class) }}" class="text-primary hover:text-purple-400">View</a>
                                     <a href="{{ route('admin.classes.edit', $class) }}" class="text-blue-400 hover:text-blue-300">Edit</a>
-                                    <form action="{{ route('admin.classes.destroy', $class) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this class?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-400 hover:text-red-300">Delete</button>
-                                    </form>
+                                    <button onclick="showDeleteOptionsModal({{ $class->id }}, '{{ $class->name }}', {{ $class->isRecurring() && !$class->isChildClass() ? 'true' : 'false' }})" class="text-red-400 hover:text-red-300">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -139,4 +136,78 @@
         @endif
     </div>
 </div>
+
+<!-- Delete Options Modal -->
+<div id="deleteOptionsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-gray-800">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg font-medium text-white" id="deleteOptionsModalTitle">Delete Class Options</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-300" id="deleteOptionsModalMessage">
+                    Choose how you want to delete this class.
+                </p>
+                <div class="mt-4 space-y-3">
+                    <!-- Delete This Class Only -->
+                    <form id="deleteSingleForm" method="POST" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+                            Delete This Class Only
+                        </button>
+                    </form>
+
+                    <!-- Delete After Date (for recurring classes) -->
+                    <div id="deleteAfterSection" class="hidden">
+                        <form id="deleteAfterForm" method="POST" class="mt-3">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="delete_after_date" class="block text-sm font-medium text-gray-300 mb-2">Delete After Date</label>
+                                <input type="date" name="delete_after_date" id="delete_after_date" required
+                                       class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <button type="submit" class="w-full px-4 py-2 bg-orange-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300">
+                                Delete All Future Instances
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="button" onclick="hideDeleteOptionsModal()" class="w-full px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDeleteOptionsModal(classId, className, isRecurring) {
+    document.getElementById('deleteOptionsModalTitle').textContent = `Delete "${className}"`;
+    document.getElementById('deleteSingleForm').action = `/admin/classes/${classId}`;
+
+    // Show delete after section only for recurring classes
+    const deleteAfterSection = document.getElementById('deleteAfterSection');
+    if (isRecurring) {
+        deleteAfterSection.classList.remove('hidden');
+        document.getElementById('deleteAfterForm').action = `/admin/classes/${classId}/delete-after-date`;
+    } else {
+        deleteAfterSection.classList.add('hidden');
+    }
+
+    document.getElementById('deleteOptionsModal').classList.remove('hidden');
+}
+
+function hideDeleteOptionsModal() {
+    document.getElementById('deleteOptionsModal').classList.add('hidden');
+    document.getElementById('delete_after_date').value = '';
+}
+
+// Close modal when clicking outside
+document.getElementById('deleteOptionsModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideDeleteOptionsModal();
+    }
+});
+</script>
 @endsection
