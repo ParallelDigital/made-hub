@@ -23,9 +23,13 @@ class BookingController extends Controller
         $user = Auth::user();
         $class = FitnessClass::findOrFail($classId);
 
-        // Check if user has enough credits (assuming 1 credit per class)
-        if ($user->credits < 1) {
-            return response()->json(['success' => false, 'message' => 'Insufficient credits. Please purchase more credits.'], 400);
+        // Check if user has enough credits
+        $availableCredits = $user->getAvailableCredits();
+        if ($availableCredits < 1) {
+            $message = $user->hasActiveMembership() 
+                ? 'You have used all your monthly credits. Please wait until next month or book with payment.'
+                : 'Insufficient credits. Please purchase more credits or get a membership.';
+            return response()->json(['success' => false, 'message' => $message], 400);
         }
 
         // Check if class is full
@@ -47,13 +51,16 @@ class BookingController extends Controller
         $booking = Booking::create([
             'user_id' => $user->id,
             'fitness_class_id' => $classId,
-            // 'booking_type' => 'credit', // omit: column may not exist in current DB
             'status' => 'confirmed',
             'booked_at' => now(),
         ]);
 
-        // Deduct credit from user
-        $user->decrement('credits');
+        // Use credit from user (handles both membership and regular credits)
+        if (!$user->useCredit()) {
+            // This shouldn't happen due to earlier check, but just in case
+            $booking->delete();
+            return response()->json(['success' => false, 'message' => 'Unable to deduct credit. Please try again.'], 400);
+        }
 
         // Send confirmation email
         $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $booking->id]);
@@ -63,7 +70,13 @@ class BookingController extends Controller
             \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
         }
 
-        return response()->json(['success' => true, 'message' => 'Class booked successfully with credits! Confirmation email sent.']);
+        $remainingCredits = $user->getAvailableCredits();
+        $creditType = $user->hasActiveMembership() ? 'monthly credits' : 'credits';
+        
+        return response()->json([
+            'success' => true, 
+            'message' => "Class booked successfully with {$creditType}! You have {$remainingCredits} {$creditType} remaining. Confirmation email sent."
+        ]);
     }
 
     public function checkout($classId)

@@ -345,7 +345,7 @@
                                 </div>
                                 <div class="text-left">
                                     <div class="font-medium text-gray-900">Use Credits</div>
-                                    <div class="text-sm text-gray-500">You have {{ auth()->user()->credits ?? 0 }} credits</div>
+                                    <div class="text-sm text-gray-500">You have {{ auth()->user()->getAvailableCredits() }} {{ auth()->user()->hasActiveMembership() ? 'monthly credits' : 'credits' }}</div>
                                 </div>
                             </div>
                             <div class="text-green-600 font-semibold">1 Credit</div>
@@ -656,7 +656,7 @@
                 @else
                     // User not logged in, redirect to login
                     if (confirm('You need to sign in to use credits. Redirect to login?')) {
-                        window.location.href = '/login?redirect=' + encodeURIComponent(`/book-with-credits/${classId}`);
+                        window.location.href = '/login';
                     }
                 @endauth
             }
