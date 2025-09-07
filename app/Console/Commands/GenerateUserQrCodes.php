@@ -11,7 +11,7 @@ class GenerateUserQrCodes extends Command
      *
      * @var string
      */
-    protected $signature = 'users:generate-qr-codes';
+    protected $signature = 'users:generate-qr-codes {--all : Regenerate QR codes for all users} {--dry : Dry run; do not write changes}';
 
     /**
      * The console command description.
@@ -25,21 +25,35 @@ class GenerateUserQrCodes extends Command
      */
     public function handle()
     {
-        $this->info('Generating QR codes for users...');
+        $all = (bool)$this->option('all');
+        $dry = (bool)$this->option('dry');
 
-        $users = \App\Models\User::whereNull('qr_code')->get();
-        $progressBar = $this->output->createProgressBar($users->count());
+        $this->info(($all ? 'Regenerating' : 'Generating missing') . ' QR codes for users...' . ($dry ? ' (dry run)' : ''));
+
+        $query = \App\Models\User::query();
+        if (!$all) {
+            $query->whereNull('qr_code');
+        }
+
+        $total = (clone $query)->count();
+        $progressBar = $this->output->createProgressBar($total);
         $progressBar->start();
 
-        foreach ($users as $user) {
-            $qrCode = $this->generateUniqueQrCode();
-            $user->update(['qr_code' => $qrCode]);
-            $progressBar->advance();
-        }
+        $updated = 0;
+        $query->orderBy('id')->chunk(200, function ($chunk) use (&$progressBar, &$updated, $dry) {
+            foreach ($chunk as $user) {
+                $qrCode = $this->generateUniqueQrCode();
+                if (!$dry) {
+                    $user->forceFill(['qr_code' => $qrCode])->save();
+                }
+                $updated++;
+                $progressBar->advance();
+            }
+        });
 
         $progressBar->finish();
         $this->newLine();
-        $this->info('QR codes generated successfully for ' . $users->count() . ' users!');
+        $this->info("QR codes " . ($dry ? 'would be ' : '') . "set for {$updated} user(s).");
     }
 
     /**

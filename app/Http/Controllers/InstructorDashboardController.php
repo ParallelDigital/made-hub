@@ -72,16 +72,53 @@ class InstructorDashboardController extends Controller
         }
 
         $request->validate([
-            'qr_code' => 'required|string'
+            'qr_code' => 'sometimes|string|nullable',
+            'payload' => 'sometimes|string|nullable',
         ]);
 
-        // Find user by QR code
-        $user = User::where('qr_code', $request->qr_code)->first();
+        // Extract QR code robustly from either direct code or full payload URL/text
+        $rawPayload = $request->input('payload');
+        $rawCode = $request->input('qr_code');
+        $parsed = $this->parseQrPayload($rawPayload ?: $rawCode);
+
+        if (!$parsed || empty($parsed['qr'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid QR code content.',
+                'debug' => [
+                    'parsed' => $parsed,
+                ],
+            ]);
+        }
+
+        // Normalize to uppercase to avoid collation issues
+        $qr = strtoupper($parsed['qr']);
+
+        // Find user by exact QR code
+        $user = User::whereRaw('UPPER(qr_code) = ?', [$qr])->first();
         
         if (!$user) {
             return response()->json([
                 'success' => false, 
-                'message' => 'Invalid QR code. User not found.'
+                'message' => 'Invalid QR code. User not found.',
+                'debug' => [
+                    'parsed_qr' => $qr,
+                    'parsed_user_id' => $parsed['user_id'] ?? null,
+                ],
+            ]);
+        }
+
+        // If payload included a user_id, verify it matches the resolved user to avoid mismatches
+        if (!empty($parsed['user_id']) && (int)$parsed['user_id'] !== (int)$user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'QR does not match the encoded user.',
+                'user_name' => $user->name,
+                'debug' => [
+                    'parsed_qr' => $qr,
+                    'parsed_user_id' => (int)$parsed['user_id'],
+                    'matched_user_id' => (int)$user->id,
+                ],
             ]);
         }
 
@@ -95,7 +132,12 @@ class InstructorDashboardController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => "{$user->name} is not booked for this class.",
-                'user_name' => $user->name
+                'user_name' => $user->name,
+                'debug' => [
+                    'parsed_qr' => $qr,
+                    'matched_user_id' => (int)$user->id,
+                    'class_id' => (int)$class->id,
+                ],
             ]);
         }
 
@@ -120,7 +162,56 @@ class InstructorDashboardController extends Controller
             'success' => true,
             'message' => "{$user->name} successfully checked in!",
             'user_name' => $user->name,
-            'checked_in_at' => now()->format('g:i A')
+            'checked_in_at' => now()->format('g:i A'),
+            'debug' => [
+                'parsed_qr' => $qr,
+                'matched_user_id' => (int)$user->id,
+                'class_id' => (int)$class->id,
+            ],
         ]);
+    }
+
+    /**
+     * Extract the QR code string from a raw scan payload or direct code.
+     * Accepts:
+     *  - Signed route format: /user/checkin/{user}/{qr_code}?signature=...
+     *  - Direct codes like QRXXXXXXXX (letters/digits/hyphen)
+     */
+    private function parseQrPayload(?string $payload): ?array
+    {
+        if (!$payload) {
+            return null;
+        }
+        $text = trim($payload);
+
+        // Try parse as URL and extract the 4th segment as qr_code
+        if (str_starts_with($text, 'http://') || str_starts_with($text, 'https://')) {
+            try {
+                $parts = parse_url($text);
+                $path = $parts['path'] ?? '';
+                $segments = array_values(array_filter(explode('/', $path), fn($s) => $s !== ''));
+                // Expect: ['user','checkin','{user}','{qr_code}']
+                if (count($segments) >= 4 && strtolower($segments[0]) === 'user' && strtolower($segments[1]) === 'checkin') {
+                    return [
+                        'user_id' => is_numeric($segments[2]) ? (int)$segments[2] : null,
+                        'qr' => $segments[3],
+                    ];
+                }
+            } catch (\Throwable $e) {
+                // fall through
+            }
+        }
+
+        // Direct code strict pattern: starts with QR and at least 6 more chars
+        if (preg_match('/^QR[A-Za-z0-9\-]{6,}$/', $text)) {
+            return ['user_id' => null, 'qr' => $text];
+        }
+
+        // Attempt to find QR... token anywhere as last resort (still strict)
+        if (preg_match('/\b(QR[A-Za-z0-9\-]{6,})\b/', $text, $m)) {
+            return ['user_id' => null, 'qr' => $m[1]];
+        }
+
+        return null;
     }
 }

@@ -33,10 +33,10 @@
         <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <h2 class="text-xl font-bold text-white mb-4">Scan QR Code</h2>
             
-            <!-- Camera Preview -->
+            <!-- Camera Preview (Html5Qrcode requires a container div, not a video tag) -->
             <div class="relative mb-4">
-                <video id="preview" class="w-full h-64 bg-gray-900 rounded-lg object-cover"></video>
-                <div id="scanner-overlay" class="absolute inset-0 flex items-center justify-center">
+                <div id="qr-reader" class="w-full h-64 bg-gray-900 rounded-lg overflow-hidden"></div>
+                <div id="scanner-overlay" class="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div class="w-48 h-48 border-2 border-indigo-500 rounded-lg"></div>
                 </div>
             </div>
@@ -108,6 +108,7 @@
 <script>
 let html5QrcodeScanner = null;
 let recentCheckins = [];
+let scanning = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     const startBtn = document.getElementById('start-scanner');
@@ -120,7 +121,8 @@ document.addEventListener('DOMContentLoaded', function() {
     manualForm.addEventListener('submit', handleManualCheckin);
 
     function startScanner() {
-        html5QrcodeScanner = new Html5Qrcode("preview");
+        if (scanning) return;
+        html5QrcodeScanner = new Html5Qrcode("qr-reader");
         
         Html5Qrcode.getCameras().then(devices => {
             if (devices && devices.length) {
@@ -137,16 +139,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     cameraId,
                     {
                         fps: 10,
-                        qrbox: { width: 200, height: 200 },
+                        qrbox: { width: 220, height: 220 },
                         aspectRatio: 1.0,
                         disableFlip: false,
-                        videoConstraints: {
-                            facingMode: "environment" // Use back camera
-                        }
+                        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                        videoConstraints: { facingMode: { ideal: "environment" } }
                     },
                     onScanSuccess,
                     onScanFailure
                 ).then(() => {
+                    scanning = true;
                     startBtn.disabled = true;
                     stopBtn.disabled = false;
                     updateScanResults('info', 'Camera started. Point camera at QR code to scan.');
@@ -166,6 +168,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function stopScanner() {
         if (html5QrcodeScanner) {
             html5QrcodeScanner.stop().then(() => {
+                html5QrcodeScanner.clear().catch(() => {});
+                scanning = false;
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
                 updateScanResults('info', 'Camera stopped.');
@@ -186,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Extract QR code from the scanned text
         const qrCode = extractQrCodeFromUrl(decodedText);
         if (qrCode) {
-            processCheckin(qrCode);
+            processCheckin(qrCode, decodedText);
         } else {
             updateScanResults('error', `Invalid QR code format. Scanned: ${decodedText}`);
             // Resume scanning after error
@@ -203,24 +207,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function extractQrCodeFromUrl(url) {
-        // First try to extract QR code from URL like: /user/checkin/{user}/{qr_code}
-        let match = url.match(/\/user\/checkin\/\d+\/([A-Z0-9]+)/);
-        if (match) {
-            return match[1];
-        }
-        
-        // If it's just a QR code string (like QR12345678), return it directly
-        match = url.match(/^(QR[A-Z0-9]{8})$/);
-        if (match) {
-            return match[1];
-        }
-        
-        // Try to extract from any URL containing the QR pattern
-        match = url.match(/(QR[A-Z0-9]{8})/);
-        if (match) {
-            return match[1];
-        }
-        
+        try { url = String(url); } catch(e) { return null; }
+        // Accept signed route form: /user/checkin/{user}/{qr_code}
+        let match = url.match(/\/user\/checkin\/\d+\/([A-Za-z0-9\-]+)/i);
+        if (match) return match[1];
+        // Accept raw QR strings like QRXXXXXXXX (case-insensitive) possibly longer
+        match = url.match(/\b(QR[\w\-]{6,})\b/i);
+        if (match) return match[1];
         return null;
     }
 
@@ -228,12 +221,12 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         const qrCode = manualInput.value.trim();
         if (qrCode) {
-            processCheckin(qrCode);
+            processCheckin(qrCode, qrCode);
             manualInput.value = '';
         }
     }
 
-    function processCheckin(qrCode) {
+    function processCheckin(qrCode, payload) {
         updateScanResults('info', 'Processing check-in...');
         
         fetch(`{{ route('instructor.classes.scan', $class) }}`, {
@@ -242,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({ qr_code: qrCode })
+            body: JSON.stringify({ qr_code: qrCode, payload: payload })
         })
         .then(response => response.json())
         .then(data => {
@@ -255,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (html5QrcodeScanner) {
                         html5QrcodeScanner.resume();
                     }
-                }, 3000);
+                }, 1500);
             } else {
                 const type = data.already_checked_in ? 'warning' : 'error';
                 updateScanResults(type, data.message);
@@ -268,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (html5QrcodeScanner) {
                         html5QrcodeScanner.resume();
                     }
-                }, 2000);
+                }, 1500);
             }
         })
         .catch(error => {
@@ -280,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (html5QrcodeScanner) {
                     html5QrcodeScanner.resume();
                 }
-            }, 2000);
+            }, 1500);
         });
     }
 
