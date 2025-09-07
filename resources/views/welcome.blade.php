@@ -50,8 +50,7 @@
             <nav class="flex items-center justify-between px-4 sm:px-6 py-4">
                 <div class="flex items-center space-x-8">
                     <div class="flex items-center space-x-2">
-                        <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-8 w-8">
-                        <span class="text-xl font-bold text-primary">MADE RUNNING</span>
+                        <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20">
                     </div>
                     <div class="hidden lg:flex space-x-6">
                         <a href="{{ route('welcome') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
@@ -109,29 +108,84 @@
         </div>
 
         <!-- Hero Section -->
-        <div class="relative h-[450px] md:h-[500px] flex items-center justify-center overflow-hidden">
+        <div class="relative h-[550px] md:h-[550px] flex items-center overflow-hidden">
             <!-- Background Image -->
             <div class="absolute inset-0 bg-cover bg-center bg-no-repeat z-5" style="background-image: url('{{ asset('made-club.jpg') }}');"></div>
             <div class="absolute inset-0 bg-black/70 z-20"></div>
 
             <!-- Content -->
-            <div class="relative z-30 text-center px-6 max-w-4xl mx-auto">
-                <div class="mb-8">
-                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="mx-auto mb-4">
-                </div>
+            <div class="relative z-30 px-6 max-w-6xl container mx-auto">
                 
                 <h1 class="text-5xl md:text-8xl font-black mb-6 tracking-tight">
                     <span class="block text-white">MADE TO</span>
                     <span class="block text-primary">ELEVATE</span>
                 </h1>
                 
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full sm:w-auto">
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                     <a href="{{ route('register') }}" class="w-full sm:w-auto bg-primary text-black px-8 py-4 text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">
                         BOOK YOUR CLASS
                     </a>
                     <a href="#schedule" class="w-full sm:w-auto border-2 border-white text-white px-8 py-4 text-lg font-bold rounded hover:bg-white hover:text-black transition-all text-center">
                         VIEW SCHEDULE
                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Membership Section -->
+        <div id="membership" class="bg-white text-black py-12 sm:py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <!-- Image Column -->
+                    <div>
+                        <img src="{{ asset('made-club.jpg') }}" alt="Group fitness class" class="rounded-lg shadow-lg w-full h-full object-cover">
+                    </div>
+                    <!-- Content Column -->
+                    <div class="text-left">
+                        <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">ARE YOU READY <br>TO ELEVATE</h2>
+                        <p class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">PERKS OF MEMBERSHIP</p>
+                        <ul class="space-y-4 mb-8">
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Personal Accountability Adviser</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Access to Co working Spaces (Free Wi-fi)</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Seminars – marketing, personal finance, plus more</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Access to the Made Gym</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Exclusive networking Group Chat</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">5 classes a month (HIIT, Yoga, Dance)</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">Early access to Events</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">1 Free Physio Consultation</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="font-semibold text-gray-700 uppercase">50% off Room Hire</span>
+                            </li>
+                        </ul>
+                        <a href="#" class="inline-block bg-black text-white px-10 py-4 text-sm font-bold uppercase tracking-widest rounded hover:bg-gray-800 transition-all">
+                            SIGN UP NOW
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -346,8 +400,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
                     <div>
                         <div class="flex items-center justify-center md:justify-start space-x-2 mb-4">
-                            <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-8 w-8">
-                            <span class="text-xl font-bold text-primary">MADE RUNNING</span>
+                            <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20">
                         </div>
                         <p class="text-gray-400 text-sm">
                             Transform your fitness journey with our high-intensity training programs designed to push your limits.
