@@ -5,6 +5,71 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
+
+// Test email route with detailed debugging
+Route::get('/test-email-send', function () {
+    try {
+        // Enable detailed error reporting
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+        
+        // Get the first user and booking
+        $user = \App\Models\User::first();
+        if (!$user) {
+            return 'No users found in the database';
+        }
+        
+        $booking = \App\Models\Booking::first();
+        if (!$booking) {
+            return 'No bookings found in the database';
+        }
+        
+        // Generate QR URL
+        $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $booking->id]);
+        
+        // Log the attempt
+        \Log::info('Manual test email send attempt', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'booking_id' => $booking->id,
+            'qr_url' => $qrUrl
+        ]);
+        
+        // Send the email
+        $email = new \App\Mail\BookingConfirmed($booking, $qrUrl);
+        $result = \Mail::to($user->email)->send($email);
+        
+        // Log the result
+        \Log::info('Manual test email send result', [
+            'success' => $result !== null,
+            'result' => $result
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Test email sent to ' . $user->email,
+            'user_id' => $user->id,
+            'booking_id' => $booking->id,
+            'email_sent' => $result !== null
+        ]);
+        
+    } catch (\Exception $e) {
+        // Log the error
+        \Log::error('Manual test email error', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
 Route::get('/api/classes', [App\Http\Controllers\HomeController::class, 'getClasses']);
 Route::get('/purchase', [App\Http\Controllers\PurchaseController::class, 'index'])->name('purchase.index');
 
