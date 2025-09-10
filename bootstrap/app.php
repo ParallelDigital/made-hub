@@ -18,4 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+    ->withAliases([
+        'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
+    ])
+    ->create();
