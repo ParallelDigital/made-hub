@@ -13,52 +13,91 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="space-y-6">
         @csrf
         @method('patch')
 
         <div>
-            <x-input-label for="name" :value="__('Name')" class="text-gray-200" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-primary focus:ring-primary h-[30px]" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
-        </div>
-
-        <div>
-            <x-input-label for="email" :value="__('Email')" class="text-gray-200" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-primary focus:ring-primary h-[30px]" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <p class="text-sm mt-2 text-gray-300">
-                        {{ __('Your email address is unverified.') }}
+                    <x-input-label for="name" :value="__('Full Name')" class="text-gray-300 text-sm font-medium mb-1" />
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 2a5 5 0 00-5 5v2a2 5 0 00-2 5v4a2 2 0 002 2h10a2 2 0 002-2v-4a5 5 0 00-2-5V7a5 5 0 00-5-5z" />
+                            </svg>
+                        </div>
+                        <x-text-input 
+                            id="name" 
+                            name="name" 
+                            type="text" 
+                            class="pl-10 w-full h-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg" 
+                            :value="old('name', $user->name)" 
+                            required 
+                            autofocus 
+                            autocomplete="name" 
+                        />
+                    </div>
+                    <x-input-error class="mt-1" :messages="$errors->get('name')" />
+                </div>
 
-                        <button form="send-verification" class="underline text-sm text-primary hover:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-gray-900">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
+                <div>
+                    <x-input-label for="email" :value="__('Email Address')" class="text-gray-300 text-sm font-medium mb-1" />
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                            </svg>
+                        </div>
+                        <x-text-input 
+                            id="email" 
+                            name="email" 
+                            type="email" 
+                            class="pl-10 w-full h-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg" 
+                            :value="old('email', $user->email)" 
+                            required 
+                            autocomplete="username" 
+                        />
+                    </div>
+                    <x-input-error class="mt-1" :messages="$errors->get('email')" />
 
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
+                    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                        <div class="mt-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                            <p class="text-sm text-yellow-400">
+                                {{ __('Your email address is unverified.') }}
+                                <button 
+                                    form="send-verification" 
+                                    class="ml-1 underline text-yellow-300 hover:text-white transition-colors"
+                                >
+                                    {{ __('Click here to re-send the verification email.') }}
+                                </button>
+                            </p>
+
+                            @if (session('status') === 'verification-link-sent')
+                                <p class="mt-2 text-sm text-green-400">
+                                    {{ __('A new verification link has been sent to your email address.') }}
+                                </p>
+                            @endif
+                        </div>
                     @endif
                 </div>
-            @endif
+            </div>
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
-
+        <div class="flex items-center justify-end pt-4 border-t border-gray-700">
             @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-400"
-                >{{ __('Saved.') }}</p>
+                <div class="mr-4 flex items-center">
+                    <svg class="h-5 w-5 text-green-500 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-sm text-green-400">{{ __('Saved') }}</span>
+                </div>
             @endif
+            
+            <x-primary-button class="bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                {{ __('Save Changes') }}
+            </x-primary-button>
         </div>
     </form>
 </section>
