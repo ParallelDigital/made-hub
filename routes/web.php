@@ -72,6 +72,9 @@ Route::get('/test-email-send', function () {
 });
 Route::get('/api/classes', [App\Http\Controllers\HomeController::class, 'getClasses']);
 Route::get('/purchase', [App\Http\Controllers\PurchaseController::class, 'index'])->name('purchase.index');
+Route::get('/purchase/package/{type}', [App\Http\Controllers\PurchaseController::class, 'showPackageCheckout'])->name('purchase.package.checkout');
+Route::post('/purchase/package/{type}', [App\Http\Controllers\PurchaseController::class, 'processPackageCheckout'])->name('purchase.package.process');
+Route::get('/purchase/package/{type}/success', [App\Http\Controllers\PurchaseController::class, 'packageSuccess'])->name('purchase.package.success');
 
 // Booking Routes
 Route::post('/book-with-credits/{classId}', [App\Http\Controllers\BookingController::class, 'bookWithCredits'])->name('booking.credits');
@@ -130,12 +133,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('classes', App\Http\Controllers\Admin\FitnessClassController::class);
     Route::get('classes/calendar-data', [App\Http\Controllers\Admin\FitnessClassController::class, 'getCalendarData'])->name('classes.calendar-data');
     Route::post('classes/{class}/delete-after-date', [App\Http\Controllers\Admin\FitnessClassController::class, 'deleteAfterDate'])->name('classes.delete-after-date');
+    Route::get('memberships/export', [App\Http\Controllers\Admin\MembershipController::class, 'export'])->name('memberships.export');
     Route::resource('memberships', App\Http\Controllers\Admin\MembershipController::class);
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);
     Route::resource('pricing', App\Http\Controllers\Admin\PricingController::class);
     // Admin bookings list
     Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show', 'update']);
     Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('users/export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('users.export');
     Route::get('users/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
     Route::put('users/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
     Route::get('reports', [App\Http\Controllers\Admin\AdminController::class, 'reports'])->name('reports');

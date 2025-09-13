@@ -84,4 +84,76 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')
             ->with('success', 'User updated successfully.');
     }
+
+    /**
+     * Export filtered users as CSV.
+     */
+    public function export(Request $request)
+    {
+        $query = User::query();
+
+        // Apply the same filters as index()
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('email', 'like', "%{$searchTerm}%")
+                  ->orWhere('user_login', 'like', "%{$searchTerm}%")
+                  ->orWhere('first_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        $filename = 'users_export_' . now()->format('Y_m_d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control' => 'no-store, no-cache',
+        ];
+
+        $callback = function () use ($query) {
+            $handle = fopen('php://output', 'w');
+            // BOM for Excel UTF-8 compatibility
+            fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            // Header row
+            fputcsv($handle, [
+                'ID', 'Name', 'First Name', 'Last Name', 'Email', 'Role', 'Username', 'Nickname',
+                'Registered (WP)', 'Created At'
+            ]);
+
+            $query->orderByDesc('created_at')->chunk(1000, function ($rows) use ($handle) {
+                foreach ($rows as $u) {
+                    fputcsv($handle, [
+                        $u->id,
+                        $u->name,
+                        $u->first_name,
+                        $u->last_name,
+                        $u->email,
+                        $u->role,
+                        $u->user_login,
+                        $u->nickname,
+                        optional($u->user_registered)->format('Y-m-d H:i:s'),
+                        optional($u->created_at)->format('Y-m-d H:i:s'),
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        };
+
+        return response()->streamDownload($callback, $filename, $headers);
+    }
 }

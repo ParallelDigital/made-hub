@@ -3,6 +3,10 @@
 @section('content')
 <div class="flex items-center justify-between mb-8">
     <h1 class="text-2xl font-bold text-white">Users</h1>
+    <a href="{{ route('admin.users.export', request()->query()) }}"
+       class="inline-flex items-center px-4 py-2 bg-primary hover:bg-purple-400 text-white rounded-md text-sm font-semibold shadow-sm">
+        Export CSV
+    </a>
 </div>
 
 <div class="bg-gray-900/50 border border-gray-700/50 rounded-lg p-6 mb-8">

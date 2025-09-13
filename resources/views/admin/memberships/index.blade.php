@@ -5,9 +5,15 @@
 @section('content')
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-white">Member Subscriptions</h1>
-    @isset($stripeMode)
-        <span class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-300">Mode: {{ strtoupper($stripeMode) }}</span>
-    @endisset
+    <div class="flex items-center gap-3">
+        @isset($stripeMode)
+            <span class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-300">Mode: {{ strtoupper($stripeMode) }}</span>
+        @endisset
+        <a href="{{ route('admin.memberships.export', request()->query()) }}"
+           class="inline-flex items-center px-4 py-2 bg-primary hover:bg-purple-400 text-white rounded-md text-sm font-semibold shadow-sm">
+            Export CSV
+        </a>
+    </div>
 </div>
 
 @if(session('success'))

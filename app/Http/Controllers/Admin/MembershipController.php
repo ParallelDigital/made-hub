@@ -215,4 +215,84 @@ class MembershipController extends Controller
                         ->with('success', 'Membership deleted successfully.');
     }
 
+    /**
+     * Export Stripe members as CSV applying the same status filter as the index.
+     */
+    public function export(Request $request)
+    {
+        $statusFilter = $request->input('status', 'all');
+        $filename = 'memberships_export_' . now()->format('Y_m_d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control' => 'no-store, no-cache',
+        ];
+
+        $callback = function () use ($statusFilter) {
+            $handle = fopen('php://output', 'w');
+            // BOM for Excel UTF-8 compatibility
+            fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            // Header row
+            fputcsv($handle, ['Name', 'Email', 'Months Active', 'Status', 'Subscription ID']);
+
+            try {
+                $secret = config('services.stripe.secret');
+                if ($secret) {
+                    $stripe = new \Stripe\StripeClient($secret);
+                    $params = ['limit' => 100, 'expand' => ['data.customer']];
+                    do {
+                        $resp = $stripe->subscriptions->all($params);
+                        $data = collect($resp->data ?? []);
+
+                        foreach ($data as $sub) {
+                            $status = $sub->status;
+                            if ($status === 'past_due') {
+                                $status = 'inactive';
+                            }
+                            if ($statusFilter !== 'all' && $status !== $statusFilter) {
+                                continue;
+                            }
+
+                            $startTs = $sub->start_date ?? $sub->current_period_start ?? null;
+                            $monthsActive = 0;
+                            if ($startTs) {
+                                $startDate = \Carbon\Carbon::createFromTimestamp($startTs);
+                                $monthsActive = (int) $startDate->diffInMonths(now());
+                                if ($monthsActive === 0) {
+                                    $monthsActive = 1;
+                                }
+                            }
+
+                            $customer = $sub->customer;
+                            $name = is_object($customer) ? ($customer->name ?? '—') : '—';
+                            $email = is_object($customer) ? ($customer->email ?? '—') : '—';
+
+                            fputcsv($handle, [
+                                $name,
+                                $email,
+                                $monthsActive,
+                                $status,
+                                $sub->id,
+                            ]);
+                        }
+
+                        if (($resp->has_more ?? false) && $data->isNotEmpty()) {
+                            $params['starting_after'] = $data->last()->id;
+                        } else {
+                            break;
+                        }
+                    } while (true);
+                }
+            } catch (\Throwable $e) {
+                // Write an error row for visibility
+                fputcsv($handle, ['Error', $e->getMessage(), '', '', '']);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->streamDownload($callback, $filename, $headers);
+    }
 }
