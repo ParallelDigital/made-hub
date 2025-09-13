@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+    <div class="flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
         <div class="w-full max-w-md">
             <!-- Logo/Brand -->
             <div class="text-center mb-8">

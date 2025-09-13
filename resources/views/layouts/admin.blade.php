@@ -27,6 +27,7 @@
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gray-900 text-white">
     <div class="min-h-screen flex" x-data="{ sidebarOpen: false }">
@@ -43,8 +44,8 @@
 
             <!-- Logo -->
             <div class="flex items-center justify-center h-16 px-4 bg-gray-900 border-b border-gray-700">
-                <a href="{{ route('admin.dashboard') }}" class="text-xl font-bold text-primary">
-                    MADE ADMIN
+                <a href="{{ route('admin.dashboard') }}" class="text-xl font-bold">
+                    <span class="text-white font-semibold">MADE ADMIN</span>
                 </a>
             </div>
 
@@ -188,6 +189,7 @@
         </div>
     </div>
 
+    @stack('scripts')
     <script>
         // Handle window resize for sidebar
         window.addEventListener('resize', function() {

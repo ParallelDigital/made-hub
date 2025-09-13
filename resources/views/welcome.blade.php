@@ -44,7 +44,7 @@
             </style>
         @endif
     </head>
-    <body class="bg-black text-white font-inter min-h-screen">
+    <body class="bg-black text-white font-inter">
         <!-- Navigation -->
         <div x-data="{ open: false }" class="relative bg-black border-b border-gray-800">
             <nav class="flex items-center justify-between px-4 sm:px-6 py-4">

@@ -15,7 +15,7 @@ class PurchaseController extends Controller
         $packages = [
             [
                 'type' => 'first_timer',
-                'name' => 'MADE NEWBIE 3 PACK',
+                'name' => 'MADE MEMBERSHIP',
                 'price' => 40,
                 'classes' => 3,
                 'description' => 'New here? Try your first three classes at our lowest price! Experience the thrill of the workout and see what MADE is all about.',

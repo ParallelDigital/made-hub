@@ -5,7 +5,7 @@
 @section('content')
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-white">Manage Coupons</h1>
-    <a href="{{ route('admin.coupons.create') }}" class="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg transition-colors">
+    <a href="{{ route('admin.coupons.create') }}" class="bg-primary hover:bg-purple-400 text-white px-4 py-2 rounded-md font-medium transition-colors">
         Add New Coupon
     </a>
 </div>

@@ -125,7 +125,10 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
     Route::resource('instructors', App\Http\Controllers\Admin\InstructorController::class);
+    Route::get('instructors/{instructor}/classes', [App\Http\Controllers\Admin\InstructorController::class, 'getClasses'])
+        ->name('instructors.classes');
     Route::resource('classes', App\Http\Controllers\Admin\FitnessClassController::class);
+    Route::get('classes/calendar-data', [App\Http\Controllers\Admin\FitnessClassController::class, 'getCalendarData'])->name('classes.calendar-data');
     Route::post('classes/{class}/delete-after-date', [App\Http\Controllers\Admin\FitnessClassController::class, 'deleteAfterDate'])->name('classes.delete-after-date');
     Route::resource('memberships', App\Http\Controllers\Admin\MembershipController::class);
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);

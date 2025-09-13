@@ -2,20 +2,63 @@
 
 @section('title', 'Classes Management')
 
+@push('styles')
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <style>
+        .fc {
+            color: #e5e7eb;
+        }
+        .fc .fc-toolbar-title {
+            color: #fff;
+        }
+        .fc .fc-button {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .fc .fc-button:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        .fc .fc-button-primary:not(:disabled).fc-button-active, 
+        .fc .fc-button-primary:not(:disabled):active {
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+        .fc .fc-daygrid-day-number, 
+        .fc .fc-col-header-cell-cushion {
+            color: #e5e7eb;
+        }
+        .fc .fc-daygrid-day.fc-day-today {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+        .fc .fc-daygrid-event {
+            cursor: pointer;
+        }
+        .fc .fc-event {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+@endpush
+
 @section('content')
 <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-white">Classes Management</h1>
-    <a href="{{ route('admin.classes.create') }}" class="bg-primary hover:bg-purple-400 text-white px-4 py-2 rounded-md font-medium transition-colors">
-        Add New Class
-    </a>
+    <h1 class="text-2xl font-bold text-white">Classes Calendar</h1>
+    <div class="flex gap-3">
+        <a href="{{ route('admin.classes.index', ['view' => 'list']) }}" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium transition-colors">
+            List View
+        </a>
+        <a href="{{ route('admin.classes.create') }}" class="bg-primary hover:bg-purple-400 text-white px-4 py-2 rounded-md font-medium transition-colors">
+            Add New Class
+        </a>
+    </div>
 </div>
 
-<!-- Filters -->
+<!-- Calendar View -->
 <div class="bg-gray-800 shadow rounded-lg border border-gray-700 mb-6">
     <div class="px-4 py-4">
-        <form method="GET" action="{{ route('admin.classes.index') }}" class="flex flex-wrap gap-4 items-end">
+        <div class="flex flex-wrap gap-4 items-center">
             <div class="flex-1 min-w-[200px]">
-                <label for="instructor" class="block text-sm font-medium text-gray-300 mb-1">Filter by Instructor</label>
+                <label for="instructor" class="block text-sm font-medium text-gray-300 mb-1">Instructor</label>
                 <select name="instructor" id="instructor" class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                     <option value="">All Instructors</option>
                     @foreach($instructors as $instructor)
@@ -26,9 +69,8 @@
                 </select>
             </div>
             
-            
             <div class="flex-1 min-w-[150px]">
-                <label for="status" class="block text-sm font-medium text-gray-300 mb-1">Filter by Status</label>
+                <label for="status" class="block text-sm font-medium text-gray-300 mb-1">Status</label>
                 <select name="status" id="status" class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                     <option value="">All Status</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
@@ -36,15 +78,32 @@
                 </select>
             </div>
             
-            <div class="flex gap-2">
-                <button type="submit" class="bg-primary hover:bg-purple-400 text-white px-4 py-2 rounded-md font-medium transition-colors">
-                    Filter
+            <div class="flex-1 min-w-[150px]">
+                <label for="view" class="block text-sm font-medium text-gray-300 mb-1">View</label>
+                <select id="view-selector" class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="timeGridWeek">Week</option>
+                    <option value="dayGridMonth">Month</option>
+                    <option value="timeGridDay">Day</option>
+                </select>
+            </div>
+            
+            <div class="flex gap-2 items-end">
+                <button type="button" id="apply-filters" class="bg-primary hover:bg-purple-400 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                    Apply Filters
                 </button>
                 <a href="{{ route('admin.classes.index') }}" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
-                    Clear
+                    Reset
                 </a>
             </div>
-        </form>
+        </div>
+    </div>
+    
+    <!-- Calendar Container -->
+    <div class="relative p-4">
+        <div id="calendar-loading" class="absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-10" style="display: none;">
+            <div class="text-white text-lg">Loading calendar...</div>
+        </div>
+        <div id="classes-calendar"></div>
     </div>
 </div>
 
