@@ -105,6 +105,13 @@
                     Cancel Booking
                 </button>
             </form>
+
+            <form method="POST" action="{{ route('admin.bookings.resend-confirmation', $booking) }}" class="inline">
+                @csrf
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
+                    Resend Confirmation
+                </button>
+            </form>
         @endif
 
         <a href="{{ route('admin.bookings.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">

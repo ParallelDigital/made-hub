@@ -1,0 +1,119 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\FitnessClass;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
+class HomeController extends Controller
+{
+    public function index(Request $request)
+    {
+        // Get selected date or default to today
+        $selectedDate = $request->get('date') ? Carbon::parse($request->get('date')) : Carbon::now();
+        
+        // If it's an AJAX request, return JSON response
+        if ($request->ajax() || $request->wantsJson()) {
+            return $this->getClassesData($selectedDate);
+        }
+        
+        // For regular page load, get the data and pass to the view
+        $data = $this->getClassesData($selectedDate);
+        
+        return view('welcome', [
+            'selectedDateClasses' => $data['classes'],
+            'weekDays' => $data['weekDays'],
+            'selectedDate' => $selectedDate,
+            'prevWeek' => $data['prevWeek'],
+            'nextWeek' => $data['nextWeek']
+        ]);
+    }
+    
+    /**
+     * Get classes data for a specific date
+     */
+    private function getClassesData(Carbon $selectedDate)
+    {
+        // Build 7-day range starting from the selected date
+        $rangeStart = $selectedDate->copy();
+        
+        // Get selected date's classes for the schedule display
+        $selectedDateString = $selectedDate->toDateString();
+        $dayOfWeek = $selectedDate->dayOfWeek; // 0 = Sunday, 1 = Monday, etc.
+        
+        // Get both exact date matches and recurring classes for this day of week
+        $selectedDateClasses = FitnessClass::with(['instructor', 'bookings'])
+            ->where('active', 1)
+            ->where(function($query) use ($selectedDateString, $dayOfWeek) {
+                // Exact date match
+                $query->whereDate('class_date', $selectedDateString)
+                      // OR recurring classes that match this day of week
+                      ->orWhere(function($subQuery) use ($dayOfWeek) {
+                          $subQuery->where('recurring', 1)
+                                   ->whereRaw("strftime('%w', class_date) = ?", [(string)$dayOfWeek]);
+                      });
+            })
+            ->orderBy('start_time')
+            ->get()
+            ->map(function($class) {
+                $availableSpots = $class->max_capacity - $class->bookings->count();
+                return [
+                    'id' => $class->id,
+                    'name' => $class->name,
+                    'instructor' => [
+                        'name' => $class->instructor->name ?? 'No Instructor',
+                        'photo_url' => $class->instructor && $class->instructor->photo 
+                            ? asset('storage/' . $class->instructor->photo) 
+                            : 'https://www.gravatar.com/avatar/?d=mp&s=100',
+                        'initials' => strtoupper(substr($class->instructor->name ?? 'IN', 0, 2))
+                    ],
+                    'start_time' => $class->start_time,
+                    'end_time' => $class->end_time,
+                    'price' => (float)$class->price,
+                    'available_spots' => $availableSpots,
+                    'max_spots' => $class->max_capacity,
+                    'booked_count' => $class->bookings->count(),
+                    'description' => $class->description,
+                    'location' => $class->location,
+                    'class_date' => $class->class_date
+                ];
+            });
+        
+        // Get week data for navigation
+        $weekDays = [];
+        for ($i = 0; $i < 7; $i++) {
+            $date = $rangeStart->copy()->addDays($i);
+            $weekDays[] = [
+                'day' => $date->format('D'),
+                'date' => $date->format('j'),
+                'full_date' => $date->format('Y-m-d'),
+                'is_today' => $date->isToday(),
+                'is_selected' => $date->isSameDay($selectedDate)
+            ];
+        }
+        
+        // Navigation dates
+        $prevWeek = $rangeStart->copy()->subDays(7)->format('Y-m-d');
+        $nextWeek = $rangeStart->copy()->addDays(7)->format('Y-m-d');
+        
+        return [
+            'classes' => $selectedDateClasses,
+            'weekDays' => $weekDays,
+            'selectedDate' => $selectedDate->format('l, F j, Y'),
+            'prevWeek' => $prevWeek,
+            'nextWeek' => $nextWeek
+        ];
+    }
+
+    public function getClasses(Request $request)
+    {
+        // Get selected date or default to today
+        $selectedDate = $request->get('date') ? Carbon::parse($request->get('date')) : Carbon::now();
+        
+        // Get the data
+        $data = $this->getClassesData($selectedDate);
+        
+        return response()->json($data);
+    }
+}

@@ -23,6 +23,12 @@ class BookingController extends Controller
         $user = Auth::user();
         $class = FitnessClass::findOrFail($classId);
 
+        // Check if the class has already started
+        $classStart = \Carbon\Carbon::parse($class->class_date->toDateString() . ' ' . $class->start_time);
+        if ($classStart->isPast()) {
+            return response()->json(['success' => false, 'message' => 'This class has already started.'], 400);
+        }
+
         // Check if user has enough credits
         $availableCredits = $user->getAvailableCredits();
         if ($availableCredits < 1) {
@@ -64,70 +70,14 @@ class BookingController extends Controller
 
         // Send confirmation email
         try {
-            // Reload the booking with relationships to ensure we have all data
-            $freshBooking = Booking::with(['user', 'fitnessClass'])->find($booking->id);
-            
-            // Generate QR URL with a longer expiration (30 days)
-            $qrUrl = URL::temporarySignedRoute(
-                'booking.checkin',
-                now()->addDays(30),
-                ['booking' => $freshBooking->id]
-            );
-            
-            // Log the attempt with detailed info
-            \Log::info('Sending booking confirmation email', [
-                'user_id' => $freshBooking->user_id,
-                'booking_id' => $freshBooking->id,
-                'email' => $freshBooking->user->email,
-                'class_name' => $freshBooking->fitnessClass->name ?? 'Unknown',
-                'qr_url' => $qrUrl,
-                'mail_config' => [
-                    'driver' => config('mail.default'),
-                    'host' => config('mail.mailers.smtp.host'),
-                    'port' => config('mail.mailers.smtp.port'),
-                    'from' => config('mail.from')
-                ]
-            ]);
-            
-            // Send the email directly (don't queue it)
-            $email = new \App\Mail\BookingConfirmed($freshBooking, $qrUrl);
-            $result = \Mail::to($freshBooking->user->email)
-                         ->send($email);
-            
-            // Log the result
-            if ($result) {
-                \Log::info('Booking confirmation email sent successfully', [
-                    'user_id' => $freshBooking->user_id,
-                    'booking_id' => $freshBooking->id,
-                    'email' => $freshBooking->user->email
-                ]);
-            } else {
-                \Log::warning('Booking confirmation email returned false', [
-                    'user_id' => $freshBooking->user_id,
-                    'booking_id' => $freshBooking->id,
-                    'email' => $freshBooking->user->email
-                ]);
-            }
-            
+            Mail::to($user->email)->send(new \App\Mail\BookingConfirmed($booking));
+            \Log::info('Booking confirmation email sent successfully for booking ID: ' . $booking->id);
         } catch (\Exception $e) {
-            // Log the error with full context
             \Log::error('Failed to send booking confirmation email', [
                 'user_id' => $user->id,
                 'booking_id' => $booking->id ?? 'unknown',
-                'email' => $user->email ?? 'unknown',
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'mail_config' => [
-                    'driver' => config('mail.default'),
-                    'host' => config('mail.mailers.smtp.host'),
-                    'port' => config('mail.mailers.smtp.port'),
-                    'from' => config('mail.from')
-                ]
             ]);
-            
-            // Even if email fails, we don't want to fail the booking
-            // But we can add a flag to the response if needed
-            $emailError = true;
         }
 
         $remainingCredits = $user->getAvailableCredits();
@@ -277,11 +227,11 @@ class BookingController extends Controller
 
             // Send booking confirmation email
             try {
-                $qrUrl = URL::route('qr-code', ['booking' => $booking->id]);
-                Mail::to($user->email)->send(new \App\Mail\BookingConfirmed($booking, $qrUrl));
+                Mail::to($user->email)->send(new \App\Mail\BookingConfirmed($booking));
+                \Log::info('Booking confirmation email sent for new booking.', ['booking_id' => $booking->id]);
             } catch (\Exception $e) {
                 // Log the error but don't fail the booking
-                \Log::error('Failed to send booking confirmation email: ' . $e->getMessage());
+                \Log::error('Failed to send booking confirmation email for new booking: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             }
 
             \Log::info('Booking created', ['booking_id' => $booking->id, 'user_id' => $user->id, 'class_id' => $classId]);
@@ -295,19 +245,9 @@ class BookingController extends Controller
             \Log::info('Existing booking found', ['booking_id' => $booking->id]);
         }
 
-        // Generate a signed check-in URL and email the QR to the user
-        $qrUrl = URL::signedRoute('user.checkin', ['user' => $user->id, 'qr_code' => $user->qr_code]);
-        try {
-            Mail::to($email)->send(new BookingConfirmed($booking, $qrUrl));
-            \Log::info('Confirmation email sent', ['email' => $email]);
-        } catch (\Throwable $e) {
-            \Log::warning('Booking confirmation email failed: ' . $e->getMessage());
-        }
-
         return redirect()->route('booking.confirmation', ['classId' => $classId])
             ->with('success', 'Payment successful! Your class has been booked.');
     }
-
     /**
      * Check-in endpoint (scannable QR target). Future: mark attendance.
      */

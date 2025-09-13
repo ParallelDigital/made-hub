@@ -1,34 +1,103 @@
-@php
-    // Generate a simple QR using Google Charts (no dependency). For production, consider a local QR library.
-    $encoded = urlencode($qrUrl);
-    $qrImg = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl={$encoded}&choe=UTF-8";
-@endphp
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Confirmed</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #111111;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #ffffff;
+        }
+        .content {
+            padding: 30px;
+            color: #333333;
+            line-height: 1.6;
+        }
+        .content h2 {
+            font-size: 20px;
+            color: #111111;
+        }
+        .booking-details {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #fcd34d; /* primary color */
+        }
+        .booking-details p {
+            margin: 5px 0;
+        }
+        .qr-code {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .qr-code img {
+            max-width: 200px;
+            height: auto;
+        }
+        .footer {
+            background-color: #111111;
+            color: #aaaaaa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .footer a {
+            color: #fcd34d;
+            text-decoration: none;
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
-    <h2>Booking Confirmed</h2>
-    <p>Hi {{ $booking->user->name ?? 'there' }},</p>
-    <p>Your booking for <strong>{{ $booking->fitnessClass->name ?? 'your class' }}</strong> is confirmed.</p>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Booking Confirmed</h1>
+        </div>
+        <div class="content">
+            <h2>Hi {{ $booking->user->name ?? 'there' }},</h2>
+            <p>Your spot is secured! We're excited to see you at the studio. Here are your booking details:</p>
 
-    @if(isset($booking->fitnessClass))
-        <p>
-            <strong>Date:</strong> {{ \Carbon\Carbon::parse($booking->fitnessClass->class_date)->format('l, F j, Y') }}<br>
-            <strong>Time:</strong> {{ \Carbon\Carbon::parse($booking->fitnessClass->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($booking->fitnessClass->end_time)->format('g:i A') }}
-        </p>
-    @endif
+            <div class="booking-details">
+                <p><strong>Class:</strong> {{ $booking->fitnessClass?->name ?? 'N/A' }}</p>
+                <p><strong>Date:</strong> {{ $booking->fitnessClass?->class_date?->format('l, F j, Y') ?? 'N/A' }}</p>
+                <p><strong>Time:</strong> {{ $booking->fitnessClass?->start_time ? \Carbon\Carbon::parse($booking->fitnessClass->start_time)->format('g:i A') : 'N/A' }}</p>
+                <p><strong>Instructor:</strong> {{ $booking->fitnessClass?->instructor?->name ?? 'N/A' }}</p>
+            </div>
 
-    <p>Show this QR code at the studio to check in:</p>
-    <p>
-        <img src="{{ $qrImg }}" alt="QR Code" width="200" height="200">
-    </p>
-    <p>If you can’t scan the code, use this link:</p>
-    <p><a href="{{ $qrUrl }}">{{ $qrUrl }}</a></p>
+            <div class="qr-code">
+                <h3>Your QR Code for Check-in</h3>
+                <p>Present this code at the front desk to check in quickly.</p>
+                <div style="display: inline-block;">{!! base64_decode($qrCode) !!}</div>
+            </div>
 
-    <p>See you soon!</p>
+            <p>If you have any questions or need to make changes, please don't hesitate to contact us.</p>
+            <p>See you soon,<br>The MadeHub Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ date('Y') }} MadeHub. All rights reserved.</p>
+            <p><a href="{{ url('/') }}">Visit our website</a></p>
+        </div>
+    </div>
 </body>
 </html>

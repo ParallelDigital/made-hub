@@ -139,6 +139,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('pricing', App\Http\Controllers\Admin\PricingController::class);
     // Admin bookings list
     Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show', 'update']);
+    Route::post('bookings/{booking}/resend-confirmation', [App\Http\Controllers\Admin\BookingController::class, 'resendConfirmation'])->name('bookings.resend-confirmation');
     Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::get('users/export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('users.export');
     Route::get('users/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');

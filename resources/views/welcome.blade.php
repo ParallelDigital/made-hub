@@ -161,13 +161,13 @@
         </div>
 
         <!-- Schedule Section -->
-        <div id="schedule" class="bg-black text-white py-8">
+        <div id="schedule" class="bg-white text-black py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Week Navigation -->
                 <div class="px-4 sm:px-6 py-4">
                         <div class="flex items-center justify-between">
                             <!-- Previous Week Arrow -->
-                            <button onclick="loadDate('{{ $prevWeek }}')" class="p-2 text-gray-300 transition-colors" id="prev-week-btn">
+                            <button onclick="loadDate('{{ $prevWeek }}')" class="p-2 text-gray-700 transition-colors" id="prev-week-btn">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
@@ -176,8 +176,8 @@
                             <!-- Week Days -->
                             <div class="flex space-x-2 flex-1 overflow-x-auto px-2" id="week-days">
                                 @foreach($weekDays as $day)
-                                <button onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-3 py-2 transition-colors cursor-pointer flex-1 min-w-[60px]
-                                    {{ $day['is_selected'] ? 'text-white' : ($day['is_today'] ? 'text-white font-bold' : 'text-gray-400') }}">
+                                <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-3 py-2 transition-colors cursor-pointer flex-1 min-w-[60px]
+                                    {{ $day['is_selected'] ? 'text-black' : ($day['is_today'] ? 'text-white font-bold' : 'text-gray-400') }}">
                                     <div class="text-xs font-medium">{{ $day['day'] }}</div>
                                     <div class="text-xl font-bold">{{ $day['date'] }}</div>
                                     @if($day['is_selected'])
@@ -188,7 +188,7 @@
                             </div>
                             
                             <!-- Next Week Arrow -->
-                            <button onclick="loadDate('{{ $nextWeek }}')" class="p-2 text-gray-300 transition-colors" id="next-week-btn">
+                            <button onclick="loadDate('{{ $nextWeek }}')" class="p-2 text-gray-700 transition-colors" id="next-week-btn">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
@@ -197,9 +197,9 @@
                 </div>
 
                 <!-- Selected Date Header -->
-                <div class="px-4 sm:px-6 py-4 bg-black border-t border-b border-gray-800">
+                <div class="px-4 sm:px-6 py-4 bg-gray-100 border-t border-b border-gray-300">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-white" id="selected-date-header">{{ $selectedDate->format('l, F j, Y') }}</h3>
+                            <h3 class="text-lg font-semibold text-black" id="selected-date-header">{{ $selectedDate->format('l, F j, Y') }}</h3>
                             <button
                                 type="button"
                                 onclick="loadDate('{{ now()->toDateString() }}')"
@@ -213,7 +213,7 @@
                     <div id="loading-spinner" class="hidden px-6 py-12">
                         <div class="text-center">
                             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                            <p class="mt-4 text-gray-600">Loading classes...</p>
+                            <p class="mt-4 text-gray-700">Loading classes...</p>
                         </div>
                     </div>
 
@@ -222,10 +222,10 @@
                         @if($selectedDateClasses->count() > 0)
                             <div class="space-y-2 sm:space-y-3" id="classes-list">
                                 @foreach($selectedDateClasses as $class)
-                                <div class="flex items-start py-6 border-b border-gray-800 last:border-b-0">
+                                    <div class="flex items-center py-6 border-b border-gray-300 last:border-b-0">
                                     <div class="flex-shrink-0 w-20 text-left">
-                                        <div class="text-lg font-bold text-white">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</div>
-                                        <div class="text-sm text-gray-400">{{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} min.</div>
+                                        <div class="text-lg font-bold text-black">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</div>
+                                        <div class="text-sm text-gray-600">{{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} min.</div>
                                     </div>
 
                                     <div class="flex-1 ml-6">
@@ -237,21 +237,41 @@
                                             </div>
 
                                             <div class="flex-1">
-                                                <div class="text-lg font-semibold text-white mb-1">{{ $class->name }} ({{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} Min)</div>
-                                                <div class="text-sm text-gray-300 mb-1">{{ $class->instructor->name ?? 'No Instructor' }}</div>
-                                                <div class="text-sm text-gray-400">Manchester Red Room</div>
-                                                <div class="text-sm text-gray-400">Manchester</div>
+                                                <div class="text-lg font-semibold text-black mb-1">{{ $class->name }} ({{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} Min)</div>
+                                                <div class="text-sm text-gray-700 mb-1">{{ $class->instructor->name ?? 'No Instructor' }}</div>
+                                                <div class="text-sm text-gray-600">Manchester Red Room</div>
+                                                <div class="text-sm text-gray-600">Manchester</div>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="flex-shrink-0 ml-4">
+                                        @php
+                                            $availableSpots = $class->available_spots ?? 0;
+                                            $classStart = \Carbon\Carbon::parse($class->class_date->toDateString() . ' ' . $class->start_time);
+                                        @endphp
+                                        @if($classStart->isPast())
+                                            <button disabled class="whitespace-nowrap p-4 bg-gray-300 text-gray-500 text-md font-medium rounded-md cursor-not-allowed">
+                                                Class Ended
+                                            </button>
+                                        @elseif($availableSpots <= 0)
+                                            <button disabled class="whitespace-nowrap p-4 bg-gray-400 text-white text-md font-medium rounded-md cursor-not-allowed">
+                                                Class Full
+                                            </button>
+                                        @else
+                                            <button onclick="openBookingModal({{ $class->id }}, {{ $class->price ?? 0 }})"
+                                                    class="whitespace-nowrap p-4 bg-primary text-white text-md font-medium rounded-md transition-colors hover:opacity-90">
+                                                Book Class ({{ $availableSpots }} left)
+                                            </button>
+                                        @endif
                                     </div>
                                 </div>
                                 @endforeach
                             </div>
                         @else
                             <div class="text-center py-12" id="no-classes">
-                                
-                                <h3 class="text-lg font-medium text-white mb-2">No classes scheduled</h3>
-                                <p class="text-gray-400">There are no classes scheduled for this date.</p>
+                                <h3 class="text-lg font-medium text-black mb-2">No classes scheduled</h3>
+                                <p class="text-gray-600">There are no classes scheduled for this date.</p>
                             </div>
                         @endif
                     </div>
@@ -393,6 +413,7 @@
 
         <script>
             let currentDate = '{{ $selectedDate->format("Y-m-d") }}';
+            const CLASSES_API = '{{ url('/api/classes') }}';
             let isLoading = false;
 
             function loadDate(date) {
@@ -410,9 +431,21 @@
                 url.searchParams.set('date', date);
                 window.history.pushState({}, '', url);
                 
-                // Fetch new data
-                fetch(`/api/classes?date=${date}`)
-                    .then(response => response.json())
+                // Fetch new data (absolute URL for reliability)
+                fetch(`${CLASSES_API}?date=${date}`)
+                    .then(async response => {
+                        if (!response.ok) {
+                            const text = await response.text();
+                            throw new Error(`Request failed (${response.status}): ${text.substring(0, 200)}`);
+                        }
+                        // Guard against non-JSON responses
+                        const contentType = response.headers.get('content-type') || '';
+                        if (!contentType.includes('application/json')) {
+                            const text = await response.text();
+                            throw new Error(`Unexpected response type: ${contentType}. Body: ${text.substring(0, 200)}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         updateUI(data);
                         isLoading = false;
@@ -420,9 +453,16 @@
                     .catch(error => {
                         console.error('Error loading classes:', error);
                         isLoading = false;
-                        // Hide loading spinner on error
+                        // Hide loading spinner on error and show a friendly message
                         document.getElementById('loading-spinner').classList.add('hidden');
-                        document.getElementById('classes-container').classList.remove('hidden');
+                        const container = document.getElementById('classes-container');
+                        container.classList.remove('hidden');
+                        container.innerHTML = `
+                            <div class="text-center py-12">
+                                <h3 class="text-lg font-medium text-black mb-2">Unable to load classes</h3>
+                                <p class="text-gray-600">Please refresh the page or try again in a moment.</p>
+                            </div>
+                        `;
                     });
             }
 
@@ -448,20 +488,22 @@
                 weekDays.forEach(day => {
                     const button = document.createElement('button');
                     button.onclick = () => loadDate(day.full_date);
+                    button.setAttribute('data-date', day.full_date);
                     
                     let classes = 'text-center px-6 py-4 rounded-lg transition-colors cursor-pointer flex-1 ';
                     if (day.is_selected) {
-                        classes += 'bg-primary text-white';
+                        classes += 'text-black';
                     } else if (day.is_today) {
-                        classes += 'bg-gray-200 text-gray-800 font-semibold';
+                        classes += 'bg-gray-200 text-black font-semibold';
                     } else {
-                        classes += 'text-gray-600 hover:bg-gray-100';
+                        classes += 'text-gray-700 hover:bg-gray-100';
                     }
                     
                     button.className = classes;
                     button.innerHTML = `
                         <div class="text-sm font-medium uppercase">${day.day}</div>
                         <div class="text-xl font-bold">${day.date}</div>
+                        ${day.is_selected ? '<div class="w-8 h-1 bg-primary mx-auto mt-1"></div>' : ''}
                     `;
                     
                     weekDaysContainer.appendChild(button);
@@ -472,6 +514,23 @@
                 document.getElementById('next-week-btn').setAttribute('onclick', `loadDate('${nextWeek}')`);
             }
 
+            // Delegated click listener to ensure date selection works even if inline handlers fail
+            if (!window.__weekDaysClickBound) {
+                const weekDaysContainer = document.getElementById('week-days');
+                if (weekDaysContainer) {
+                    weekDaysContainer.addEventListener('click', (e) => {
+                        const target = e.target.closest('[data-date]');
+                        if (target && weekDaysContainer.contains(target)) {
+                            const date = target.getAttribute('data-date');
+                            if (date) {
+                                loadDate(date);
+                            }
+                        }
+                    });
+                    window.__weekDaysClickBound = true;
+                }
+            }
+
             function updateClassesList(classes) {
                 const container = document.getElementById('classes-container');
                 
@@ -479,8 +538,8 @@
                     container.innerHTML = `
                         <div class="text-center py-12">
                            
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">No classes scheduled</h3>
-                            <p class="text-gray-500">There are no classes scheduled for this date.</p>
+                            <h3 class="text-lg font-medium text-black mb-2">No classes scheduled</h3>
+                            <p class="text-gray-600">There are no classes scheduled for this date.</p>
                         </div>
                     `;
                 } else {
@@ -490,6 +549,10 @@
                         const startTime = new Date(`2000-01-01T${classItem.start_time}`);
                         const endTime = new Date(`2000-01-01T${classItem.end_time}`);
                         const duration = Math.round((endTime - startTime) / (1000 * 60));
+                        
+                        // Check if class has already started
+                        const classStart = new Date(`${classItem.class_date}T${classItem.start_time}`);
+                        const isPastClass = classStart < new Date();
                         
                         return `
                             <div class="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
@@ -512,12 +575,16 @@
                                 </div>
                                 
                                 <div class="flex-shrink-0 ml-4">
-                                    ${classItem.available_spots <= 0 ? 
+                                    ${isPastClass ? 
+                                        `<button disabled class="whitespace-nowrap p-4 bg-gray-300 text-gray-500 text-md font-medium rounded-md cursor-not-allowed">
+                                            Class Ended
+                                        </button>` :
+                                        classItem.available_spots <= 0 ? 
                                         `<button disabled class="whitespace-nowrap px-4 py-2 bg-gray-400 text-white text-xs font-medium rounded-md cursor-not-allowed">
                                             Class Full
                                         </button>` :
                                         `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" 
-                                                class="whitespace-nowrap px-4 py-2 bg-primary text-white text-xs font-medium rounded-md transition-colors hover:opacity-90">
+                                                class="whitespace-nowrap p-4 bg-primary text-white text-md font-medium rounded-md transition-colors hover:opacity-90">
                                             Book Class (${classItem.available_spots} left)
                                         </button>`
                                     }

@@ -47,4 +47,26 @@ class BookingController extends Controller
         return redirect()->route('admin.bookings.show', $booking)
             ->with('success', 'Booking status updated successfully.');
     }
+
+    /**
+     * Resend the booking confirmation email.
+     */
+    public function resendConfirmation(Booking $booking)
+    {
+        try {
+            // The Mailable will handle its own data loading, so we just pass the booking.
+            \Illuminate\Support\Facades\Mail::to($booking->user->email)->send(new \App\Mail\BookingConfirmed($booking));
+
+            return redirect()->back()->with('success', 'Booking confirmation email has been resent successfully.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to resend booking confirmation for booking ID: ' . $booking->id, [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()->with('error', 'Failed to resend email. Please check the logs for details.');
+        }
+    }
 }

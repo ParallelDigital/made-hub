@@ -5,37 +5,70 @@ namespace App\Mail;
 use App\Models\Booking;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Address;
+use Illuminate\Support\Facades\URL;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class BookingConfirmed extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public Booking $booking;
-    public string $qrUrl;
-
     /**
      * Create a new message instance.
      */
-    public function __construct(Booking $booking, string $qrUrl)
+    public function __construct(public Booking $booking)
     {
-        $this->booking = $booking->load(['user', 'fitnessClass']);
-        $this->qrUrl = $qrUrl;
+        //
     }
 
     /**
-     * Build the message.
+     * Get the message envelope.
      */
-    public function build(): self
+    public function envelope(): Envelope
     {
-        $class = $this->booking->fitnessClass;
-        $subject = 'Your booking is confirmed: ' . ($class->name ?? 'Fitness Class');
+        // Eager load the class name for the subject line, but handle if it's missing.
+        $this->booking->load('fitnessClass');
 
-        return $this->subject($subject)
-            ->view('emails.booking_confirmed')
-            ->with([
+        return new Envelope(
+            from: new Address(config('mail.from.address'), config('mail.from.name')),
+            subject: 'Booking Confirmed: ' . ($this->booking->fitnessClass?->name ?? 'Your Class'),
+        );
+    }
+
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        // Eager load all necessary relationships for the view.
+        $this->booking->load(['user', 'fitnessClass.instructor']);
+
+        // Generate the QR code URL and the image data directly within the mailer.
+        $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $this->booking->id]);
+        
+        // Use SVG format to avoid Imagick dependency issues
+        $qrCodeSvg = QrCode::format('svg')->size(200)->errorCorrection('H')->generate($qrUrl);
+        $qrCode = base64_encode($qrCodeSvg);
+
+        return new Content(
+            view: 'emails.booking_confirmed',
+            with: [
                 'booking' => $this->booking,
-                'qrUrl' => $this->qrUrl,
-            ]);
+                'qrCode' => $qrCode,
+            ],
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
     }
 }
