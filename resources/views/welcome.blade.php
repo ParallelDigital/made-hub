@@ -298,34 +298,41 @@
                     </div>
                     
                     @auth
-                        <!-- PIN input for booking with credits -->
-                        <div class="space-y-2">
+                        <!-- PIN input for booking with credits (hidden until 'Use Credits' is clicked) -->
+                        <div id="pinSection" class="space-y-2 hidden mt-2">
                             <label for="pinCodeInput" class="block text-sm font-medium text-gray-700">Enter your 4-digit booking code (PIN)</label>
-                            <input id="pinCodeInput" name="pin_code" inputmode="numeric" pattern="\\d{4}" maxlength="4"
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                   placeholder="0000">
+                            <div class="relative">
+                                <input id="pinCodeInput" name="pin_code" inputmode="numeric" pattern="\\d{4}" maxlength="4"
+                                       class="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                       placeholder="0000" type="password">
+                                <button type="button" id="togglePinVisibility" aria-label="Show PIN"
+                                        class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700">
+                                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3C5 3 1.73 7.11 1 10c.73 2.89 4 7 9 7s8.27-4.11 9-7c-.73-2.89-4-7-9-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="10" cy="10" r="3" fill="currentColor"/></svg>
+                                </button>
+                            </div>
+                            <p id="pinError" class="text-sm text-red-600 hidden">Please enter your 4-digit PIN.</p>
                         </div>
-                        <button onclick="bookWithCredits(window.selectedClassId)" 
-                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
+                        <button id="useCreditsBtn" onclick="bookWithCredits(window.selectedClassId)" 
+                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-purple-50 hover:border-purple-300 transition-colors">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                                     </svg>
                                 </div>
                                 <div class="text-left">
-                                    <div class="font-medium text-gray-900">Use Credits</div>
+                                    <div id="useCreditsLabel" class="font-medium text-gray-900">Use Credits</div>
                                     <div class="text-sm text-gray-500">You have {{ auth()->user()->getAvailableCredits() }} {{ auth()->user()->hasActiveMembership() ? 'monthly credits' : 'credits' }}</div>
                                 </div>
                             </div>
-                            <div class="text-green-600 font-semibold">1 Credit</div>
+                            <div class="text-primary font-semibold" id="useCreditsRight">1 Credit</div>
                         </button>
                     @else
                         <button onclick="redirectToLogin(window.selectedClassId, window.selectedClassPrice)" 
-                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
+                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-purple-50 hover:border-purple-300 transition-colors">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                                     </svg>
                                 </div>
@@ -334,7 +341,7 @@
                                     <div class="text-sm text-gray-500">Sign in to use credits</div>
                                 </div>
                             </div>
-                            <div class="text-green-600 font-semibold">1 Credit</div>
+                            <div class="text-primary font-semibold">1 Credit</div>
                         </button>
                     @endauth
                     
@@ -639,18 +646,54 @@
             }
 
             function bookWithCredits(classId) {
-                closeBookingModal();
                 
                 // Check if user is authenticated
                 @auth
                     // User is logged in, proceed with credit booking
+                    const pinSection = document.getElementById('pinSection');
+                    const useBtn = document.getElementById('useCreditsBtn');
+                    const useLabel = document.getElementById('useCreditsLabel');
+                    const useRight = document.getElementById('useCreditsRight');
+                    const pinError = document.getElementById('pinError');
+                    const togglePinBtn = document.getElementById('togglePinVisibility');
+                    if (togglePinBtn && !togglePinBtn._bound) {
+                        togglePinBtn.addEventListener('click', function() {
+                            const input = document.getElementById('pinCodeInput');
+                            if (!input) return;
+                            if (input.type === 'password') {
+                                input.type = 'text';
+                                this.setAttribute('aria-label', 'Hide PIN');
+                            } else {
+                                input.type = 'password';
+                                this.setAttribute('aria-label', 'Show PIN');
+                            }
+                        });
+                        togglePinBtn._bound = true;
+                    }
+                    // First click: reveal PIN field and focus, do not submit yet
+                    if (pinSection && pinSection.classList.contains('hidden')) {
+                        pinSection.classList.remove('hidden');
+                        const input = document.getElementById('pinCodeInput');
+                        if (input) { input.focus(); }
+                        if (useLabel) useLabel.textContent = 'Confirm with Credits';
+                        if (useRight) useRight.textContent = '';
+                        return;
+                    }
                     const pinInput = document.getElementById('pinCodeInput');
                     const pin = pinInput ? pinInput.value.trim() : '';
                     if (!/^\d{4}$/.test(pin)) {
-                        alert('Please enter your 4-digit booking code (PIN).');
+                        if (pinError) pinError.classList.remove('hidden');
+                        if (pinInput) { pinInput.focus(); }
                         return;
                     }
-                    if (confirm('Book this class using your credits?')) {
+                    if (pinError) pinError.classList.add('hidden');
+                    // Loading state
+                    if (useBtn) {
+                        useBtn.disabled = true;
+                        useBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                        if (useLabel) useLabel.textContent = 'Booking...';
+                    }
+                    {
                         fetch(`/book-with-credits/${classId}`, {
                             method: 'POST',
                             headers: {
@@ -665,14 +708,33 @@
                             if (data.success) {
                                 alert('Class booked successfully with credits!');
                                 // Optionally refresh the page or update the UI
+                                closeBookingModal();
                                 location.reload();
                             } else {
-                                alert(data.message || 'Booking failed. Please try again.');
+                                // Show inline error and keep modal open
+                                if (pinError) {
+                                    pinError.textContent = data.message || 'Booking failed. Please try again.';
+                                    pinError.classList.remove('hidden');
+                                } else {
+                                    alert(data.message || 'Booking failed. Please try again.');
+                                }
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('An error occurred. Please try again.');
+                            if (pinError) {
+                                pinError.textContent = 'An error occurred. Please try again.';
+                                pinError.classList.remove('hidden');
+                            } else {
+                                alert('An error occurred. Please try again.');
+                            }
+                        })
+                        .finally(() => {
+                            if (useBtn) {
+                                useBtn.disabled = false;
+                                useBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                                if (useLabel) useLabel.textContent = 'Confirm with Credits';
+                            }
                         });
                     }
                 @else

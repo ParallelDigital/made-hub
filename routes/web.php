@@ -105,6 +105,14 @@ Route::get('/dashboard', function () {
     }
 
     // For regular users, fetch their upcoming bookings
+    // Ensure the user has a PIN code (only if column exists)
+    if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'pin_code')) {
+        if (empty($user->pin_code)) {
+            $user->pin_code = \App\Models\User::generateUniquePinCode();
+            $user->save();
+        }
+    }
+
     $upcomingBookings = $user->bookings()
         ->whereHas('fitnessClass', function ($query) {
             $query->where('class_date', '>=', now()->toDateString());

@@ -24,7 +24,13 @@
             <p><span class="text-gray-400">Name:</span> {{ Auth::user()->name }}</p>
             <p><span class="text-gray-400">Email:</span> {{ Auth::user()->email }}</p>
             <p><span class="text-gray-400">QR Code ID:</span> {{ Auth::user()->qr_code }}</p>
-            <p><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white">{{ Auth::user()->pin_code ?? '— — — —' }}</span></p>
+            @php $role = Auth::user()->role; @endphp
+            @if($role === 'admin' || $role === 'instructor')
+                <p><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white">{{ Auth::user()->pin_code ?? '— — — —' }}</span></p>
+            @else
+                <p><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white">{{ Auth::user()->pin_code ? '••••' : '— — — —' }}</span></p>
+                <p class="text-xs text-gray-400">Your PIN will be autofilled and shown only when you book with credits.</p>
+            @endif
             <p>
                 <span class="text-gray-400">Membership:</span>
                 @if(Auth::user()->hasActiveMembership())
@@ -33,7 +39,8 @@
                     None
                 @endif
             </p>
-            <p><span class="text-gray-400">Credits:</span> {{ Auth::user()->getAvailableCredits() }}</p>
+            @php $credits = Auth::user()->hasActiveMembership() ? Auth::user()->getAvailableCredits() : 0; @endphp
+            <p><span class="text-gray-400">Credits:</span> {{ $credits }}</p>
         </div>
         <div class="flex gap-3 mt-4">
             <a href="{{ route('profile.edit') }}" class="inline-flex px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition">Edit Profile</a>
