@@ -24,12 +24,17 @@
             <p><span class="text-gray-400">Name:</span> {{ Auth::user()->name }}</p>
             <p><span class="text-gray-400">Email:</span> {{ Auth::user()->email }}</p>
             <p><span class="text-gray-400">QR Code ID:</span> {{ Auth::user()->qr_code }}</p>
-            @php $role = Auth::user()->role; @endphp
-            @if($role === 'admin' || $role === 'instructor')
+            @php 
+                $role = Auth::user()->role; 
+                $hasMembership = Auth::user()->hasActiveMembership();
+                $currentCredits = $hasMembership ? Auth::user()->getAvailableCredits() : (Auth::user()->credits ?? 0);
+                $hasAnyCredits = ($currentCredits ?? 0) > 0;
+            @endphp
+            @if($role === 'admin' || $role === 'instructor' || $hasAnyCredits)
                 <p><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white">{{ Auth::user()->pin_code ?? '— — — —' }}</span></p>
             @else
                 <p><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white">{{ Auth::user()->pin_code ? '••••' : '— — — —' }}</span></p>
-                <p class="text-xs text-gray-400">Your PIN will be autofilled and shown only when you book with credits.</p>
+                <p class="text-xs text-gray-400">Your PIN will be shown when you book with credits.</p>
             @endif
             <p>
                 <span class="text-gray-400">Membership:</span>
@@ -39,7 +44,11 @@
                     None
                 @endif
             </p>
-            @php $credits = Auth::user()->hasActiveMembership() ? Auth::user()->getAvailableCredits() : 0; @endphp
+            @php 
+                $credits = Auth::user()->hasActiveMembership() 
+                    ? Auth::user()->getAvailableCredits() 
+                    : (Auth::user()->credits ?? 0);
+            @endphp
             <p><span class="text-gray-400">Credits:</span> {{ $credits }}</p>
         </div>
         <div class="flex gap-3 mt-4">

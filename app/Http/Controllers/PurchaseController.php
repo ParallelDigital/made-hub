@@ -19,7 +19,7 @@ class PurchaseController extends Controller
         return view('purchase.index', compact('packages'));
     }
 
-    public function showCheckoutForm($class_id)
+    public function showCheckoutForm(Request $request, $class_id)
     {
         $class = FitnessClass::findOrFail($class_id);
 
@@ -29,7 +29,16 @@ class PurchaseController extends Controller
             return redirect()->route('welcome')->with('error', 'This class has already started and cannot be booked.');
         }
 
-        return view('checkout.index', compact('class'));
+        $user = $request->user();
+        $hasMembership = $user ? $user->hasActiveMembership() : false;
+        $availableCredits = 0;
+        if ($user) {
+            $availableCredits = $hasMembership ? $user->getAvailableCredits() : ($user->credits ?? 0);
+        }
+
+        $autoOpenCredits = $request->boolean('useCredits');
+
+        return view('checkout.index', compact('class', 'availableCredits', 'autoOpenCredits'));
     }
 
     // New: package checkout

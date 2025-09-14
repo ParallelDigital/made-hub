@@ -646,99 +646,11 @@
             }
 
             function bookWithCredits(classId) {
-                
-                // Check if user is authenticated
                 @auth
-                    // User is logged in, proceed with credit booking
-                    const pinSection = document.getElementById('pinSection');
-                    const useBtn = document.getElementById('useCreditsBtn');
-                    const useLabel = document.getElementById('useCreditsLabel');
-                    const useRight = document.getElementById('useCreditsRight');
-                    const pinError = document.getElementById('pinError');
-                    const togglePinBtn = document.getElementById('togglePinVisibility');
-                    if (togglePinBtn && !togglePinBtn._bound) {
-                        togglePinBtn.addEventListener('click', function() {
-                            const input = document.getElementById('pinCodeInput');
-                            if (!input) return;
-                            if (input.type === 'password') {
-                                input.type = 'text';
-                                this.setAttribute('aria-label', 'Hide PIN');
-                            } else {
-                                input.type = 'password';
-                                this.setAttribute('aria-label', 'Show PIN');
-                            }
-                        });
-                        togglePinBtn._bound = true;
-                    }
-                    // First click: reveal PIN field and focus, do not submit yet
-                    if (pinSection && pinSection.classList.contains('hidden')) {
-                        pinSection.classList.remove('hidden');
-                        const input = document.getElementById('pinCodeInput');
-                        if (input) { input.focus(); }
-                        if (useLabel) useLabel.textContent = 'Confirm with Credits';
-                        if (useRight) useRight.textContent = '';
-                        return;
-                    }
-                    const pinInput = document.getElementById('pinCodeInput');
-                    const pin = pinInput ? pinInput.value.trim() : '';
-                    if (!/^\d{4}$/.test(pin)) {
-                        if (pinError) pinError.classList.remove('hidden');
-                        if (pinInput) { pinInput.focus(); }
-                        return;
-                    }
-                    if (pinError) pinError.classList.add('hidden');
-                    // Loading state
-                    if (useBtn) {
-                        useBtn.disabled = true;
-                        useBtn.classList.add('opacity-70', 'cursor-not-allowed');
-                        if (useLabel) useLabel.textContent = 'Booking...';
-                    }
-                    {
-                        fetch(`/book-with-credits/${classId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify({ pin_code: pin })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('Class booked successfully with credits!');
-                                // Optionally refresh the page or update the UI
-                                closeBookingModal();
-                                location.reload();
-                            } else {
-                                // Show inline error and keep modal open
-                                if (pinError) {
-                                    pinError.textContent = data.message || 'Booking failed. Please try again.';
-                                    pinError.classList.remove('hidden');
-                                } else {
-                                    alert(data.message || 'Booking failed. Please try again.');
-                                }
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            if (pinError) {
-                                pinError.textContent = 'An error occurred. Please try again.';
-                                pinError.classList.remove('hidden');
-                            } else {
-                                alert('An error occurred. Please try again.');
-                            }
-                        })
-                        .finally(() => {
-                            if (useBtn) {
-                                useBtn.disabled = false;
-                                useBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                                if (useLabel) useLabel.textContent = 'Confirm with Credits';
-                            }
-                        });
-                    }
+                    // Redirect to checkout where credits flow is handled
+                    closeBookingModal();
+                    window.location.href = `/checkout/${classId}?useCredits=1`;
                 @else
-                    // User not logged in, redirect to login
                     if (confirm('You need to sign in to use credits. Redirect to login?')) {
                         window.location.href = '/login';
                     }

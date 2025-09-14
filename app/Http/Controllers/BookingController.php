@@ -35,10 +35,12 @@ class BookingController extends Controller
             return response()->json(['success' => false, 'message' => 'This class has already started.'], 400);
         }
 
-        // Check if user has enough credits
-        $availableCredits = $user->getAvailableCredits();
+        // Check if user has enough credits (consider legacy credits when no active membership)
+        $availableCredits = $user->hasActiveMembership()
+            ? $user->getAvailableCredits()
+            : ((int) ($user->credits ?? 0));
         if ($availableCredits < 1) {
-            $message = $user->hasActiveMembership() 
+            $message = $user->hasActiveMembership()
                 ? 'You have used all your monthly credits. Please wait until next month or book with payment.'
                 : 'Insufficient credits. Please purchase more credits or get a membership.';
             return response()->json(['success' => false, 'message' => $message], 400);
