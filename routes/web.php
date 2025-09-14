@@ -76,6 +76,20 @@ Route::get('/purchase/package/{type}', [App\Http\Controllers\PurchaseController:
 Route::post('/purchase/package/{type}', [App\Http\Controllers\PurchaseController::class, 'processPackageCheckout'])->name('purchase.package.process');
 Route::get('/purchase/package/{type}/success', [App\Http\Controllers\PurchaseController::class, 'packageSuccess'])->name('purchase.package.success');
 
+// AJAX login for in-modal authentication (guests only)
+Route::post('/ajax/login', function (\Illuminate\Http\Request $request) {
+    $credentials = $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required', 'string'],
+    ]);
+    $remember = (bool) $request->boolean('remember', false);
+    if (\Illuminate\Support\Facades\Auth::attempt($credentials, $remember)) {
+        $request->session()->regenerate();
+        return response()->json(['success' => true]);
+    }
+    return response()->json(['success' => false, 'message' => 'Invalid credentials.'], 422);
+})->middleware('guest')->name('ajax.login');
+
 // Booking Routes
 Route::post('/book-with-credits/{classId}', [App\Http\Controllers\BookingController::class, 'bookWithCredits'])->name('booking.credits');
 Route::get('/checkout/{class_id}', [App\Http\Controllers\PurchaseController::class, 'showCheckoutForm'])->name('checkout.show');
@@ -160,7 +174,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('memberships/export', [App\Http\Controllers\Admin\MembershipController::class, 'export'])->name('memberships.export');
     Route::resource('memberships', App\Http\Controllers\Admin\MembershipController::class);
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);
-    Route::resource('pricing', App\Http\Controllers\Admin\PricingController::class);
     // Admin bookings list
     Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show', 'update']);
     Route::post('bookings/{booking}/resend-confirmation', [App\Http\Controllers\Admin\BookingController::class, 'resendConfirmation'])->name('bookings.resend-confirmation');

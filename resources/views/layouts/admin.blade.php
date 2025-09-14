@@ -52,6 +52,26 @@
 
             <!-- Navigation -->
             <nav class="mt-8 px-4">
+                @php $role = auth()->check() ? auth()->user()->role : null; @endphp
+                @if($role === 'instructor')
+                <!-- Instructor Menu -->
+                <div class="space-y-2">
+                    <a href="{{ route('instructor.dashboard') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('instructor.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        </svg>
+                        My Classes
+                    </a>
+                    <a href="{{ route('profile.edit') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('profile.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 018 17h8a4 4 0 013 1.196M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        My Profile
+                    </a>
+                </div>
+                @elseif($role === 'admin')
                 <div class="space-y-2">
                     <a href="{{ route('admin.dashboard') }}"
                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
@@ -86,14 +106,6 @@
                         Memberships
                     </a>
 
-                    <a href="{{ route('admin.pricing.index') }}"
-                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.pricing.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                        Pricing
-                    </a>
-
                     <a href="{{ route('admin.coupons.index') }}"
                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.coupons.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,15 +129,26 @@
                         </svg>
                         Users
                     </a>
-
-                    <a href="{{ route('admin.reports') }}"
-                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.reports') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                </div>
+                @else
+                <!-- Regular User Menu -->
+                <div class="space-y-2">
+                    <a href="{{ route('dashboard') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('dashboard') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                         </svg>
-                        Reports
+                        Dashboard
+                    </a>
+                    <a href="{{ route('profile.edit') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('profile.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 018 17h8a4 4 0 013 1.196M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Profile
                     </a>
                 </div>
+                @endif
             </nav>
 
             <!-- User Section -->

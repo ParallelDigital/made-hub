@@ -26,9 +26,10 @@ class BookingConfirmed extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public Booking $booking)
+    public function __construct(public Booking $booking, ?string $qrUrl = null)
     {
-        //
+        // $qrUrl is accepted for backward compatibility but not required,
+        // since this Mailable generates the signed URL internally.
     }
 
     /**
@@ -82,12 +83,25 @@ class BookingConfirmed extends Mailable
             $this->prepareQrImage($qrUrl);
         }
 
+        $attachments = [];
+
+        // Image attachment (JPG/PNG)
         if (!empty($this->qrCodeRaw)) {
-            return [
-                \Illuminate\Mail\Mailables\Attachment::fromData(function () {
-                    return $this->qrCodeRaw;
-                }, $this->qrAttachmentName ?? 'checkin-qr.jpg')->withMime($this->qrMime ?? 'image/jpeg'),
-            ];
+            $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromData(function () {
+                return $this->qrCodeRaw;
+            }, $this->qrAttachmentName ?? 'checkin-qr.jpg')->withMime($this->qrMime ?? 'image/jpeg');
+        }
+
+        // Optional PDF attachment if Dompdf is available
+        $pdfBytes = $this->generateQrPdf();
+        if ($pdfBytes) {
+            $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromData(function () use ($pdfBytes) {
+                return $pdfBytes;
+            }, 'checkin-qr.pdf')->withMime('application/pdf');
+        }
+
+        if (!empty($attachments)) {
+            return $attachments;
         }
 
         return [];
@@ -130,6 +144,48 @@ class BookingConfirmed extends Mailable
             $this->qrCodeRaw = null;
             $this->qrMime = null;
             $this->qrAttachmentName = null;
+            return null;
+        }
+    }
+
+    /**
+     * Optionally render a simple one-page PDF with the QR code embedded, if Dompdf is available.
+     * Returns raw PDF bytes or null when unavailable/failure.
+     */
+    private function generateQrPdf(): ?string
+    {
+        // Only attempt if Dompdf is installed
+        if (!class_exists(\Dompdf\Dompdf::class)) {
+            return null;
+        }
+
+        try {
+            // Ensure we have base64 image data for embedding in PDF
+            $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $this->booking->id]);
+            $base64 = $this->prepareQrImage($qrUrl);
+            if (empty($base64) || empty($this->qrMime)) {
+                return null;
+            }
+            $dataUri = 'data:' . $this->qrMime . ';base64,' . $base64;
+
+            $html = '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:DejaVu Sans, sans-serif; margin:32px;} .card{border:1px solid #ddd;border-radius:8px;padding:24px;text-align:center} img{width:240px;height:240px} h1{font-size:18px;margin:12px 0 8px} p{font-size:12px;color:#444;margin:4px 0}</style></head><body>' .
+                '<div class="card">' .
+                '<h1>Check-in QR Code</h1>' .
+                '<p>Present this QR at the studio to check in.</p>' .
+                '<img src="' . $dataUri . '" alt="QR Code" />' .
+                '<p style="margin-top:12px;">Booking #'.htmlspecialchars((string)$this->booking->id).'</p>' .
+                '</div>' .
+                '</body></html>';
+
+            $dompdf = new \Dompdf\Dompdf([
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'DejaVu Sans',
+            ]);
+            $dompdf->loadHtml($html, 'UTF-8');
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+            return $dompdf->output();
+        } catch (\Throwable $e) {
             return null;
         }
     }

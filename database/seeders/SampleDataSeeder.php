@@ -127,56 +127,7 @@ class SampleDataSeeder extends Seeder
             'active' => true,
         ]);
 
-        // Create sample pricing tiers
-        \App\Models\PricingTier::create([
-            'name' => 'Early Bird Class Special',
-            'description' => 'Book classes before 6 AM and save 20%',
-            'type' => 'class',
-            'base_price' => 25.00,
-            'discount_percentage' => 20.00,
-            'final_price' => 20.00,
-            'valid_from' => now(),
-            'valid_until' => now()->addMonths(3),
-            'min_quantity' => 1,
-            'max_quantity' => 5,
-            'active' => true,
-        ]);
-
-        \App\Models\PricingTier::create([
-            'name' => 'Student Membership Discount',
-            'description' => 'Special pricing for students with valid ID',
-            'type' => 'membership',
-            'base_price' => 89.99,
-            'discount_percentage' => 30.00,
-            'final_price' => 62.99,
-            'min_quantity' => 1,
-            'active' => true,
-        ]);
-
-        \App\Models\PricingTier::create([
-            'name' => 'Class Bundle Package',
-            'description' => '10 classes for the price of 8 - great value!',
-            'type' => 'package',
-            'base_price' => 250.00,
-            'discount_percentage' => 20.00,
-            'final_price' => 200.00,
-            'min_quantity' => 1,
-            'max_quantity' => 2,
-            'active' => true,
-        ]);
-
-        \App\Models\PricingTier::create([
-            'name' => 'Black Friday Special',
-            'description' => 'Limited time offer - 50% off all memberships',
-            'type' => 'membership',
-            'base_price' => 89.99,
-            'discount_percentage' => 50.00,
-            'final_price' => 44.99,
-            'valid_from' => now()->addMonths(2),
-            'valid_until' => now()->addMonths(2)->addDays(7),
-            'min_quantity' => 1,
-            'active' => true,
-        ]);
+        // Pricing tiers removed
 
         // Create sample users
         $sampleUsers = [

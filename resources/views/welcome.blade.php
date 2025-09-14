@@ -31,22 +31,20 @@
                     </div>
                 </div>
                 <div class="hidden lg:flex items-center space-x-4">
-                    @auth
+                    <?php if(auth()->check()): ?>
                         <a href="{{ url('/dashboard') }}" class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
                             DASHBOARD
                         </a>
-                    @else
+                    <?php else: ?>
                         <a href="{{ route('login') }}" class="text-white hover:text-primary transition-colors">LOG IN</a>
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
-                                JOIN NOW
-                            </a>
-                        @endif
-                    @endauth
+                        <a href="{{ route('register') }}" class="bg-primary text-black px-6 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">
+                            JOIN NOW
+                        </a>
+                    <?php endif; ?>
                 </div>
                 <!-- Mobile menu button -->
                 <div class="lg:hidden">
-                    <button @click="open = !open" class="text-white hover:text-primary focus:outline-none">
+                    <button x-on:click="open = !open" class="text-white hover:text-primary focus:outline-none">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
                             <path x-show="open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -56,7 +54,7 @@
             </nav>
 
             <!-- Mobile Menu -->
-            <div x-show="open" @click.away="open = false" class="lg:hidden bg-black border-b border-gray-800 absolute w-full z-40" x-transition>
+            <div x-show="open" x-on:click.outside="open = false" class="lg:hidden bg-black border-b border-gray-800 absolute w-full z-40" x-transition>
                 <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                     <a href="{{ route('welcome') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-primary hover:bg-gray-900">SCHEDULE</a>
                     <a href="{{ route('purchase.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-primary hover:bg-gray-900">PURCHASE</a>
@@ -65,14 +63,12 @@
                 </div>
                 <div class="pt-4 pb-3 border-t border-gray-700">
                     <div class="px-2 space-y-2">
-                        @auth
+                        <?php if(auth()->check()): ?>
                             <a href="{{ url('/dashboard') }}" class="block w-full text-left bg-primary text-black px-4 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">DASHBOARD</a>
-                        @else
+                        <?php else: ?>
                             <a href="{{ route('login') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-primary hover:bg-gray-900">LOG IN</a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="block w-full text-center bg-primary text-black px-4 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">JOIN NOW</a>
-                            @endif
-                        @endauth
+                            <a href="{{ route('register') }}" class="block w-full text-center bg-primary text-black px-4 py-2 rounded font-semibold hover:bg-opacity-90 transition-all">JOIN NOW</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -176,16 +172,16 @@
                             
                             <!-- Week Days -->
                             <div class="flex space-x-2 flex-1 overflow-x-auto px-2" id="week-days">
-                                @foreach($weekDays as $day)
+                                <?php foreach($weekDays as $day): ?>
                                 <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-3 py-2 transition-colors cursor-pointer flex-1 min-w-[60px]
                                     {{ $day['is_selected'] ? 'text-black' : ($day['is_today'] ? 'text-white font-bold' : 'text-gray-400') }}">
                                     <div class="text-xs font-medium">{{ $day['day'] }}</div>
                                     <div class="text-xl font-bold">{{ $day['date'] }}</div>
-                                    @if($day['is_selected'])
+                                    <?php if(!empty($day['is_selected'])): ?>
                                         <div class="w-8 h-1 bg-primary mx-auto mt-1"></div>
-                                    @endif
+                                    <?php endif; ?>
                                 </button>
-                                @endforeach
+                                <?php endforeach; ?>
                             </div>
                             
                             <!-- Next Week Arrow -->
@@ -220,9 +216,9 @@
 
                     <!-- Selected Date Classes -->
                     <div class="px-6 py-4" id="classes-container">
-                        @if($selectedDateClasses->count() > 0)
+                        <?php if($selectedDateClasses->count() > 0): ?>
                             <div class="space-y-2 sm:space-y-3" id="classes-list">
-                                @foreach($selectedDateClasses as $class)
+                                <?php foreach($selectedDateClasses as $class): ?>
                                     <div class="flex items-center py-6 border-b border-gray-300 last:border-b-0">
                                     <div class="flex-shrink-0 w-20 text-left">
                                         <div class="text-lg font-bold text-black">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</div>
@@ -247,34 +243,34 @@
                                     </div>
 
                                     <div class="flex-shrink-0 ml-4">
-                                        @php
+                                        <?php
                                             $availableSpots = $class->available_spots ?? 0;
                                             $classStart = \Carbon\Carbon::parse($class->class_date->toDateString() . ' ' . $class->start_time);
-                                        @endphp
-                                        @if($classStart->isPast())
+                                        ?>
+                                        <?php if($classStart->isPast()): ?>
                                             <button disabled class="whitespace-nowrap p-4 bg-gray-300 text-gray-500 text-md font-medium rounded-md cursor-not-allowed">
                                                 Class Ended
                                             </button>
-                                        @elseif($availableSpots <= 0)
+                                        <?php elseif($availableSpots <= 0): ?>
                                             <button disabled class="whitespace-nowrap p-4 bg-gray-400 text-white text-md font-medium rounded-md cursor-not-allowed">
                                                 Class Full
                                             </button>
-                                        @else
+                                        <?php else: ?>
                                             <button onclick="openBookingModal({{ $class->id }}, {{ $class->price ?? 0 }})"
                                                     class="whitespace-nowrap p-4 bg-primary text-white text-md font-medium rounded-md transition-colors hover:opacity-90">
                                                 Book Class ({{ $availableSpots }} left)
                                             </button>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </div>
-                                @endforeach
+                                <?php endforeach; ?>
                             </div>
-                        @else
+                        <?php else: ?>
                             <div class="text-center py-12" id="no-classes">
                                 <h3 class="text-lg font-medium text-black mb-2">No classes scheduled</h3>
                                 <p class="text-gray-600">There are no classes scheduled for this date.</p>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -297,12 +293,12 @@
                         <p>Choose how you'd like to book this class:</p>
                     </div>
                     
-                    @auth
+                    <?php if(auth()->check()): ?>
                         <!-- PIN input for booking with credits (hidden until 'Use Credits' is clicked) -->
                         <div id="pinSection" class="space-y-2 hidden mt-2">
                             <label for="pinCodeInput" class="block text-sm font-medium text-gray-700">Enter your 4-digit booking code (PIN)</label>
                             <div class="relative">
-                                <input id="pinCodeInput" name="pin_code" inputmode="numeric" pattern="\\d{4}" maxlength="4"
+                                <input id="pinCodeInput" name="pin_code" inputmode="numeric" pattern="[0-9]{4}" maxlength="4"
                                        class="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                                        placeholder="0000" type="password">
                                 <button type="button" id="togglePinVisibility" aria-label="Show PIN"
@@ -327,23 +323,21 @@
                             </div>
                             <div class="text-primary font-semibold" id="useCreditsRight">1 Credit</div>
                         </button>
-                    @else
-                        <button onclick="redirectToLogin(window.selectedClassId, window.selectedClassPrice)" 
-                                class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-purple-50 hover:border-purple-300 transition-colors">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-                                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                    </svg>
-                                </div>
-                                <div class="text-left">
-                                    <div class="font-medium text-gray-900">Use Credits</div>
-                                    <div class="text-sm text-gray-500">Sign in to use credits</div>
-                                </div>
+                    <?php else: ?>
+                        <!-- Inline login section for guests -->
+                        <div id="loginSection" class="space-y-3">
+                            <div>
+                                <label for="loginEmail" class="block text-sm font-medium text-gray-700">Email</label>
+                                <input id="loginEmail" type="email" class="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="you@example.com">
                             </div>
-                            <div class="text-primary font-semibold">1 Credit</div>
-                        </button>
-                    @endauth
+                            <div>
+                                <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                                <input id="loginPassword" type="password" class="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="••••••••">
+                            </div>
+                            <p id="loginError" class="text-sm text-red-600 hidden">Invalid email or password.</p>
+                            <button type="button" onclick="submitModalLogin()" class="w-full inline-flex items-center justify-center px-4 py-2 bg-primary text-black rounded font-semibold hover:bg-opacity-90 transition-colors">Sign in</button>
+                        </div>
+                    <?php endif; ?>
                     
                     <button onclick="buySpot(window.selectedClassId)" 
                             class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
@@ -367,6 +361,39 @@
                             class="w-full px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
                         Cancel
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm Modal -->
+        <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Please confirm</h3>
+                    <button onclick="confirmModalNo()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <p id="confirmMessage" class="text-gray-700 mb-6">Are you sure?</p>
+                <div class="flex justify-end gap-3">
+                    <button onclick="confirmModalNo()" class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button onclick="confirmModalYes()" class="px-4 py-2 rounded bg-primary text-black font-semibold hover:bg-opacity-90">Yes, continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Modal -->
+        <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 id="feedbackTitle" class="text-lg font-semibold text-gray-900">Notice</h3>
+                    <button onclick="closeFeedbackModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <p id="feedbackMessage" class="text-gray-700"></p>
+                <div class="mt-6 text-right">
+                    <button onclick="closeFeedbackModal()" class="px-4 py-2 rounded bg-primary text-black font-semibold hover:bg-opacity-90">OK</button>
                 </div>
             </div>
         </div>
@@ -427,6 +454,7 @@
         </div>
 
         <script>
+            window.IS_AUTH = {{ auth()->check() ? 'true' : 'false' }};
             let currentDate = '{{ $selectedDate->format("Y-m-d") }}';
             const CLASSES_API = '{{ url('/api/classes') }}';
             let isLoading = false;
@@ -646,15 +674,36 @@
             }
 
             function bookWithCredits(classId) {
-                @auth
-                    // Redirect to checkout where credits flow is handled
-                    closeBookingModal();
-                    window.location.href = `/checkout/${classId}?useCredits=1`;
-                @else
-                    if (confirm('You need to sign in to use credits. Redirect to login?')) {
-                        window.location.href = '/login';
+                if (window.IS_AUTH) {
+                    // Step 1: reveal PIN input
+                    const pinSection = document.getElementById('pinSection');
+                    if (pinSection && pinSection.classList.contains('hidden')) {
+                        pinSection.classList.remove('hidden');
+                        document.getElementById('pinCodeInput')?.focus();
+                        return; // wait for user to enter PIN and click again
                     }
-                @endauth
+
+                    // Step 2: validate PIN and confirm
+                    const pinInput = document.getElementById('pinCodeInput');
+                    const pinError = document.getElementById('pinError');
+                    const pin = (pinInput?.value || '').trim();
+                    if (!/^\d{4}$/.test(pin)) {
+                        pinError?.classList.remove('hidden');
+                        return;
+                    } else {
+                        pinError?.classList.add('hidden');
+                    }
+
+                    // Step 2b: confirm using a modal
+                    return openConfirmModal('Use 1 credit to book this class?', function(){
+                        // proceed with booking after confirm
+                        performCreditBooking(classId, pin);
+                    });
+                    // booking handled in performCreditBooking after confirmation
+                } else {
+                    // Guest: prompt to sign in inline (AJAX login)
+                    document.getElementById('loginSection')?.scrollIntoView({ behavior: 'smooth' });
+                }
             }
 
             function buySpot(classId) {
@@ -669,6 +718,43 @@
                 // Pass a plain absolute path as redirect so backend accepts it
                 const redirectPath = `/?openBooking=1&classId=${classId||''}&price=${priceNum}`;
                 window.location.href = `/login?redirect=${redirectPath}`;
+            }
+
+            // Submit inline login (AJAX) for guests within the modal
+            function submitModalLogin() {
+                const email = (document.getElementById('loginEmail')?.value || '').trim();
+                const password = (document.getElementById('loginPassword')?.value || '').trim();
+                const errorEl = document.getElementById('loginError');
+                if (!email || !password) {
+                    errorEl?.classList.remove('hidden');
+                    errorEl.textContent = 'Please enter your email and password.';
+                    return;
+                }
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                fetch('/ajax/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                })
+                .then(async (res) => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok || !data.success) throw new Error(data.message || 'Invalid credentials.');
+                    return data;
+                })
+                .then(() => {
+                    // After login, reload and auto-open the booking modal via query params to render authenticated content
+                    const classId = window.selectedClassId;
+                    const price = window.selectedClassPrice || 0;
+                    window.location.href = `/?openBooking=1&classId=${classId||''}&price=${price||0}`;
+                })
+                .catch((err) => {
+                    errorEl?.classList.remove('hidden');
+                    errorEl.textContent = err.message || 'Invalid email or password.';
+                });
             }
 
             // Auto-open modal after login redirect if instructed
@@ -694,6 +780,75 @@
                     }
                 }
             })();
+
+            // Toggle PIN visibility
+            (function(){
+                const toggleBtn = document.getElementById('togglePinVisibility');
+                const input = document.getElementById('pinCodeInput');
+                if (toggleBtn && input) {
+                    toggleBtn.addEventListener('click', function(){
+                        input.type = input.type === 'password' ? 'text' : 'password';
+                    });
+                }
+            })();
+
+            // Modal utilities (confirm + feedback)
+            function openConfirmModal(message, onConfirm) {
+                const modal = document.getElementById('confirmModal');
+                const msg = document.getElementById('confirmMessage');
+                msg.textContent = message || 'Are you sure?';
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                window.__confirmCb = function(){ try { onConfirm && onConfirm(); } finally { closeConfirmModal(); } };
+            }
+            function closeConfirmModal() {
+                const modal = document.getElementById('confirmModal');
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                window.__confirmCb = null;
+            }
+            function confirmModalYes(){ if (window.__confirmCb) window.__confirmCb(); }
+            function confirmModalNo(){ closeConfirmModal(); }
+
+            function openFeedbackModal(title, message) {
+                const modal = document.getElementById('feedbackModal');
+                document.getElementById('feedbackTitle').textContent = title || 'Notice';
+                document.getElementById('feedbackMessage').textContent = message || '';
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeFeedbackModal() {
+                document.getElementById('feedbackModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            // Perform booking with credits (AJAX) after confirmation
+            function performCreditBooking(classId, pin) {
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                fetch(`/book-with-credits/${classId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ pin_code: pin })
+                })
+                .then(async (res) => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
+                    return data;
+                })
+                .then((data) => {
+                    closeBookingModal();
+                    openFeedbackModal('Booked with credits', data.message || 'Your class has been booked.');
+                    // Refresh after a brief delay to update availability
+                    setTimeout(() => window.location.reload(), 1200);
+                })
+                .catch((err) => {
+                    openFeedbackModal('Booking failed', err.message || 'Unable to book with credits.');
+                });
+            }
 
             // Close modal when clicking outside
             document.addEventListener('click', function(event) {

@@ -50,7 +50,10 @@ class AuthenticatedSessionController extends Controller
             return $intendedUrl ? redirect($intendedUrl) : redirect()->route('instructor.dashboard');
         }
 
-        return $intendedUrl ? redirect($intendedUrl) : redirect()->route('dashboard', [], false);
+        // Note: redirect()->route signature is (name, parameters, status)
+        // Passing 'false' as the third parameter sets HTTP status to 0 and causes an exception.
+        // We simply redirect to the named route with default 302 status.
+        return $intendedUrl ? redirect($intendedUrl) : redirect()->route('dashboard');
     }
 
     /**
