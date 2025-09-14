@@ -49,15 +49,23 @@ class BookingConfirmed extends Mailable
         // Generate the QR code URL and the image data directly within the mailer.
         $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $this->booking->id]);
         
-        // Use SVG format to avoid Imagick dependency issues
-        $qrCodeSvg = QrCode::format('svg')->size(200)->errorCorrection('H')->generate($qrUrl);
-        $qrCode = base64_encode($qrCodeSvg);
+        // Generate QR code - use SVG since PNG requires Imagick
+        try {
+            $qrCodeSvg = QrCode::format('svg')->size(200)->generate($qrUrl);
+            $qrCodeBase64 = base64_encode($qrCodeSvg);
+            $qrCodeFormat = 'svg';
+        } catch (\Exception $e) {
+            // If QR generation fails, we'll show the URL instead
+            $qrCodeBase64 = null;
+            $qrCodeFormat = null;
+        }
 
         return new Content(
             view: 'emails.booking_confirmed',
             with: [
                 'booking' => $this->booking,
-                'qrCode' => $qrCode,
+                'qrCode' => $qrCodeBase64,
+                'qrUrl' => $qrUrl,
             ],
         );
     }

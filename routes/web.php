@@ -115,7 +115,23 @@ Route::get('/dashboard', function () {
             return $booking->fitnessClass->class_date . ' ' . $booking->fitnessClass->start_time;
         });
 
-    return view('dashboard', ['upcomingBookings' => $upcomingBookings]);
+    // Signed URL for user's universal check-in (based on their personal QR code)
+    $userQrUrl = \Illuminate\Support\Facades\URL::signedRoute('user.checkin', [
+        'user' => $user->id,
+        'qr_code' => $user->qr_code,
+    ]);
+
+    // Pre-generate an SVG QR image for the dashboard (safe to embed inline on web)
+    $qrSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+        ->size(220)
+        ->errorCorrection('M')
+        ->generate($userQrUrl);
+
+    return view('dashboard', [
+        'upcomingBookings' => $upcomingBookings,
+        'userQrUrl' => $userQrUrl,
+        'qrSvg' => $qrSvg,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

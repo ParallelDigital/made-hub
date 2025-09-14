@@ -33,6 +33,7 @@ class User extends Authenticatable
         'display_name',
         'role',
         'qr_code',
+        'pin_code',
         'membership_id',
         'monthly_credits',
         'credits_last_refreshed',
@@ -76,6 +77,9 @@ class User extends Authenticatable
             if (empty($user->qr_code)) {
                 $user->qr_code = self::generateUniqueQrCode();
             }
+            if (empty($user->pin_code)) {
+                $user->pin_code = self::generateUniquePinCode();
+            }
         });
     }
 
@@ -89,6 +93,18 @@ class User extends Authenticatable
         } while (self::where('qr_code', $qrCode)->exists());
 
         return $qrCode;
+    }
+
+    /**
+     * Generate a unique 4-digit PIN code for the user
+     */
+    public static function generateUniquePinCode(): string
+    {
+        do {
+            $pin = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        } while (self::where('pin_code', $pin)->exists());
+
+        return $pin;
     }
 
     /**

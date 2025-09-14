@@ -14,13 +14,19 @@ use Stripe\StripeClient;
 
 class BookingController extends Controller
 {
-    public function bookWithCredits($classId)
+    public function bookWithCredits(Request $request, $classId)
     {
         if (!Auth::check()) {
             return response()->json(['success' => false, 'message' => 'Please log in to book with credits.'], 401);
         }
 
         $user = Auth::user();
+        
+        // Require valid 4-digit booking PIN from the user
+        $pin = (string) $request->input('pin_code');
+        if (!$pin || $pin !== (string) ($user->pin_code ?? '')) {
+            return response()->json(['success' => false, 'message' => 'Invalid booking code (PIN).'], 422);
+        }
         $class = FitnessClass::findOrFail($classId);
 
         // Check if the class has already started

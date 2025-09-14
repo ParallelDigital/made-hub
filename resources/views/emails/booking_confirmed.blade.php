@@ -88,7 +88,12 @@
             <div class="qr-code">
                 <h3>Your QR Code for Check-in</h3>
                 <p>Present this code at the front desk to check in quickly.</p>
-                <div style="display: inline-block;">{!! base64_decode($qrCode) !!}</div>
+                @if($qrCode)
+                    <img src="data:image/svg+xml;base64,{{ $qrCode }}" alt="Your Booking QR Code" style="max-width: 200px; height: auto; display: block; margin: 0 auto;">
+                @else
+                    <p><strong>Check-in Link:</strong><br>
+                    <a href="{{ $qrUrl }}" style="color: #fcd34d; word-break: break-all;">{{ $qrUrl }}</a></p>
+                @endif
             </div>
 
             <p>If you have any questions or need to make changes, please don't hesitate to contact us.</p>

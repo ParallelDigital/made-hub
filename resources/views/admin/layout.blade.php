@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }} - {{ (auth()->check() && auth()->user()->role === 'instructor') ? 'Instructor Dashboard' : 'Admin Dashboard' }}</title>
+    <title>
+        {{ config('app.name', 'Laravel') }} -
+        @php $role = (auth()->check() ? auth()->user()->role : null); @endphp
+        @if($role === 'instructor')
+            Instructor Dashboard
+        @elseif($role === 'admin')
+            Admin Dashboard
+        @else
+            User Dashboard
+        @endif
+    </title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -55,7 +65,11 @@
             </div>
 
             <nav class="mt-6">
-                @php $isInstructor = auth()->check() && auth()->user()->role === 'instructor'; @endphp
+                @php 
+                    $role = auth()->check() ? auth()->user()->role : null; 
+                    $isInstructor = $role === 'instructor';
+                    $isAdmin = $role === 'admin';
+                @endphp
                 <div class="px-6 py-3">
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider" x-show="!sidebarCollapsed">Main</p>
                 </div>
@@ -75,7 +89,7 @@
                         </svg>
                         <span class="transition-opacity duration-200" :class="sidebarCollapsed ? 'opacity-0 pointer-events-none hidden' : 'opacity-100'">My Profile</span>
                     </a>
-                @else
+                @elseif ($isAdmin)
                     <!-- Admin menu -->
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('admin.dashboard') ? 'bg-gray-700 text-white border-r-2 border-primary' : '' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,6 +146,20 @@
                         </svg>
                         <span class="transition-opacity duration-200" :class="sidebarCollapsed ? 'opacity-0 pointer-events-none hidden' : 'opacity-100'">Reports</span>
                     </a>
+                @else
+                    <!-- Regular user menu: Dashboard and Profile only -->
+                    <a href="{{ route('dashboard') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('dashboard') ? 'bg-gray-700 text-white border-r-2 border-primary' : '' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        </svg>
+                        <span class="transition-opacity duration-200" :class="sidebarCollapsed ? 'opacity-0 pointer-events-none hidden' : 'opacity-100'">Dashboard</span>
+                    </a>
+                    <a href="{{ route('profile.edit') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('profile.*') ? 'bg-gray-700 text-white border-r-2 border-primary' : '' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 018 17h8a4 4 0 013 1.196M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span class="transition-opacity duration-200" :class="sidebarCollapsed ? 'opacity-0 pointer-events-none hidden' : 'opacity-100'">Profile</span>
+                    </a>
                 @endif
             </nav>
             </div>
@@ -165,7 +193,8 @@
                                 </svg>
                             </button>
                             <h2 class="font-semibold text-xl text-white leading-tight">
-                                @yield('title', (auth()->check() && auth()->user()->role === 'instructor') ? 'Instructor Dashboard' : 'Admin Dashboard')
+                                @php $role = (auth()->check() ? auth()->user()->role : null); @endphp
+                                @yield('title', $role === 'instructor' ? 'Instructor Dashboard' : ($role === 'admin' ? 'Admin Dashboard' : 'User Dashboard'))
                             </h2>
                         </div>
                         <div class="flex items-center space-x-4">

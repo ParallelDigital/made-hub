@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>Made Running - Premium Fitness Experience</title>
 
@@ -297,6 +298,13 @@
                     </div>
                     
                     @auth
+                        <!-- PIN input for booking with credits -->
+                        <div class="space-y-2">
+                            <label for="pinCodeInput" class="block text-sm font-medium text-gray-700">Enter your 4-digit booking code (PIN)</label>
+                            <input id="pinCodeInput" name="pin_code" inputmode="numeric" pattern="\\d{4}" maxlength="4"
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                   placeholder="0000">
+                        </div>
                         <button onclick="bookWithCredits(window.selectedClassId)" 
                                 class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
                             <div class="flex items-center">
@@ -313,7 +321,7 @@
                             <div class="text-green-600 font-semibold">1 Credit</div>
                         </button>
                     @else
-                        <button onclick="redirectToLogin()" 
+                        <button onclick="redirectToLogin(window.selectedClassId, window.selectedClassPrice)" 
                                 class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
                             <div class="flex items-center">
                                 <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
@@ -636,13 +644,21 @@
                 // Check if user is authenticated
                 @auth
                     // User is logged in, proceed with credit booking
+                    const pinInput = document.getElementById('pinCodeInput');
+                    const pin = pinInput ? pinInput.value.trim() : '';
+                    if (!/^\d{4}$/.test(pin)) {
+                        alert('Please enter your 4-digit booking code (PIN).');
+                        return;
+                    }
                     if (confirm('Book this class using your credits?')) {
                         fetch(`/book-with-credits/${classId}`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'Accept': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            }
+                            },
+                            body: JSON.stringify({ pin_code: pin })
                         })
                         .then(response => response.json())
                         .then(data => {
@@ -673,10 +689,37 @@
                 window.location.href = `/checkout/${classId}`;
             }
 
-            function redirectToLogin() {
+            function redirectToLogin(classId, price) {
                 closeBookingModal();
-                window.location.href = '/login';
+                const priceNum = parseInt(price || 0) || 0;
+                // Pass a plain absolute path as redirect so backend accepts it
+                const redirectPath = `/?openBooking=1&classId=${classId||''}&price=${priceNum}`;
+                window.location.href = `/login?redirect=${redirectPath}`;
             }
+
+            // Auto-open modal after login redirect if instructed
+            (function() {
+                const url = new URL(window.location.href);
+                const sp = url.searchParams;
+                if (sp.get('openBooking') === '1') {
+                    const classId = parseInt(sp.get('classId')) || null;
+                    const price = parseInt(sp.get('price')) || 0;
+                    if (classId) {
+                        // Ensure state then open
+                        window.selectedClassId = classId;
+                        window.selectedClassPrice = price;
+                        // Open modal now
+                        openBookingModal(classId, price);
+                        // Clean the URL so refresh doesn't reopen
+                        sp.delete('openBooking');
+                        // do not remove classId/price to allow re-open if needed; or clean all:
+                        sp.delete('classId');
+                        sp.delete('price');
+                        const newUrl = url.pathname + (sp.toString() ? ('?' + sp.toString()) : '');
+                        window.history.replaceState({}, '', newUrl);
+                    }
+                }
+            })();
 
             // Close modal when clicking outside
             document.addEventListener('click', function(event) {

@@ -28,6 +28,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // If a safe redirect param is present, prefer it (used to open booking modal post-login)
+        $redirectParam = $request->string('redirect')->toString();
+        if ($redirectParam && str_starts_with($redirectParam, '/')) {
+            return redirect($redirectParam);
+        }
+
         // Get the intended URL and validate it
         $intendedUrl = $request->session()->get('url.intended');
         
@@ -44,7 +50,7 @@ class AuthenticatedSessionController extends Controller
             return $intendedUrl ? redirect($intendedUrl) : redirect()->route('instructor.dashboard');
         }
 
-        return $intendedUrl ? redirect($intendedUrl) : redirect()->route('dashboard', absolute: false);
+        return $intendedUrl ? redirect($intendedUrl) : redirect()->route('dashboard', [], false);
     }
 
     /**
