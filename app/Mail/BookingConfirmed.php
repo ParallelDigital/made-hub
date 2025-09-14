@@ -16,6 +16,13 @@ class BookingConfirmed extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /** @var string|null */
+    private $qrCodeRaw = null;
+    /** @var string|null */
+    private $qrAttachmentName = null;
+    /** @var string|null */
+    private $qrMime = null;
+
     /**
      * Create a new message instance.
      */
@@ -48,17 +55,8 @@ class BookingConfirmed extends Mailable
 
         // Generate the QR code URL and the image data directly within the mailer.
         $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $this->booking->id]);
-        
-        // Generate QR code - use SVG since PNG requires Imagick
-        try {
-            $qrCodeSvg = QrCode::format('svg')->size(200)->generate($qrUrl);
-            $qrCodeBase64 = base64_encode($qrCodeSvg);
-            $qrCodeFormat = 'svg';
-        } catch (\Exception $e) {
-            // If QR generation fails, we'll show the URL instead
-            $qrCodeBase64 = null;
-            $qrCodeFormat = null;
-        }
+        // Ensure QR image bytes are prepared (JPEG preferred, PNG fallback)
+        $qrCodeBase64 = $this->prepareQrImage($qrUrl);
 
         return new Content(
             view: 'emails.booking_confirmed',
@@ -66,6 +64,7 @@ class BookingConfirmed extends Mailable
                 'booking' => $this->booking,
                 'qrCode' => $qrCodeBase64,
                 'qrUrl' => $qrUrl,
+                'qrMime' => $this->qrMime ?? 'image/jpeg',
             ],
         );
     }
@@ -77,6 +76,61 @@ class BookingConfirmed extends Mailable
      */
     public function attachments(): array
     {
+        // Ensure QR is prepared in case attachments() is evaluated before content()
+        if (empty($this->qrCodeRaw)) {
+            $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $this->booking->id]);
+            $this->prepareQrImage($qrUrl);
+        }
+
+        if (!empty($this->qrCodeRaw)) {
+            return [
+                \Illuminate\Mail\Mailables\Attachment::fromData(function () {
+                    return $this->qrCodeRaw;
+                }, $this->qrAttachmentName ?? 'checkin-qr.jpg')->withMime($this->qrMime ?? 'image/jpeg'),
+            ];
+        }
+
         return [];
+    }
+
+    /**
+     * Generate QR image bytes (JPEG preferred, PNG fallback), set properties, and return base64 data URI payload.
+     */
+    private function prepareQrImage(string $qrUrl): ?string
+    {
+        try {
+            $qrPng = QrCode::format('png')->size(300)->margin(1)->generate($qrUrl);
+            $qrPngString = (string) $qrPng;
+
+            // Convert PNG -> JPG using GD (if available)
+            $jpgData = null;
+            if (function_exists('imagecreatefromstring')) {
+                $im = @imagecreatefromstring($qrPngString);
+                if ($im !== false) {
+                    ob_start();
+                    imagejpeg($im, null, 90);
+                    $jpgData = ob_get_clean();
+                    imagedestroy($im);
+                }
+            }
+
+            if ($jpgData) {
+                $this->qrCodeRaw = $jpgData;
+                $this->qrMime = 'image/jpeg';
+                $this->qrAttachmentName = 'checkin-qr.jpg';
+                return base64_encode($jpgData);
+            } else {
+                // PNG fallback
+                $this->qrCodeRaw = $qrPngString;
+                $this->qrMime = 'image/png';
+                $this->qrAttachmentName = 'checkin-qr.png';
+                return base64_encode($qrPngString);
+            }
+        } catch (\Throwable $e) {
+            $this->qrCodeRaw = null;
+            $this->qrMime = null;
+            $this->qrAttachmentName = null;
+            return null;
+        }
     }
 }

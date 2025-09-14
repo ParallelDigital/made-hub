@@ -19,17 +19,14 @@
             border-radius: 8px;
             overflow: hidden;
         }
-        .header {
-            background-color: #111111;
-            color: #ffffff;
-            padding: 20px;
-            text-align: center;
-        }
+        .header { background-color: #000000; color: #ffffff; padding: 20px; text-align: center; }
         .header h1 {
             margin: 0;
             font-size: 24px;
             color: #ffffff;
         }
+        .brand-badge { display: inline-flex; align-items: center; gap: 10px; justify-content: center; }
+        .brand-title { color: #c8b7ed; font-weight: 800; letter-spacing: 0.5px; }
         .content {
             padding: 30px;
             color: #333333;
@@ -42,8 +39,8 @@
         .booking-details {
             margin: 20px 0;
             padding: 20px;
-            background-color: #f9f9f9;
-            border-left: 4px solid #fcd34d; /* primary color */
+            background-color: #f9f9ff;
+            border-left: 4px solid #c8b7ed; /* brand primary */
         }
         .booking-details p {
             margin: 5px 0;
@@ -56,15 +53,24 @@
             max-width: 200px;
             height: auto;
         }
+        .button {
+            display: inline-block;
+            background-color: #c8b7ed;
+            color: #000000 !important;
+            padding: 12px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+        }
         .footer {
-            background-color: #111111;
+            background-color: #000000;
             color: #aaaaaa;
             padding: 20px;
             text-align: center;
             font-size: 12px;
         }
         .footer a {
-            color: #fcd34d;
+            color: #c8b7ed;
             text-decoration: none;
         }
     </style>
@@ -72,7 +78,11 @@
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>Booking Confirmed</h1>
+            <div class="brand-badge">
+                <img src="{{ asset('made-running.webp') }}" alt="Made Running" width="36" height="36" style="border-radius: 6px;">
+                <span class="brand-title">MADE RUNNING</span>
+            </div>
+            <h1 style="margin-top:10px;">Booking Confirmed</h1>
         </div>
         <div class="content">
             <h2>Hi {{ $booking->user->name ?? 'there' }},</h2>
@@ -89,11 +99,11 @@
                 <h3>Your QR Code for Check-in</h3>
                 <p>Present this code at the front desk to check in quickly.</p>
                 @if($qrCode)
-                    <img src="data:image/svg+xml;base64,{{ $qrCode }}" alt="Your Booking QR Code" style="max-width: 200px; height: auto; display: block; margin: 0 auto;">
-                @else
-                    <p><strong>Check-in Link:</strong><br>
-                    <a href="{{ $qrUrl }}" style="color: #fcd34d; word-break: break-all;">{{ $qrUrl }}</a></p>
+                    <img src="data:{{ $qrMime ?? 'image/jpeg' }};base64,{{ $qrCode }}" alt="Your Booking QR Code" style="max-width: 200px; height: auto; display: block; margin: 0 auto;">
                 @endif
+                <p style="margin-top:12px; font-size: 13px; color:#555;">The QR code is also attached to this email as an image for your convenience.</p>
+                <p style="margin-top:16px;"><a href="{{ $qrUrl }}" class="button">Open Check-in Link</a></p>
+                <p style="margin-top:8px; font-size: 12px; color:#666; word-break: break-all;">Or copy this link: {{ $qrUrl }}</p>
             </div>
 
             <p>If you have any questions or need to make changes, please don't hesitate to contact us.</p>
