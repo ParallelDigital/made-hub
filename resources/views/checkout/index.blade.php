@@ -62,7 +62,7 @@
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-2">
                     <div class="flex">
                         <button id="tab-btn-card" type="button" class="flex-1 px-4 py-2 rounded-md text-sm font-semibold transition-colors {{ $openCredits ? 'text-gray-700 hover:text-black' : 'bg-black text-white' }}">Pay with Card</button>
-                        <button id="tab-btn-credits" type="button" class="flex-1 px-4 py-2 rounded-md text-sm font-semibold transition-colors {{ $openCredits ? 'bg-black text-white' : 'text-gray-700 hover:text-black' }}">Use Credits</button>
+                        <button id="tab-btn-credits" type="button" class="flex-1 px-4 py-2 rounded-md text-sm font-semibold transition-colors {{ $openCredits ? 'bg-black text-white' : 'text-gray-700' }}">Use Credits</button>
                     </div>
                 </div>
 
