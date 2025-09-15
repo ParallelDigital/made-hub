@@ -27,43 +27,8 @@
                         </svg>
                         Secure Payment Processing
                     </div>
-                </div>
-            </div>
-            <!-- Class Details -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-bold text-black mb-4">Class Details</h2>
-                
-                <div class="space-y-4">
-                    <div class="flex items-center">
-                        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" 
-                                 alt="{{ $class->instructor->name ?? 'Instructor' }}" 
-                                 class="w-16 h-16 rounded-full object-cover">
-                        </div>
-                        <div class="ml-4">
-                            <h3 class="font-semibold text-black">{{ $class->name }}</h3>
-                            <p class="text-sm text-gray-700">{{ $class->instructor->name ?? 'No Instructor' }}</p>
-                        </div>
-                    </div>
-
-                    <div class="border-t border-gray-200 pt-4">
-                        <div class="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <span class="text-gray-600">Date:</span>
-                                <p class="font-medium text-black">{{ \Carbon\Carbon::parse($class->class_date)->format('l, F j, Y') }}</p>
-                            </div>
-                            <div>
-                                <span class="text-gray-600">Time:</span>
-                                <p class="font-medium text-black">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($class->end_time)->format('g:i A') }}</p>
-                            </div>
-                            <div>
-                                <span class="text-gray-600">Duration:</span>
-                                <p class="font-medium text-black">{{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} minutes</p>
-                            </div>
-                        
-                        </div>
-                    </div>
-
+                    
+                    <!-- Coupon Section -->
                     <div class="border-t border-gray-200 pt-4">
                         <form id="coupon-form" class="flex items-center space-x-2">
                             <input type="text" id="coupon-code" name="coupon_code" placeholder="Enter coupon code" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
@@ -72,6 +37,7 @@
                         <div id="coupon-message" class="mt-2 text-sm"></div>
                     </div>
 
+                    <!-- Pricing Summary -->
                     <div class="border-t border-gray-200 pt-4 space-y-2">
                         <div class="flex justify-between items-center text-sm">
                             <span class="text-gray-700">Subtotal:</span>
