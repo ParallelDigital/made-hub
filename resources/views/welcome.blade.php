@@ -115,12 +115,12 @@
 
             <!-- Content -->
             <div class="relative z-30 px-6 max-w-6xl container mx-auto">
-                
+
                 <h1 class="text-5xl md:text-8xl font-black mb-6 tracking-tight">
-                    <span class="block text-white">MADE TO</span>
+                    <span class="block text-white"></span>
                     <span class="block text-primary">ELEVATE</span>
                 </h1>
-                
+
                 <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                     <a href="{{ route('register') }}" class="w-full sm:w-auto bg-primary text-black px-8 py-4 text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">
                         BOOK YOUR CLASS
@@ -220,7 +220,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
                             </button>
-                            
+
                             <!-- Week Days -->
                             <div class="flex space-x-1 sm:space-x-2 flex-1 overflow-x-auto" id="week-days">
                                 @foreach($weekDays as $day)
@@ -231,7 +231,7 @@
                                 </button>
                                 @endforeach
                             </div>
-                            
+
                             <!-- Next Week Arrow -->
                             <button onclick="loadDate('{{ $nextWeek }}')" class="p-2 rounded-lg hover:bg-gray-200 text-gray-600 transition-colors" id="next-week-btn">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,32 +267,32 @@
                                         <div class="text-sm font-semibold text-gray-900">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</div>
                                         <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} min</div>
                                     </div>
-                                    
+
                                     <div class="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center ml-6">
-                                        <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
-                                             alt="{{ $class->instructor->name ?? 'Instructor' }}" 
+                                        <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}"
+                                             alt="{{ $class->instructor->name ?? 'Instructor' }}"
                                              class="w-12 h-12 rounded-full object-cover">
                                     </div>
-                                    
+
                                     <div class="flex-1 ml-0 sm:ml-4">
                                         <div class="font-semibold text-gray-900">{{ $class->name }} ({{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} Min)</div>
                                         <div class="text-sm text-gray-600">{{ $class->instructor->name ?? 'No Instructor' }}</div>
                                     </div>
-                                    
+
                                     <div class="flex-shrink-0 w-full sm:w-auto ml-0 sm:ml-4 mt-4 sm:mt-0">
                                         @php
                                             $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
                                             $availableSpots = max(0, $class->max_spots - $currentBookings);
                                             $isFull = $availableSpots <= 0;
                                         @endphp
-                                        
+
                                         @if($isFull)
-                                            <button disabled 
+                                            <button disabled
                                                     class="w-full sm:w-auto px-6 py-2 bg-gray-400 text-white text-sm font-medium rounded-md cursor-not-allowed">
                                                 Class Full
                                             </button>
                                         @else
-                                            <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" 
+                                            <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})"
                                                     class="w-full sm:w-auto px-6 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors hover:opacity-90">
                                                 Book Class ({{ $availableSpots }} left)
                                             </button>
@@ -328,14 +328,14 @@
                         </svg>
                     </button>
                 </div>
-                
+
                 <div class="space-y-4">
                     <div class="text-sm text-gray-600 mb-4">
                         <p>Choose how you'd like to book this class:</p>
                     </div>
-                    
+
                     @auth
-                        <button onclick="bookWithCredits(window.selectedClassId)" 
+                        <button onclick="bookWithCredits(window.selectedClassId)"
                                 class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
                             <div class="flex items-center">
                                 <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
@@ -351,7 +351,7 @@
                             <div class="text-green-600 font-semibold">1 Credit</div>
                         </button>
                     @else
-                        <button onclick="redirectToLogin()" 
+                        <button onclick="redirectToLogin()"
                                 class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
                             <div class="flex items-center">
                                 <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
@@ -367,8 +367,8 @@
                             <div class="text-green-600 font-semibold">1 Credit</div>
                         </button>
                     @endauth
-                    
-                    <button onclick="buySpot(window.selectedClassId)" 
+
+                    <button onclick="buySpot(window.selectedClassId)"
                             class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
@@ -384,9 +384,9 @@
                         <div class="text-gray-800 font-semibold" id="modalClassPrice">£0</div>
                     </button>
                 </div>
-                
+
                 <div class="mt-6 pt-4 border-t border-gray-200">
-                    <button onclick="closeBookingModal()" 
+                    <button onclick="closeBookingModal()"
                             class="w-full px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
                         Cancel
                     </button>
@@ -406,7 +406,7 @@
                             Transform your fitness journey with our high-intensity training programs designed to push your limits.
                         </p>
                     </div>
-                    
+
                     <div>
                         <h3 class="text-white font-semibold mb-4">COMPANY</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
@@ -415,7 +415,7 @@
                             <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
                         </ul>
                     </div>
-                    
+
                     <div>
                         <h3 class="text-white font-semibold mb-4">SUPPORT</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
@@ -424,7 +424,7 @@
                             <li><a href="#" class="hover:text-white transition-colors">Privacy</a></li>
                         </ul>
                     </div>
-                    
+
                     <div>
                         <h3 class="text-white font-semibold mb-4">CONNECT</h3>
                         <div class="flex space-x-4 justify-center md:justify-start">
@@ -455,19 +455,19 @@
 
             function loadDate(date) {
                 if (isLoading) return;
-                
+
                 isLoading = true;
                 currentDate = date;
-                
+
                 // Show loading spinner
                 document.getElementById('loading-spinner').classList.remove('hidden');
                 document.getElementById('classes-container').classList.add('hidden');
-                
+
                 // Update URL without page reload
                 const url = new URL(window.location);
                 url.searchParams.set('date', date);
                 window.history.pushState({}, '', url);
-                
+
                 // Fetch new data
                 fetch(`/api/classes?date=${date}`)
                     .then(response => response.json())
@@ -487,13 +487,13 @@
             function updateUI(data) {
                 // Update date header
                 document.getElementById('selected-date-header').textContent = data.selectedDate;
-                
+
                 // Update week navigation
                 updateWeekNavigation(data.weekDays, data.prevWeek, data.nextWeek);
-                
+
                 // Update classes list
                 updateClassesList(data.classes);
-                
+
                 // Hide loading spinner and show content
                 document.getElementById('loading-spinner').classList.add('hidden');
                 document.getElementById('classes-container').classList.remove('hidden');
@@ -502,11 +502,11 @@
             function updateWeekNavigation(weekDays, prevWeek, nextWeek) {
                 const weekDaysContainer = document.getElementById('week-days');
                 weekDaysContainer.innerHTML = '';
-                
+
                 weekDays.forEach(day => {
                     const button = document.createElement('button');
                     button.onclick = () => loadDate(day.full_date);
-                    
+
                     let classes = 'text-center px-6 py-4 rounded-lg transition-colors cursor-pointer flex-1 ';
                     if (day.is_selected) {
                         classes += 'bg-primary text-white';
@@ -515,16 +515,16 @@
                     } else {
                         classes += 'text-gray-600 hover:bg-gray-100';
                     }
-                    
+
                     button.className = classes;
                     button.innerHTML = `
                         <div class="text-sm font-medium uppercase">${day.day}</div>
                         <div class="text-xl font-bold">${day.date}</div>
                     `;
-                    
+
                     weekDaysContainer.appendChild(button);
                 });
-                
+
                 // Update arrow buttons
                 document.getElementById('prev-week-btn').setAttribute('onclick', `loadDate('${prevWeek}')`);
                 document.getElementById('next-week-btn').setAttribute('onclick', `loadDate('${nextWeek}')`);
@@ -532,7 +532,7 @@
 
             function updateClassesList(classes) {
                 const container = document.getElementById('classes-container');
-                
+
                 if (classes.length === 0) {
                     container.innerHTML = `
                         <div class="text-center py-12">
@@ -552,32 +552,32 @@
                         const startTime = new Date(`2000-01-01T${classItem.start_time}`);
                         const endTime = new Date(`2000-01-01T${classItem.end_time}`);
                         const duration = Math.round((endTime - startTime) / (1000 * 60));
-                        
+
                         return `
                             <div class="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
                                 <div class="flex-shrink-0 w-16 text-center">
                                     <div class="text-sm font-semibold text-gray-900">${startTime.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true})}</div>
                                     <div class="text-xs text-gray-500">${duration} min</div>
                                 </div>
-                                
+
                                 <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-4">
-                                    <img src="${classItem.instructor.photo_url}" 
-                                         alt="${classItem.instructor.name}" 
+                                    <img src="${classItem.instructor.photo_url}"
+                                         alt="${classItem.instructor.name}"
                                          class="w-10 h-10 rounded-full object-cover">
                                 </div>
-                                
+
                                 <div class="flex-1 min-w-0">
                                     <h3 class="text-sm font-semibold text-gray-900 truncate">${classItem.name}</h3>
                                     <p class="text-xs text-gray-600">${classItem.instructor.name}</p>
                                     <p class="text-xs text-gray-500">${classItem.available_spots} spots available</p>
                                 </div>
-                                
+
                                 <div class="flex-shrink-0 ml-4">
-                                    ${classItem.available_spots <= 0 ? 
+                                    ${classItem.available_spots <= 0 ?
                                         `<button disabled class="whitespace-nowrap px-4 py-2 bg-gray-400 text-white text-xs font-medium rounded-md cursor-not-allowed">
                                             Class Full
                                         </button>` :
-                                        `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" 
+                                        `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})"
                                                 class="whitespace-nowrap px-4 py-2 bg-primary text-white text-xs font-medium rounded-md transition-colors hover:opacity-90">
                                             Book Class (${classItem.available_spots} left)
                                         </button>`
@@ -586,7 +586,7 @@
                             </div>
                         `;
                     }).join('');
-                    
+
                     container.innerHTML = `<div class="space-y-3" id="classes-list">${classesHTML}</div>`;
                 }
             }
@@ -608,12 +608,12 @@
             function openBookingModal(classId, price) {
                 window.selectedClassId = classId;
                 window.selectedClassPrice = price || 0;
-                
+
                 // Ensure price is a valid number
                 const priceNum = parseInt(price) || 0;
                 // Update the price in the modal
                 document.getElementById('modalClassPrice').textContent = `£${priceNum.toLocaleString()}`;
-                
+
                 document.getElementById('bookingModal').classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
             }
@@ -626,7 +626,7 @@
 
             function bookWithCredits(classId) {
                 closeBookingModal();
-                
+
                 // Check if user is authenticated
                 @auth
                     // User is logged in, proceed with credit booking
