@@ -52,7 +52,7 @@
             <!-- Package Summary -->
             <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Package Summary</h2>
-                <div class="space-y-4">
+                <div class="space-y-4 md:col-span-3">
                     <div class="flex items-start justify-between pb-4 border-b border-gray-100">
                         <div>
                             <div class="text-xl font-bold text-gray-900">{{ strtoupper($package->name) }}</div>
