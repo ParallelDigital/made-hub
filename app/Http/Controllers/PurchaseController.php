@@ -4,53 +4,173 @@ namespace App\Http\Controllers;
 
 use App\Models\Coupon;
 use App\Models\FitnessClass;
+use App\Models\PackageCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
+use Stripe\StripeClient;
 
 class PurchaseController extends Controller
 {
     public function index()
     {
-        $packages = [
-            [
-                'type' => 'first_timer',
-                'name' => 'MADE NEWBIE 3 PACK',
-                'price' => 40,
-                'classes' => 3,
-                'description' => 'New here? Try your first three classes at our lowest price! Experience the thrill of the workout and see what MADE is all about.',
-                'featured' => true
-            ],
-            [
-                'type' => 'single',
-                'name' => '1 Class',
-                'price' => 20,
-                'classes' => 1,
-                'description' => 'Single class credit. Valid at participating locations. Terms apply.'
-            ],
-            [
-                'type' => 'package_5',
-                'name' => '5 Classes',
-                'price' => 89,
-                'classes' => 5,
-                'description' => 'Pack of 5 class credits. Flexible usage. Terms apply.'
-            ],
-            [
-                'type' => 'package_10',
-                'name' => '10 Classes',
-                'price' => 157,
-                'classes' => 10,
-                'description' => 'Pack of 10 class credits. Best value for regulars. Terms apply.'
-            ]
-        ];
-
+        $packages = $this->getPackages();
         return view('purchase.index', compact('packages'));
     }
 
-    public function showCheckoutForm($class_id)
+    public function showCheckoutForm(Request $request, $class_id)
     {
         $class = FitnessClass::findOrFail($class_id);
-        return view('checkout.index', compact('class'));
+
+        // Check if the class has already started
+        $classStart = \Carbon\Carbon::parse($class->class_date->toDateString() . ' ' . $class->start_time);
+        if ($classStart->isPast()) {
+            return redirect()->route('welcome')->with('error', 'This class has already started and cannot be booked.');
+        }
+
+        $user = $request->user();
+        $hasMembership = $user ? $user->hasActiveMembership() : false;
+        $availableCredits = 0;
+        if ($user) {
+            $availableCredits = $hasMembership ? $user->getAvailableCredits() : ($user->credits ?? 0);
+        }
+
+        $autoOpenCredits = $request->boolean('useCredits');
+
+        return view('checkout.index', compact('class', 'availableCredits', 'autoOpenCredits'));
+    }
+
+    // New: package checkout
+    public function showPackageCheckout(Request $request, string $type)
+    {
+        $packages = collect($this->getPackages());
+        $package = $packages->firstWhere('type', $type);
+        abort_unless($package, 404);
+        return view('purchase.package-checkout', ['package' => (object)$package]);
+    }
+
+    public function processPackageCheckout(Request $request, string $type)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+        ]);
+
+        $packages = collect($this->index()->getData()['packages'] ?? []);
+        $package = $packages->firstWhere('type', $type);
+        abort_unless($package, 404);
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            $isMembership = ($type === 'membership');
+            $lineItem = [
+                'price_data' => [
+                    'currency' => 'gbp',
+                    'product_data' => [
+                        'name' => $package['name'],
+                    ],
+                    'unit_amount' => (int) round($package['price'] * 100),
+                ],
+                'quantity' => 1,
+            ];
+
+            if ($isMembership) {
+                // Recurring monthly subscription
+                $lineItem['price_data']['recurring'] = ['interval' => 'month'];
+            }
+
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [$lineItem],
+                'mode' => $isMembership ? 'subscription' : 'payment',
+                'success_url' => route('purchase.package.success', ['type' => $type]) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('purchase.index'),
+                'customer_email' => $request->email,
+                'metadata' => [
+                    'package_type' => $type,
+                    'name' => $request->name,
+                    'email' => $request->email,
+                ],
+            ]);
+
+            return redirect($session->url);
+        } catch (\Exception $e) {
+            return back()->with('error', 'There was an error processing your payment. ' . $e->getMessage());
+        }
+    }
+
+    public function packageSuccess(Request $request, string $type)
+    {
+        // Generate a unique code and email it
+        $code = strtoupper(bin2hex(random_bytes(4)));
+        // Determine recipient email
+        $recipientEmail = $request->user()->email ?? null;
+        if (!$recipientEmail && $request->has('session_id')) {
+            try {
+                $client = new StripeClient(config('services.stripe.secret'));
+                $session = $client->checkout->sessions->retrieve($request->get('session_id'));
+                $recipientEmail = $session->customer_details->email ?? $session->customer_email ?? null;
+            } catch (\Throwable $e) {
+                \Log::warning('Unable to retrieve Stripe session for email: '.$e->getMessage());
+            }
+        }
+
+        // Store code record
+        PackageCode::create([
+            'code' => $code,
+            'package_type' => $type,
+            'classes' => in_array($type, ['unlimited','membership']) ? null : ($type === 'package_10' ? 10 : 5),
+            'email' => $recipientEmail,
+            'expires_at' => now()->addMonth(),
+        ]);
+
+        // Send email
+        try {
+            if ($recipientEmail) {
+                Mail::to($recipientEmail)
+                    ->send(new \App\Mail\PackageCodeMail($code, $type));
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Failed to send package code email: '.$e->getMessage());
+        }
+
+        return redirect()->route('purchase.index')->with('success', 'Purchase successful! Your code has been emailed to you.');
+    }
+
+    private function getPackages(): array
+    {
+        return [
+            [
+                'type' => 'membership',
+                'name' => 'MEMBERSHIP',
+                'price' => 30.00,
+                'classes' => null,
+                'billing' => 'per month',
+            ],
+            [
+                'type' => 'package_5',
+                'name' => '5 CLASSES',
+                'price' => 32.50,
+                'classes' => 5,
+                'validity' => 'VALID FOR 1 MONTH',
+            ],
+            [
+                'type' => 'package_10',
+                'name' => '10 CLASSES',
+                'price' => 50.00,
+                'classes' => 10,
+                'validity' => 'VALID FOR 1 MONTH',
+            ],
+            [
+                'type' => 'unlimited',
+                'name' => 'UNLIMITED',
+                'price' => 90.00,
+                'classes' => null,
+                'validity' => 'VALID FOR 1 MONTH',
+            ],
+        ];
     }
 
     public function applyCoupon(Request $request)
@@ -95,6 +215,13 @@ class PurchaseController extends Controller
         ]);
 
         $class = FitnessClass::findOrFail($class_id);
+
+        // Check if the class has already started
+        $classStart = \Carbon\Carbon::parse($class->class_date->toDateString() . ' ' . $class->start_time);
+        if ($classStart->isPast()) {
+            return back()->with('error', 'This class has already started and cannot be booked.');
+        }
+
         $price = $class->price;
 
         if ($request->filled('coupon_code')) {

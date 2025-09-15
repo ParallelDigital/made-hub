@@ -72,6 +72,23 @@ Route::get('/test-email-send', function () {
 });
 Route::get('/api/classes', [App\Http\Controllers\HomeController::class, 'getClasses']);
 Route::get('/purchase', [App\Http\Controllers\PurchaseController::class, 'index'])->name('purchase.index');
+Route::get('/purchase/package/{type}', [App\Http\Controllers\PurchaseController::class, 'showPackageCheckout'])->name('purchase.package.checkout');
+Route::post('/purchase/package/{type}', [App\Http\Controllers\PurchaseController::class, 'processPackageCheckout'])->name('purchase.package.process');
+Route::get('/purchase/package/{type}/success', [App\Http\Controllers\PurchaseController::class, 'packageSuccess'])->name('purchase.package.success');
+
+// AJAX login for in-modal authentication (guests only)
+Route::post('/ajax/login', function (\Illuminate\Http\Request $request) {
+    $credentials = $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required', 'string'],
+    ]);
+    $remember = (bool) $request->boolean('remember', false);
+    if (\Illuminate\Support\Facades\Auth::attempt($credentials, $remember)) {
+        $request->session()->regenerate();
+        return response()->json(['success' => true]);
+    }
+    return response()->json(['success' => false, 'message' => 'Invalid credentials.'], 422);
+})->middleware('guest')->name('ajax.login');
 
 // Booking Routes
 Route::post('/book-with-credits/{classId}', [App\Http\Controllers\BookingController::class, 'bookWithCredits'])->name('booking.credits');
@@ -102,6 +119,14 @@ Route::get('/dashboard', function () {
     }
 
     // For regular users, fetch their upcoming bookings
+    // Ensure the user has a PIN code (only if column exists)
+    if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'pin_code')) {
+        if (empty($user->pin_code)) {
+            $user->pin_code = \App\Models\User::generateUniquePinCode();
+            $user->save();
+        }
+    }
+
     $upcomingBookings = $user->bookings()
         ->whereHas('fitnessClass', function ($query) {
             $query->where('class_date', '>=', now()->toDateString());
@@ -112,7 +137,23 @@ Route::get('/dashboard', function () {
             return $booking->fitnessClass->class_date . ' ' . $booking->fitnessClass->start_time;
         });
 
-    return view('dashboard', ['upcomingBookings' => $upcomingBookings]);
+    // Signed URL for user's universal check-in (based on their personal QR code)
+    $userQrUrl = \Illuminate\Support\Facades\URL::signedRoute('user.checkin', [
+        'user' => $user->id,
+        'qr_code' => $user->qr_code,
+    ]);
+
+    // Pre-generate an SVG QR image for the dashboard (safe to embed inline on web)
+    $qrSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+        ->size(220)
+        ->errorCorrection('M')
+        ->generate($userQrUrl);
+
+    return view('dashboard', [
+        'upcomingBookings' => $upcomingBookings,
+        'userQrUrl' => $userQrUrl,
+        'qrSvg' => $qrSvg,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -125,14 +166,19 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
     Route::resource('instructors', App\Http\Controllers\Admin\InstructorController::class);
+    Route::get('instructors/{instructor}/classes', [App\Http\Controllers\Admin\InstructorController::class, 'getClasses'])
+        ->name('instructors.classes');
     Route::resource('classes', App\Http\Controllers\Admin\FitnessClassController::class);
+    Route::get('classes/calendar-data', [App\Http\Controllers\Admin\FitnessClassController::class, 'getCalendarData'])->name('classes.calendar-data');
     Route::post('classes/{class}/delete-after-date', [App\Http\Controllers\Admin\FitnessClassController::class, 'deleteAfterDate'])->name('classes.delete-after-date');
+    Route::get('memberships/export', [App\Http\Controllers\Admin\MembershipController::class, 'export'])->name('memberships.export');
     Route::resource('memberships', App\Http\Controllers\Admin\MembershipController::class);
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);
-    Route::resource('pricing', App\Http\Controllers\Admin\PricingController::class);
     // Admin bookings list
     Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show', 'update']);
+    Route::post('bookings/{booking}/resend-confirmation', [App\Http\Controllers\Admin\BookingController::class, 'resendConfirmation'])->name('bookings.resend-confirmation');
     Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('users/export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('users.export');
     Route::get('users/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
     Route::put('users/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
     Route::get('reports', [App\Http\Controllers\Admin\AdminController::class, 'reports'])->name('reports');

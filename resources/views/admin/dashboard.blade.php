@@ -219,14 +219,15 @@
             
             <!-- Calendar Grid -->
             @if($view === 'weekly')
-                <div class="grid grid-cols-7 gap-1 mb-4">
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                <div class="min-w-[720px] sm:min-w-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-1 mb-4 px-4 sm:px-0">
                     @foreach($calendarDates as $index => $date)
                     <div class="text-center {{ $date->isToday() ? 'bg-primary bg-opacity-10 border-primary border-2' : '' }} rounded-lg">
                         <div class="text-sm font-medium text-gray-300 py-2 border-b border-gray-600">
                             <div>{{ $date->format('D') }}</div>
                             <div class="text-lg {{ $date->isToday() ? 'text-primary font-bold' : '' }}">{{ $date->format('j') }}</div>
                         </div>
-                        <div class="min-h-[200px] p-2 space-y-1">
+                        <div class="min-h-[160px] sm:min-h-[200px] p-2 space-y-1">
                                 @if(isset($calendarData[$index]))
                                     @foreach($calendarData[$index] as $class)
                                         <div class="bg-primary bg-opacity-20 border border-primary rounded p-2 text-xs cursor-pointer hover:bg-opacity-30 transition-colors"
@@ -243,9 +244,11 @@
                         </div>
                     @endforeach
                 </div>
+                </div>
             @else
                 <!-- Monthly View -->
-                <div class="grid grid-cols-7 gap-1 mb-4">
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                <div class="min-w-[720px] sm:min-w-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-1 mb-4 px-4 sm:px-0">
                     @php $dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; @endphp
                     @foreach($dayNames as $dayName)
                         <div class="text-center text-sm font-medium text-gray-300 py-2 border-b border-gray-600">
@@ -274,6 +277,7 @@
                             </div>
                         </div>
                     @endforeach
+                </div>
                 </div>
             @endif
             

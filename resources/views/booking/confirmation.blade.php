@@ -1,43 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Confirmed - Made Running</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#c8b7ed',
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-black shadow-sm border-b border-gray-800">
-        <div class="max-w-6xl mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-8 w-8">
-                    <span class="text-xl font-bold text-primary">MADE RUNNING</span>
-                </div>
-                <a href="{{ route('welcome') }}" class="text-gray-300 hover:text-white transition-colors">
-                    ← Back to Classes
-                </a>
-            </div>
-        </div>
-    </header>
+<x-checkout-layout :title="'Booking Confirmed'">
+    <div class="max-w-2xl mx-auto">
 
-    <div class="max-w-2xl mx-auto px-6 py-8">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
             <!-- Success Icon -->
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-                <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
             </div>
@@ -46,25 +13,27 @@
             <p class="text-gray-600 mb-8">Your class has been successfully booked. We look forward to seeing you!</p>
 
             <!-- Class Details -->
-            <div class="bg-gray-50 rounded-lg p-6 mb-8">
+            <div class="bg-gray-50 rounded-xl p-6 mb-8">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Class Details</h2>
                 
-                <div class="space-y-3 text-left">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Class:</span>
-                        <span class="font-medium">{{ $class->name }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Instructor:</span>
-                        <span class="font-medium">{{ $class->instructor->name ?? 'TBA' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Date:</span>
-                        <span class="font-medium">{{ \Carbon\Carbon::parse($class->class_date)->format('l, F j, Y') }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Time:</span>
-                        <span class="font-medium">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($class->end_time)->format('g:i A') }}</span>
+                <div class="space-y-4 text-left">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-gray-500">Class</div>
+                            <div class="font-medium text-gray-900">{{ $class->name }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Instructor</div>
+                            <div class="font-medium text-gray-900">{{ $class->instructor->name ?? 'TBA' }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Date</div>
+                            <div class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($class->class_date)->format('l, F j, Y') }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Time</div>
+                            <div class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($class->end_time)->format('g:i A') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,15 +63,21 @@
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{{ route('welcome') }}" 
-                   class="bg-primary text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors">
-                    Book Another Class
+                   class="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-colors duration-200">
+                    <span>Book Another Class</span>
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
                 </a>
                 <a href="{{ route('purchase.index') }}" 
-                   class="bg-gray-600 text-white px-6 py-3 rounded-md font-medium hover:bg-gray-700 transition-colors">
-                    Buy Credits
+                   class="inline-flex items-center justify-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition-colors duration-200">
+                    <span>Buy Credits</span>
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
                 </a>
             </div>
         </div>
     </div>
-</body>
-</html>
+    </div>
+</x-checkout-layout>

@@ -1,0 +1,56 @@
+/* Mobile-specific fixes and enhancements */
+
+/* Prevent horizontal scrolling on mobile */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Better touch targets for mobile */
+button, a, [role="button"] {
+    touch-action: manipulation;
+}
+
+/* Responsive tables */
+.table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Better form controls on mobile */
+input, select, textarea, button {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+}
+
+/* Improve button tap targets on mobile */
+.btn, button, [type='button'], [type='submit'] {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Better mobile navigation */
+@media (max-width: 640px) {
+    .sm\:hidden {
+        display: none !important;
+    }
+    
+    /* Ensure mobile menu takes full height */
+    [x-cloak] { display: none !important; }
+    
+    /* Better spacing for mobile */
+    .mobile-px {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Prevent content from being hidden behind mobile browser UI */
+@supports (padding: max(0px)) {
+    body {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}

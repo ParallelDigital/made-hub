@@ -9,6 +9,7 @@ class FitnessClass extends Model
     protected $fillable = [
         'name',
         'description',
+        'class_type_id',
         'class_date',
         'instructor_id',
         'max_spots',
@@ -21,7 +22,8 @@ class FitnessClass extends Model
         'recurring_days',
         'recurring_frequency',
         'recurring_until',
-        'parent_class_id'
+        'parent_class_id',
+        'location'
     ];
 
     protected $casts = [
@@ -36,6 +38,11 @@ class FitnessClass extends Model
     public function instructor()
     {
         return $this->belongsTo(Instructor::class);
+    }
+    
+    public function classType()
+    {
+        return $this->belongsTo(ClassType::class, 'class_type_id');
     }
 
     public function bookings()

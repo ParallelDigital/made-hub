@@ -130,13 +130,13 @@
                 response.json().then(data => {
                     // Handle validation errors or other issues
                     console.error('Submission failed:', data);
-                    alert('An error occurred. Please check the console for details.');
+                    showAlertModal('An error occurred. Please check the console for details.', 'error');
                 });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('A network error occurred. Please try again.');
+            showAlertModal('A network error occurred. Please try again.', 'error');
         });
     });
 </script>

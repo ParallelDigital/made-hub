@@ -110,6 +110,7 @@ class HomeController extends Controller
                     'name' => $class->name,
                     'start_time' => $class->start_time,
                     'end_time' => $class->end_time,
+                    'class_date' => $class->class_date->toDateString(),
                     'price' => $class->price,
                     'max_spots' => $class->max_spots,
                     'booked_count' => $bookedCount,

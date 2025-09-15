@@ -3,6 +3,10 @@
 @section('content')
 <div class="flex items-center justify-between mb-8">
     <h1 class="text-2xl font-bold text-white">Users</h1>
+    <a href="{{ route('admin.users.export', request()->query()) }}"
+       class="inline-flex items-center px-4 py-2 bg-primary hover:bg-purple-400 text-white rounded-md text-sm font-semibold shadow-sm">
+        Export CSV
+    </a>
 </div>
 
 <div class="bg-gray-900/50 border border-gray-700/50 rounded-lg p-6 mb-8">
@@ -20,15 +24,14 @@
             <!-- Role Filter -->
             <div>
                 <label for="role" class="text-sm font-medium text-gray-400">Role</label>
-                <select name="role" id="role" 
-                        class="mt-2 block w-full bg-gray-800 border-gray-600 text-white rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm h-10 px-3">
-                    <option value="">All Roles</option>
-                    @foreach($roles as $role)
-                        <option value="{{ $role }}" {{ request('role') == $role ? 'selected' : '' }}>
-                            {{ ucfirst($role) }}
-                        </option>
-                    @endforeach
-                </select>
+                <div class="mt-2">
+                    <x-custom-select 
+                        name="role" 
+                        id="role"
+                        :options="collect($roles)->mapWithKeys(fn($role) => [$role => ucfirst($role)])->toArray()"
+                        :selected="request('role')"
+                        placeholder="All Roles" />
+                </div>
             </div>
 
             <!-- Start Date -->

@@ -10,23 +10,15 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Preload ProFontWindows to avoid font swap during interactions -->
+    <link rel="preload" href="{{ Vite::asset('resources/fonts/ProFontWindows.ttf') }}" as="font" type="font/ttf" crossorigin>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#c8b7ed'
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gray-900 text-white">
     <div class="min-h-screen flex" x-data="{ sidebarOpen: false }">
@@ -43,13 +35,34 @@
 
             <!-- Logo -->
             <div class="flex items-center justify-center h-16 px-4 bg-gray-900 border-b border-gray-700">
-                <a href="{{ route('admin.dashboard') }}" class="text-xl font-bold text-primary">
-                    MADE ADMIN
+                <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center">
+                    <img src="{{ asset('made-running.webp') }}" alt="MADE Admin" class="h-8 w-auto" onerror="this.onerror=null;this.src='{{ asset('favicon.ico') }}';" />
+                    <span class="sr-only">MADE ADMIN</span>
                 </a>
             </div>
 
             <!-- Navigation -->
             <nav class="mt-8 px-4">
+                @php $role = auth()->check() ? auth()->user()->role : null; @endphp
+                @if($role === 'instructor')
+                <!-- Instructor Menu -->
+                <div class="space-y-2">
+                    <a href="{{ route('instructor.dashboard') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('instructor.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        </svg>
+                        My Classes
+                    </a>
+                    <a href="{{ route('profile.edit') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('profile.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 018 17h8a4 4 0 013 1.196M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        My Profile
+                    </a>
+                </div>
+                @elseif($role === 'admin')
                 <div class="space-y-2">
                     <a href="{{ route('admin.dashboard') }}"
                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
@@ -84,14 +97,6 @@
                         Memberships
                     </a>
 
-                    <a href="{{ route('admin.pricing.index') }}"
-                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.pricing.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                        Pricing
-                    </a>
-
                     <a href="{{ route('admin.coupons.index') }}"
                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.coupons.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,15 +120,26 @@
                         </svg>
                         Users
                     </a>
-
-                    <a href="{{ route('admin.reports') }}"
-                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.reports') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                </div>
+                @else
+                <!-- Regular User Menu -->
+                <div class="space-y-2">
+                    <a href="{{ route('dashboard') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('dashboard') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                         </svg>
-                        Reports
+                        Dashboard
+                    </a>
+                    <a href="{{ route('profile.edit') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('profile.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 018 17h8a4 4 0 013 1.196M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Profile
                     </a>
                 </div>
+                @endif
             </nav>
 
             <!-- User Section -->
@@ -142,9 +158,9 @@
                     </div>
                 </div>
                 <div class="mt-3">
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" onclick="return confirm('Are you sure you want to log out?')" class="w-full flex items-center justify-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
+                        <button type="submit" onclick="event.preventDefault(); showConfirmModal('Are you sure you want to log out?', function(){ document.getElementById('logout-form').submit(); })" class="w-full flex items-center justify-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                             </svg>
@@ -176,7 +192,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
-                    <span class="text-white font-semibold">MADE ADMIN</span>
+                    <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center">
+                        <img src="{{ asset('made-running.webp') }}" alt="MADE Admin" class="h-8 w-auto" onerror="this.onerror=null;this.src='{{ asset('favicon.ico') }}';" />
+                        <span class="sr-only">MADE ADMIN</span>
+                    </a>
                     <div></div>
                 </div>
             </div>
@@ -188,12 +207,19 @@
         </div>
     </div>
 
+    <!-- Alert Modal Component -->
+    @include('components.alert-modal')
+
+    @stack('scripts')
     <script>
-        // Handle window resize for sidebar
+        // Handle window resize for sidebar without touching Alpine internals if not ready
         window.addEventListener('resize', function() {
             if (window.innerWidth >= 1024) {
-                // On desktop, always show sidebar
-                document.querySelector('[x-data]').__x.$data.sidebarOpen = false;
+                // On desktop, ensure sidebar state is reset for mobile transitions.
+                var root = document.querySelector('[x-data]');
+                if (root && root.__x && root.__x.$data && typeof root.__x.$data.sidebarOpen !== 'undefined') {
+                    root.__x.$data.sidebarOpen = false;
+                }
             }
         });
     </script>

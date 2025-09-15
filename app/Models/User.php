@@ -33,6 +33,7 @@ class User extends Authenticatable
         'display_name',
         'role',
         'qr_code',
+        'pin_code',
         'membership_id',
         'monthly_credits',
         'credits_last_refreshed',
@@ -76,6 +77,9 @@ class User extends Authenticatable
             if (empty($user->qr_code)) {
                 $user->qr_code = self::generateUniqueQrCode();
             }
+            if (empty($user->pin_code)) {
+                $user->pin_code = self::generateUniquePinCode();
+            }
         });
     }
 
@@ -89,6 +93,18 @@ class User extends Authenticatable
         } while (self::where('qr_code', $qrCode)->exists());
 
         return $qrCode;
+    }
+
+    /**
+     * Generate a unique 4-digit PIN code for the user
+     */
+    public static function generateUniquePinCode(): string
+    {
+        do {
+            $pin = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        } while (self::where('pin_code', $pin)->exists());
+
+        return $pin;
     }
 
     /**
@@ -126,7 +142,9 @@ class User extends Authenticatable
     public function getAvailableCredits(): int
     {
         if (!$this->hasActiveMembership()) {
-            return $this->credits ?? 0; // fallback to old credits system
+            // Display 0 on dashboard when no active membership
+            // (legacy credits may still be used during booking logic if applicable)
+            return 0;
         }
 
         // Check if credits need to be refreshed
@@ -148,7 +166,8 @@ class User extends Authenticatable
         
         // If credits haven't been refreshed this month, refresh them
         if (!$this->credits_last_refreshed || $this->credits_last_refreshed < $firstOfMonth) {
-            $this->monthly_credits = $this->membership->class_credits ?? 5; // default to 5 credits
+            // Only assign credits if membership explicitly defines class_credits; otherwise 0
+            $this->monthly_credits = $this->membership->class_credits ?? 0;
             $this->credits_last_refreshed = $firstOfMonth;
             $this->save();
         }

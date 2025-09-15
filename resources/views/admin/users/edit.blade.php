@@ -74,18 +74,19 @@
                 <!-- Role -->
                 <div>
                     <label for="role" class="block text-sm font-medium text-gray-400">Role</label>
-                    <select name="role" id="role"
-                            class="mt-1 block w-full bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm h-10 px-3">
-                        @foreach($roles as $roleOption)
-                            <option value="{{ $roleOption }}" {{ old('role', $user->role) == $roleOption ? 'selected' : '' }}>
-                                {{ ucfirst(str_replace('-', ' ', $roleOption)) }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('role')
-                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
-                    @enderror
+                    <div class="mt-1">
+                        <x-custom-select 
+                            name="role" 
+                            id="role"
+                            :options="collect($roles)->mapWithKeys(fn($role) => [$role => ucfirst($role)])->toArray()"
+                            :selected="old('role', $user->role)"
+                            placeholder="Select Role"
+                            required />
+                    </div>
                 </div>
+                @error('role')
+                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                @enderror
 
                 <!-- Nickname -->
                 <div class="md:col-span-2">
