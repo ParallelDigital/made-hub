@@ -10,16 +10,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'instructor' => \App\Http\Middleware\IsInstructor::class,
-        ]);
+    ->withMiddleware(function (Middleware $middleware) {
+        // register global/route middleware here if you need
+        // e.g. $middleware->alias(['role' => \App\Http\Middleware\RoleMiddleware::class]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })
-    ->withAliases([
-        'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
-    ])
     ->create();
