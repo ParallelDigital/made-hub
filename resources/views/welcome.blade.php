@@ -253,7 +253,7 @@
                                                     class="w-full sm:w-auto px-6 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors hover:opacity-90">
                                                 Book Class ({{ $availableSpots }} left)
                                             </button>
-                                        <?php endif; ?>
+                                        @endif
                                     </div>
                                 </div>
                                 <?php endforeach; ?>
