@@ -49,9 +49,18 @@
                 </div>
 
                 <div class="mt-6 text-center">
-                    <p class="text-sm text-gray-600">
-                        Your unique QR code: <span class="font-mono font-medium">{{ $user->qr_code }}</span>
-                    </p>
+                    <div class="bg-white border-2 border-gray-200 rounded-lg p-6">
+                        <h4 class="text-lg font-medium text-gray-900 mb-4">Your QR Code</h4>
+                        <div class="flex justify-center mb-4">
+                            {!! QrCode::size(200)->generate(route('user.checkin', ['user' => $user->id, 'qr_code' => $user->qr_code])) !!}
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">
+                            Present this QR code at the studio for quick check-in
+                        </p>
+                        <p class="text-xs text-gray-500 font-mono">
+                            Code: {{ $user->qr_code }}
+                        </p>
+                    </div>
                 </div>
 
                 <div class="mt-6">
