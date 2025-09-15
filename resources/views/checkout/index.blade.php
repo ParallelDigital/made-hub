@@ -1,20 +1,4 @@
 <x-checkout-layout>
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-black shadow-sm border-b border-gray-800">
-        <div class="max-w-6xl mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-8 w-8">
-                    <span class="text-xl font-bold text-primary">MADE RUNNING</span>
-                </div>
-                <a href="{{ route('welcome') }}" class="text-gray-300 hover:text-white transition-colors">
-                    ← Back to Classes
-                </a>
-            </div>
-        </div>
-    </header>
-
     <div class="grid md:grid-cols-5 gap-8">
             <!-- Package Summary -->
             <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit">
@@ -210,6 +194,13 @@
     </div>
 
     <script>
+        // Add CSRF token to meta tag if missing
+        if (!document.querySelector('meta[name="csrf-token"]')) {
+            const meta = document.createElement('meta');
+            meta.name = 'csrf-token';
+            meta.content = '{{ csrf_token() }}';
+            document.head.appendChild(meta);
+        }
         // Tabs logic
         (function() {
             const btnCard = document.getElementById('tab-btn-card');

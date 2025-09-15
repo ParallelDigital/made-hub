@@ -77,6 +77,9 @@
         <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
             <h2 class="text-xl font-bold text-white mb-4">Scan QR Code</h2>
             
+            <!-- Scan Results (appears here for 3 seconds) -->
+            <div id="scan-results-temp" class="mb-4 hidden"></div>
+            
             <!-- Camera Preview (Html5Qrcode requires a container div, not a video tag) -->
             <div id="scanner-container" class="relative bg-black rounded-lg overflow-hidden mb-4">
                 <div id="qr-reader" class="w-full h-full"></div>
@@ -374,6 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateScanResults(type, message) {
         const resultsDiv = document.getElementById('scan-results');
+        const tempResultsDiv = document.getElementById('scan-results-temp');
         const iconMap = {
             success: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
             error: 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
@@ -388,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
             info: 'text-blue-400 bg-blue-500/20 border-blue-500/30'
         };
 
-        resultsDiv.innerHTML = `
+        const resultHTML = `
             <div class="flex items-center p-4 border rounded-lg ${colorMap[type]}">
                 <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconMap[type]}"></path>
@@ -396,6 +400,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="font-medium">${message}</p>
             </div>
         `;
+
+        // Show in temp location under "Scan QR Code" heading for 3 seconds
+        tempResultsDiv.innerHTML = resultHTML;
+        tempResultsDiv.classList.remove('hidden');
+        
+        // Also update the main results panel
+        resultsDiv.innerHTML = resultHTML;
+        
+        // Hide temp results after 3 seconds
+        setTimeout(() => {
+            tempResultsDiv.classList.add('hidden');
+            tempResultsDiv.innerHTML = '';
+        }, 3000);
     }
 
     function addRecentCheckin(userName, time, status) {
