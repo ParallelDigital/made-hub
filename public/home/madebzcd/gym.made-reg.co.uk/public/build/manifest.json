@@ -1,0 +1,20 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-By069bJB.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/fonts/ProFontWindows.ttf": {
+    "file": "assets/ProFontWindows-Bh32xzgt.ttf",
+    "src": "resources/fonts/ProFontWindows.ttf"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BQ0kCPqy.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}

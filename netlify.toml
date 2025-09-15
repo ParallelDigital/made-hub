@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "public"
+  base = "/"
+
+[build.environment]
+  PHP_VERSION = "8.2"
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.php"
+  status = 200
+  force = true
