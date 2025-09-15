@@ -117,7 +117,7 @@
             <div class="relative z-30 px-6 max-w-6xl container mx-auto">
 
                 <h1 class="text-5xl md:text-8xl font-black mb-6 tracking-tight">
-                    <span class="block text-white">MADE TO</span>
+                    <span class="block text-white"></span>
                     <span class="block text-primary">ELEVATE</span>
                 </h1>
 
