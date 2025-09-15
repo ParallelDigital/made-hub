@@ -68,7 +68,6 @@
 
                 <!-- Panel: Card -->
                 <div id="tab-panel-card" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 {{ $openCredits ? 'hidden' : '' }}">
-                    <h2 class="text-xl font-bold text-black mb-4">Pay with Card</h2>
 
                 @if(session('error'))
                     <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
@@ -87,7 +86,7 @@
                         label="Full Name"
                         :value="old('name')"
                         required
-                        helper="Enter your name as it appears on your card"
+                        helper=""
                     />
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
