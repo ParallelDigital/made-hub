@@ -195,26 +195,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 
-                // iOS-specific configuration
-                const config = isIOS ? {
-                    fps: 5,  // Slower FPS for better performance
-                    qrbox: { width: 200, height: 200 },
+                // Mobile-optimized configuration with larger scanning area
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                const config = isMobile ? {
+                    fps: 5,  // Slower FPS for better performance on mobile
+                    qrbox: function(viewfinderWidth, viewfinderHeight) {
+                        // Make scanning area 80% of the smaller dimension for easier scanning
+                        let minEdgePercentage = 0.8;
+                        let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                        let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+                        return {
+                            width: qrboxSize,
+                            height: qrboxSize
+                        };
+                    },
                     aspectRatio: 1.0,
-                    disableFlip: true,  // Disable flip on iOS to prevent orientation issues
+                    disableFlip: isIOS,  // Disable flip on iOS to prevent orientation issues
                     experimentalFeatures: {
                         useBarCodeDetectorIfSupported: true
                     },
                     videoConstraints: {
                         deviceId: cameraId ? { exact: cameraId } : undefined,
                         facingMode: facingMode,
-                        width: { ideal: 1280 },
-                        height: { ideal: 1280 },
+                        width: { ideal: 1920, min: 640 },
+                        height: { ideal: 1920, min: 640 },
                         frameRate: { ideal: 10, max: 15 }
                     }
                 } : {
-                    // Default config for other devices
+                    // Default config for desktop devices
                     fps: 10,
-                    qrbox: { width: 220, height: 220 },
+                    qrbox: { width: 300, height: 300 },
                     aspectRatio: 1.0,
                     disableFlip: false,
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true },
