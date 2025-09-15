@@ -24,15 +24,14 @@
             <!-- Role Filter -->
             <div>
                 <label for="role" class="text-sm font-medium text-gray-400">Role</label>
-                <select name="role" id="role" 
-                        class="mt-2 block w-full bg-gray-800 border-gray-600 text-white rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm h-10 px-3">
-                    <option value="">All Roles</option>
-                    @foreach($roles as $role)
-                        <option value="{{ $role }}" {{ request('role') == $role ? 'selected' : '' }}>
-                            {{ ucfirst($role) }}
-                        </option>
-                    @endforeach
-                </select>
+                <div class="mt-2">
+                    <x-custom-select 
+                        name="role" 
+                        id="role"
+                        :options="collect($roles)->mapWithKeys(fn($role) => [$role => ucfirst($role)])->toArray()"
+                        :selected="request('role')"
+                        placeholder="All Roles" />
+                </div>
             </div>
 
             <!-- Start Date -->

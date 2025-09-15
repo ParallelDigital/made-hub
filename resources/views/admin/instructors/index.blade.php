@@ -29,12 +29,11 @@
                 <form method="GET" action="{{ route('admin.instructors.index') }}" class="flex items-center space-x-2">
                     <input type="hidden" name="view" value="{{ $view }}" />
                     <input type="hidden" name="week" value="{{ $weekOffset }}" />
-                    <select name="instructor" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg p-2">
-                        <option value="">All Instructors</option>
-                        @foreach($allInstructors as $inst)
-                            <option value="{{ $inst->id }}" {{ (string)$selectedInstructor === (string)$inst->id ? 'selected' : '' }}>{{ $inst->name }}</option>
-                        @endforeach
-                    </select>
+                    <x-custom-select 
+                        name="instructor"
+                        :options="collect($allInstructors)->mapWithKeys(fn($inst) => [$inst->id => $inst->name])->toArray()"
+                        :selected="$selectedInstructor"
+                        placeholder="All Instructors" />
                     <button type="submit" class="px-3 py-2 text-sm font-medium bg-primary text-white rounded-md">Apply</button>
                 </form>
 
@@ -198,7 +197,7 @@
                                 <div class="flex space-x-2">
                                     <a href="{{ route('admin.instructors.show', $instructor) }}" class="text-primary hover:text-purple-400">View</a>
                                     <a href="{{ route('admin.instructors.edit', $instructor) }}" class="text-blue-400 hover:text-blue-300">Edit</a>
-                                    <form action="{{ route('admin.instructors.destroy', $instructor) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this instructor?')">
+                                    <form id="delete-instructor-{{ $instructor->id }}-form" action="{{ route('admin.instructors.destroy', $instructor) }}" method="POST" class="inline" onsubmit="event.preventDefault(); showConfirmModal('Are you sure you want to delete this instructor?', function(){ document.getElementById('delete-instructor-{{ $instructor->id }}-form').submit(); })">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-400 hover:text-red-300">Delete</button>

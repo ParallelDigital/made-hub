@@ -1,6 +1,115 @@
-/* Your custom CSS styles go here */
+/* Custom CSS */
+
+@font-face {
+    font-family: 'ProFontWindows';
+    src: url('../fonts/ProFontWindows.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Apply ProFontWindows to all text elements */
+html, body,
+p, a, h1, h2, h3, h4, h5, h6,
+span, div, input, textarea, select, button,
+::placeholder, ::-webkit-input-placeholder {
+    font-family: 'ProFontWindows', monospace !important;
+}
 
 #membership li {
     margin-top: 10px !important;
+}
+
+/* NUCLEAR FONT ENFORCEMENT - NOTHING can override this */
+html, body, *, *::before, *::after,
+div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video, input, textarea, select, button {
+    font-family: 'ProFontWindows', monospace !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
+}
+
+#classes-calendar *,
+#instructor-calendar *,
+.fc *,
+.fc-view *,
+.fc-toolbar *,
+.fc-button *,
+.fc-event *,
+.fc-daygrid *,
+.fc-timegrid *,
+.fc-list *,
+[class*="fc-"] *,
+[class*="fc-"]:before,
+[class*="fc-"]:after {
+    font-family: 'ProFontWindows', monospace !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
+    font-synthesis: none !important;
+}
+
+/* FullCalendar Root Variables */
+.fc {
+    --fc-font-family: 'ProFontWindows', monospace !important;
+    --fc-page-bg-color: #111827 !important;
+    --fc-neutral-bg-color: #1f2937 !important; 
+    --fc-neutral-text-color: #e5e7eb !important;
+    --fc-border-color: #374151 !important;
+    --fc-button-text-color: #ffffff !important;
+    --fc-button-bg-color: #3b82f6 !important;
+    --fc-button-border-color: #3b82f6 !important;
+    --fc-button-hover-bg-color: #2563eb !important;
+    --fc-button-hover-border-color: #2563eb !important;
+    --fc-button-active-bg-color: #1d4ed8 !important;
+    --fc-button-active-border-color: #1d4ed8 !important;
+    --fc-today-bg-color: rgba(59, 130, 246, 0.2) !important;
+
+    font-family: 'ProFontWindows', monospace !important;
+    color: #e5e7eb !important;
+}
+.fc .fc-toolbar-title {
+    color: #fff;
+    font-family: 'ProFontWindows', monospace !important;
+}
+.fc .fc-button {
+    background-color: #3b82f6; /* blue-500 */
+    border-color: #3b82f6;
+    font-family: 'ProFontWindows', monospace !important;
+}
+.fc .fc-button:hover {
+    background-color: #2563eb; /* blue-600 */
+    border-color: #2563eb;
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active, 
+.fc .fc-button-primary:not(:disabled):active {
+    background-color: #1d4ed8; /* blue-700 */
+    border-color: #1d4ed8;
+}
+.fc .fc-daygrid-day-number, 
+.fc .fc-col-header-cell-cushion {
+    color: #e5e7eb; /* text-gray-200 */
+    font-family: 'ProFontWindows', monospace !important;
+}
+.fc .fc-daygrid-day.fc-day-today {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+.fc .fc-daygrid-event {
+    cursor: pointer;
+    font-family: 'ProFontWindows', monospace !important;
+}
+.fc .fc-event {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-family: 'ProFontWindows', monospace !important;
 }
     

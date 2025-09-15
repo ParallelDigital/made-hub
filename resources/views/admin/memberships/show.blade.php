@@ -95,7 +95,7 @@
                         Edit Membership
                     </a>
                     
-                    <form action="{{ route('admin.memberships.destroy', $membership) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this membership? This action cannot be undone.')">
+                    <form id="delete-membership-form" action="{{ route('admin.memberships.destroy', $membership) }}" method="POST" onsubmit="event.preventDefault(); showConfirmModal('Are you sure you want to delete this membership? This action cannot be undone.', function(){ document.getElementById('delete-membership-form').submit(); })">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded font-semibold hover:bg-red-700 transition-all">

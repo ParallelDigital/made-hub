@@ -10,20 +10,11 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Preload ProFontWindows to avoid font swap during interactions -->
+    <link rel="preload" href="{{ Vite::asset('resources/fonts/ProFontWindows.ttf') }}" as="font" type="font/ttf" crossorigin>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#c8b7ed'
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -167,9 +158,9 @@
                     </div>
                 </div>
                 <div class="mt-3">
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" onclick="return confirm('Are you sure you want to log out?')" class="w-full flex items-center justify-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
+                        <button type="submit" onclick="event.preventDefault(); showConfirmModal('Are you sure you want to log out?', function(){ document.getElementById('logout-form').submit(); })" class="w-full flex items-center justify-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                             </svg>
@@ -216,13 +207,19 @@
         </div>
     </div>
 
+    <!-- Alert Modal Component -->
+    @include('components.alert-modal')
+
     @stack('scripts')
     <script>
-        // Handle window resize for sidebar
+        // Handle window resize for sidebar without touching Alpine internals if not ready
         window.addEventListener('resize', function() {
             if (window.innerWidth >= 1024) {
-                // On desktop, always show sidebar
-                document.querySelector('[x-data]').__x.$data.sidebarOpen = false;
+                // On desktop, ensure sidebar state is reset for mobile transitions.
+                var root = document.querySelector('[x-data]');
+                if (root && root.__x && root.__x.$data && typeof root.__x.$data.sidebarOpen !== 'undefined') {
+                    root.__x.$data.sidebarOpen = false;
+                }
             }
         });
     </script>

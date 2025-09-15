@@ -1,23 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Checkout - Made Running</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#c8b7ed',
-                    }
-                }
-            }
-        }
-    </script>
-</head>
+<x-checkout-layout>
 <body class="bg-gray-50">
     <!-- Header -->
     <header class="bg-black shadow-sm border-b border-gray-800">
@@ -34,15 +15,36 @@
         </div>
     </header>
 
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        @if(session('error'))
-            <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{{ session('error') }}</div>
-        @endif
-        @if(session('success'))
-            <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">{{ session('success') }}</div>
-        @endif
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+    <div class="grid md:grid-cols-5 gap-8">
+            <!-- Package Summary -->
+            <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Package Summary</h2>
+                <div class="space-y-4">
+                    <div class="flex items-start justify-between pb-4 border-b border-gray-100">
+                        <div>
+                            <div class="text-xl font-bold text-gray-900">{{ strtoupper($class->name) }}</div>
+                            <div class="mt-1 text-sm text-gray-600">{{ $class->instructor->name ?? 'No Instructor' }}</div>
+                            <div class="mt-2 text-sm text-gray-600">
+                                {{ \Carbon\Carbon::parse($class->class_date)->format('l, F j, Y') }}<br>
+                                {{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($class->end_time)->format('g:i A') }}
+                            </div>
+                        </div>
+                        <div class="text-2xl font-black text-gray-900">£{{ number_format($class->price, 2) }}</div>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Instant Access After Payment
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Secure Payment Processing
+                    </div>
+                </div>
+            </div>
             <!-- Class Details -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h2 class="text-xl font-bold text-black mb-4">Class Details</h2>
@@ -128,28 +130,45 @@
                     @csrf
                     <input type="hidden" name="coupon_code" id="applied-coupon-code">
 
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-800 mb-1">Full Name</label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                        @error('name')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <x-checkout-input
+                        id="name"
+                        name="name"
+                        type="text"
+                        label="Full Name"
+                        :value="old('name')"
+                        required
+                        helper="Enter your name as it appears on your card"
+                    />
+                    @error('name')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
 
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-800 mb-1">Email Address</label>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                        @error('email')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <x-checkout-input
+                        id="email"
+                        name="email"
+                        type="email"
+                        label="Email Address"
+                        :value="old('email')"
+                        required
+                        helper="We'll send your receipt to this email"
+                    />
+                    @error('email')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
 
                     <button type="submit" id="pay-button"
-                            class="w-full bg-primary text-black py-3 px-4 rounded-md font-semibold hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
-                        Pay with Card — £{{ number_format($class->price, 2) }}
+                            class="w-full bg-primary hover:bg-primary-dark text-white rounded-lg px-6 py-4 font-semibold text-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <span>Proceed to Payment</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
                     </button>
+                    <div class="mt-4 flex items-center justify-center space-x-2 text-sm text-gray-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <span>Secure, encrypted payment processing</span>
+                    </div>
                     </form>
                 </div>
 
@@ -288,7 +307,7 @@
                             pinError.textContent = data.message || 'Booking failed. Please try again.';
                             pinError.classList.remove('hidden');
                         } else {
-                            alert(data.message || 'Booking failed. Please try again.');
+                            showAlertModal(data.message || 'Booking failed. Please try again.', 'error');
                         }
                     }
                 })
@@ -342,5 +361,4 @@
             });
         });
     </script>
-</body>
-</html>
+</x-checkout-layout>

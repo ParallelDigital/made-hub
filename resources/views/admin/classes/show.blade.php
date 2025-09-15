@@ -18,7 +18,7 @@
                class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
                 Edit Class
             </a>
-            <form action="{{ route('admin.classes.destroy', $class) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this class?')">
+            <form id="delete-class-form" action="{{ route('admin.classes.destroy', $class) }}" method="POST" class="inline" onsubmit="event.preventDefault(); showConfirmModal('Are you sure you want to delete this class?', function(){ document.getElementById('delete-class-form').submit(); })">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors">

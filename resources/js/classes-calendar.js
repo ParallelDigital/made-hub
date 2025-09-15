@@ -2,10 +2,9 @@ import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import bootstrap5Plugin from '@fullcalendar/bootstrap5';
+import listPlugin from '@fullcalendar/list';
 
-// Import Bootstrap JS (already imported in app.js)
-// The Tooltip will be available from the window.Bootstrap object
+// Simple tooltip implementation without Bootstrap dependency
 
 // Store calendar instance
 let calendar;
@@ -15,6 +14,60 @@ function initCalendar() {
     const calendarEl = document.getElementById('classes-calendar');
     if (!calendarEl) return;
 
+    // AGGRESSIVE font enforcement - force ProFontWindows on ALL elements
+    const forceProFontWindows = (element) => {
+        if (!element) return;
+        
+        // Force font on the element itself
+        element.style.setProperty('font-family', "'ProFontWindows', monospace", 'important');
+        element.style.setProperty('font-weight', '400', 'important');
+        element.style.setProperty('font-style', 'normal', 'important');
+        
+        // Force font on all descendants
+        const allElements = element.querySelectorAll('*');
+        allElements.forEach(el => {
+            el.style.setProperty('font-family', "'ProFontWindows', monospace", 'important');
+            el.style.setProperty('font-weight', '400', 'important');
+            el.style.setProperty('font-style', 'normal', 'important');
+        });
+        
+        // Set CSS variables
+        element.style.setProperty('--fc-font-family', "'ProFontWindows', monospace", 'important');
+        element.style.setProperty('--fc-page-bg-color', '#111827', 'important');
+        element.style.setProperty('--fc-neutral-bg-color', '#1f2937', 'important');
+        element.style.setProperty('--fc-neutral-text-color', '#e5e7eb', 'important');
+        element.style.setProperty('--fc-border-color', '#374151', 'important');
+        element.style.setProperty('--fc-button-text-color', '#ffffff', 'important');
+        element.style.setProperty('--fc-button-bg-color', '#3b82f6', 'important');
+        element.style.setProperty('--fc-button-border-color', '#3b82f6', 'important');
+        element.style.setProperty('--fc-button-hover-bg-color', '#2563eb', 'important');
+        element.style.setProperty('--fc-button-hover-border-color', '#2563eb', 'important');
+        element.style.setProperty('--fc-button-active-bg-color', '#1d4ed8', 'important');
+        element.style.setProperty('--fc-button-active-border-color', '#1d4ed8', 'important');
+        element.style.setProperty('--fc-today-bg-color', 'rgba(59, 130, 246, 0.2)', 'important');
+    };
+
+    // Watch for ANY DOM changes and force font
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === 1) { // Element node
+                    forceProFontWindows(node);
+                }
+            });
+        });
+        forceProFontWindows(calendarEl);
+    });
+    
+    observer.observe(calendarEl, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+    });
+
+    forceProFontWindows(calendarEl);
+
     // Destroy existing calendar if it exists
     if (calendar) {
         calendar.destroy();
@@ -22,13 +75,21 @@ function initCalendar() {
 
     // Initialize the calendar
     calendar = new Calendar(calendarEl, {
-        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin],
-        themeSystem: 'bootstrap5',
+        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
         initialView: 'timeGridWeek',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        datesSet: function() { 
+            setTimeout(() => forceProFontWindows(calendarEl), 0);
+        },
+        viewDidMount: function() {
+            setTimeout(() => forceProFontWindows(calendarEl), 0);
+        },
+        eventsSet: function() {
+            setTimeout(() => forceProFontWindows(calendarEl), 0);
         },
         events: function(fetchInfo, successCallback, failureCallback) {
             const params = {
@@ -68,14 +129,9 @@ function initCalendar() {
             window.location.href = info.event.url;
         },
         eventDidMount: function(info) {
-            // Add tooltip with class details
+            // Add simple tooltip with class details
             if (info.event.extendedProps.description) {
-                new bootstrap.Tooltip(info.el, {
-                    title: info.event.extendedProps.description,
-                    placement: 'top',
-                    trigger: 'hover',
-                    container: 'body'
-                });
+                info.el.setAttribute('title', info.event.extendedProps.description);
             }
         },
         loading: function(isLoading) {
@@ -87,6 +143,11 @@ function initCalendar() {
     });
 
     calendar.render();
+    
+    // NUCLEAR APPROACH: Force font every 100ms to prevent any changes
+    setInterval(() => {
+        forceProFontWindows(calendarEl);
+    }, 100);
     
     // Handle view change
     const viewSelector = document.getElementById('view-selector');
@@ -134,9 +195,5 @@ function getFilterParams() {
 document.addEventListener('DOMContentLoaded', function() {
     initCalendar();
     
-    // Initialize tooltips using Bootstrap 5
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    // Simple tooltip initialization - using native browser tooltips
 });

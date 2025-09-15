@@ -14,25 +14,11 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <!-- Preload ProFontWindows to avoid font swap during interactions -->
+        <link rel="preload" href="{{ Vite::asset('resources/fonts/ProFontWindows.ttf') }}" as="font" type="font/ttf" crossorigin>
         
-        <!-- Mobile Fixes CSS -->
-        <link href="{{ asset('css/mobile-fixes.css') }}" rel="stylesheet">
-        
-        <!-- Tailwind CSS (CDN) and Alpine.js (for Breeze navigation) -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-          tailwind.config = {
-            theme: {
-              extend: {
-                colors: {
-                  primary: '#c8b7ed',
-                  secondary: '#ffffff',
-                  accent: '#000000',
-                }
-              }
-            }
-          }
-        </script>
+        <!-- Scripts -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     </head>
     <body class="font-sans antialiased bg-accent text-secondary">
@@ -60,5 +46,8 @@
             <!-- Mobile bottom padding -->
             <div class="h-16 sm:hidden"></div>
         </div>
+
+        <!-- Alert Modal Component -->
+        @include('components.alert-modal')
     </body>
 </html>

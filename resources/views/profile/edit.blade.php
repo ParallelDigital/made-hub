@@ -65,7 +65,7 @@
                                     {{ auth()->user()->qr_code }}
                                 </span>
                             </div>
-                            <button onclick="navigator.clipboard.writeText('{{ auth()->user()->qr_code }}').then(() => alert('Copied to clipboard!'))" 
+                            <button onclick="navigator.clipboard.writeText('{{ auth()->user()->qr_code }}').then(() => showAlertModal('Copied to clipboard!', 'success'))" 
                                     class="mt-3 text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
                                 Copy to clipboard
                             </button>

@@ -2,43 +2,6 @@
 
 @section('title', 'Classes Management')
 
-@push('styles')
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
-    <style>
-        .fc {
-            color: #e5e7eb;
-        }
-        .fc .fc-toolbar-title {
-            color: #fff;
-        }
-        .fc .fc-button {
-            background-color: #3b82f6;
-            border-color: #3b82f6;
-        }
-        .fc .fc-button:hover {
-            background-color: #2563eb;
-            border-color: #2563eb;
-        }
-        .fc .fc-button-primary:not(:disabled).fc-button-active, 
-        .fc .fc-button-primary:not(:disabled):active {
-            background-color: #1d4ed8;
-            border-color: #1d4ed8;
-        }
-        .fc .fc-daygrid-day-number, 
-        .fc .fc-col-header-cell-cushion {
-            color: #e5e7eb;
-        }
-        .fc .fc-daygrid-day.fc-day-today {
-            background-color: rgba(59, 130, 246, 0.2);
-        }
-        .fc .fc-daygrid-event {
-            cursor: pointer;
-        }
-        .fc .fc-event {
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-    </style>
-@endpush
 
 @section('content')
 <div class="flex justify-between items-center mb-6">
@@ -118,7 +81,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Instructor</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Price</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Recurrence</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -140,9 +102,6 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                 {{ $class->start_time }} - {{ $class->end_time }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                £{{ number_format($class->price, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                 @if($class->recurring_frequency !== 'none')

@@ -34,11 +34,13 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
                 <label for="type" class="block text-sm font-medium text-gray-300 mb-1">Type</label>
-                <select name="type" id="type" class="block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:ring-primary focus:border-primary py-2.5" required>
-                    <option value="" disabled selected>Select coupon type</option>
-                    <option value="fixed" {{ old('type') == 'fixed' ? 'selected' : '' }}>Fixed Amount (£)</option>
-                    <option value="percentage" {{ old('type') == 'percentage' ? 'selected' : '' }}>Percentage (%)</option>
-                </select>
+                <x-custom-select 
+                    name="type" 
+                    id="type"
+                    :options="['fixed' => 'Fixed Amount (£)', 'percentage' => 'Percentage (%)']"
+                    :selected="old('type')"
+                    placeholder="Select coupon type"
+                    required />
             </div>
             <div>
                 <label for="value" class="block text-sm font-medium text-gray-300 mb-1">Value</label>
@@ -53,10 +55,13 @@
 
         <div>
             <label for="status" class="block text-sm font-medium text-gray-300 mb-1">Status</label>
-            <select name="status" id="status" class="block w-full bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:ring-primary focus:border-primary py-2.5" required>
-                <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
-                <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-            </select>
+            <x-custom-select 
+                name="status" 
+                id="status"
+                :options="['active' => 'Active', 'inactive' => 'Inactive']"
+                :selected="old('status', 'active')"
+                placeholder="Select status"
+                required />
         </div>
 
         <div class="mt-8 flex justify-end space-x-4 border-t border-gray-700 pt-6">

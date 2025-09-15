@@ -2,7 +2,7 @@ import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import bootstrap5Plugin from '@fullcalendar/bootstrap5';
+// Removed Bootstrap theme/plugin to avoid conflicts
 
 // Initialize the calendar when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -10,24 +10,43 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!calendarEl) return;
 
+    // Enforce ProFontWindows and brand theme variables
+    const enforceCalendarTheme = (el) => {
+        el.style.setProperty('--fc-font-family', "'ProFontWindows', monospace", 'important');
+        el.style.setProperty('--fc-page-bg-color', '#111827', 'important');
+        el.style.setProperty('--fc-neutral-bg-color', '#1f2937', 'important');
+        el.style.setProperty('--fc-neutral-text-color', '#e5e7eb', 'important');
+        el.style.setProperty('--fc-border-color', '#374151', 'important');
+        el.style.setProperty('--fc-button-text-color', '#ffffff', 'important');
+        el.style.setProperty('--fc-button-bg-color', '#3b82f6', 'important');
+        el.style.setProperty('--fc-button-border-color', '#3b82f6', 'important');
+        el.style.setProperty('--fc-button-hover-bg-color', '#2563eb', 'important');
+        el.style.setProperty('--fc-button-hover-border-color', '#2563eb', 'important');
+        el.style.setProperty('--fc-button-active-bg-color', '#1d4ed8', 'important');
+        el.style.setProperty('--fc-button-active-border-color', '#1d4ed8', 'important');
+        el.style.setProperty('--fc-today-bg-color', 'rgba(59, 130, 246, 0.2)', 'important');
+        el.style.setProperty('font-family', "'ProFontWindows', monospace", 'important');
+    };
+    enforceCalendarTheme(calendarEl);
+
     // Get the instructor ID from the data attribute
     const instructorId = calendarEl.dataset.instructorId;
     
     // Initialize the calendar
     const calendar = new Calendar(calendarEl, {
-        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, bootstrap5Plugin],
-        themeSystem: 'bootstrap5',
+        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
         initialView: 'timeGridWeek',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
+        datesSet: function() { enforceCalendarTheme(calendarEl); },
         events: {
             url: `/api/instructors/${instructorId}/classes`,
             method: 'GET',
             failure: function() {
-                alert('There was an error fetching classes!');
+                showAlertModal('There was an error fetching classes!', 'error');
             }
         },
         eventTimeFormat: { // like '14:30'

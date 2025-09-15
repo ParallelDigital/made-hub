@@ -41,7 +41,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <a href="{{ route('admin.coupons.edit', $coupon->id) }}" class="text-indigo-400 hover:text-indigo-300">Edit</a>
-                            <form action="{{ route('admin.coupons.destroy', $coupon->id) }}" method="POST" class="inline-block ml-4" onsubmit="return confirm('Are you sure you want to delete this coupon?');">
+                            <form id="delete-coupon-{{ $coupon->id }}-form" action="{{ route('admin.coupons.destroy', $coupon->id) }}" method="POST" class="inline-block ml-4" onsubmit="event.preventDefault(); showConfirmModal('Are you sure you want to delete this coupon?', function(){ document.getElementById('delete-coupon-{{ $coupon->id }}-form').submit(); })">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-400 hover:text-red-300">Delete</button>

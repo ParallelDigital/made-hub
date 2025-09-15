@@ -18,7 +18,7 @@
                class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
                 Edit Instructor
             </a>
-            <form action="{{ route('admin.instructors.destroy', $instructor) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this instructor?')">
+            <form id="delete-instructor-form" action="{{ route('admin.instructors.destroy', $instructor) }}" method="POST" class="inline" onsubmit="event.preventDefault(); showConfirmModal('Are you sure you want to delete this instructor?', function(){ document.getElementById('delete-instructor-form').submit(); })">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
@@ -320,7 +320,7 @@
                         method: 'GET',
                         failure: function(error) {
                             console.error('Error fetching classes:', error);
-                            alert('There was an error fetching classes. Please try again.');
+                            showAlertModal('There was an error fetching classes. Please try again.', 'error');
                         }
                     },
                     eventClick: function(info) {

@@ -47,15 +47,21 @@
         <form action="{{ route('admin.memberships.index') }}" method="GET" class="flex items-center gap-2">
             <input type="hidden" name="status" value="{{ $statusFilter }}">
             <label for="per_page" class="text-sm text-gray-400">Per Page:</label>
-            <select name="per_page" id="per_page" onchange="this.form.submit()" class="bg-gray-700 text-white text-sm rounded-md border-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="20" @if($perPage == 20) selected @endif>20</option>
-                <option value="50" @if($perPage == 50) selected @endif>50</option>
-                <option value="100" @if($perPage == 100) selected @endif>100</option>
-            </select>
+            <x-custom-select 
+                name="per_page" 
+                id="per_page"
+                :options="['20' => '20', '50' => '50', '100' => '100']"
+                :selected="$perPage"
+                autoSubmit="true" />
         </form>
         <form action="{{ route('admin.memberships.index') }}" method="GET">
             <input type="hidden" name="per_page" value="{{ $perPage }}">
-            <x-forms.select name="status" :options="$statusOptions" :selected="$statusFilter" />
+            <x-custom-select 
+                name="status" 
+                :options="$statusOptions" 
+                :selected="$statusFilter"
+                autoSubmit="true"
+                width="w-48" />
         </form>
     </div>
 </div>

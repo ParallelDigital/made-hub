@@ -26,27 +26,27 @@
             <!-- Type Filter -->
             <div>
                 <label for="type" class="text-sm font-medium text-gray-400">Type</label>
-                <select name="type" id="type" 
-                        class="mt-2 block w-full bg-gray-800 border-gray-600 text-white rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm h-10 px-3">
-                    <option value="">All Types</option>
-                    @foreach($types as $type)
-                        <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>
-                            {{ ucfirst($type) }}
-                        </option>
-                    @endforeach
-                </select>
+                <div class="mt-2">
+                    <x-custom-select 
+                        name="type" 
+                        id="type"
+                        :options="collect($types)->mapWithKeys(fn($type) => [$type => ucfirst($type)])->toArray()"
+                        :selected="request('type')"
+                        placeholder="All Types" />
+                </div>
             </div>
 
             <!-- Status Filter -->
             <div>
                 <label for="status" class="text-sm font-medium text-gray-400">Status</label>
-                <select name="status" id="status" 
-                        class="mt-2 block w-full bg-gray-800 border-gray-600 text-white rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm h-10 px-3">
-                    <option value="">All Statuses</option>
-                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    <option value="valid" {{ request('status') == 'valid' ? 'selected' : '' }}>Valid Now</option>
-                </select>
+                <div class="mt-2">
+                    <x-custom-select 
+                        name="status" 
+                        id="status"
+                        :options="['active' => 'Active', 'inactive' => 'Inactive', 'valid' => 'Valid Now']"
+                        :selected="request('status')"
+                        placeholder="All Statuses" />
+                </div>
             </div>
 
         </div>
@@ -138,7 +138,7 @@
                             <div class="flex items-center space-x-2">
                                 <a href="{{ route('admin.pricing.show', $tier) }}" class="text-purple-400 hover:text-purple-300">View</a>
                                 <a href="{{ route('admin.pricing.edit', $tier) }}" class="text-blue-400 hover:text-blue-300">Edit</a>
-                                <form action="{{ route('admin.pricing.destroy', $tier) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this pricing tier?')">
+                                <form id="delete-pricing-{{ $tier->id }}-form" action="{{ route('admin.pricing.destroy', $tier) }}" method="POST" class="inline" onsubmit="event.preventDefault(); showConfirmModal('Are you sure you want to delete this pricing tier?', function(){ document.getElementById('delete-pricing-{{ $tier->id }}-form').submit(); })">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-400 hover:text-red-300">Delete</button>
