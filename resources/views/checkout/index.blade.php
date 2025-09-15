@@ -56,7 +56,7 @@
             </div>
 
             <!-- Checkout Tabs and Panels -->
-            <div class="space-y-4">
+            <div class="space-y-4 md:col-span-3">
                 <!-- Tabs -->
                 @php $openCredits = ($autoOpenCredits ?? false); @endphp
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-2">
