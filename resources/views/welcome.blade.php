@@ -245,12 +245,12 @@
                                         
                                         @if($isFull)
                                             <button disabled 
-                                                    class="w-full sm:w-auto px-6 py-2 bg-gray-400 text-white text-sm font-medium rounded-md cursor-not-allowed">
+                                                    class="w-full sm:w-auto px-6 py-2 bg-gray-400 text-white text-md font-medium rounded-md cursor-not-allowed">
                                                 Class Full
                                             </button>
                                         @else
                                             <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" 
-                                                    class="w-full sm:w-auto px-6 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors hover:opacity-90">
+                                                    class="w-full sm:w-auto px-6 py-2 bg-primary text-white text-md font-medium rounded-md transition-colors hover:opacity-90">
                                                 Book Class ({{ $availableSpots }} left)
                                             </button>
                                         @endif
@@ -587,7 +587,7 @@
                                             Class Full
                                         </button>` :
                                         `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" 
-                                                class="whitespace-nowrap px-4 py-2 bg-primary text-white text-xs font-medium rounded-md transition-colors hover:opacity-90">
+                                                class="whitespace-nowrap px-4 py-2 bg-primary text-white text-md font-medium rounded-md transition-colors hover:opacity-90">
                                             Book Class (${classItem.available_spots} left)
                                         </button>`
                                     }
