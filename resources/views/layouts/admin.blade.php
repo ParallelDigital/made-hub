@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'Admin') - {{ config('app.name', 'Made Running') }}</title>
@@ -185,7 +185,7 @@
         <!-- Main Content -->
         <div class="flex-1 lg:ml-64">
             <!-- Top Bar -->
-            <div class="bg-gray-800 border-b border-gray-700 lg:hidden">
+            <div class="bg-gray-800 border-b border-gray-700 lg:hidden mobile-safe-top">
                 <div class="flex items-center justify-between px-4 py-3">
                     <button @click="sidebarOpen = !sidebarOpen" class="text-gray-400 hover:text-white">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,7 +201,7 @@
             </div>
 
             <!-- Page Content -->
-            <main class="p-6">
+            <main class="p-4 sm:p-6">
                 @yield('content')
             </main>
         </div>

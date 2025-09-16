@@ -178,6 +178,41 @@ html, body {
     }
 }
 
+/* Admin dashboard mobile improvements */
+/* Horizontal scroll with snap for top controls on mobile */
+.admin-top-controls {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x proximity;
+}
+.admin-top-controls::-webkit-scrollbar {
+    display: none;
+}
+.admin-top-controls > * {
+    scroll-snap-align: start;
+}
+
+/* Compact tables and better wrapping on small screens */
+@media (max-width: 640px) {
+    .admin-table th,
+    .admin-table td {
+        padding-left: 0.75rem; /* px-3 */
+        padding-right: 0.75rem; /* px-3 */
+    }
+    .admin-table th {
+        font-size: 0.75rem; /* text-xs */
+        letter-spacing: 0.02em;
+    }
+    .admin-table td {
+        font-size: 0.875rem; /* text-sm */
+    }
+    /* Override Tailwind whitespace-nowrap in tight spaces */
+    .admin-table td.whitespace-nowrap {
+        white-space: normal !important;
+    }
+}
+
 /* Mobile-specific improvements */
 @media (max-width: 640px) {
     /* Better form controls on mobile */

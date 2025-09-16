@@ -3,10 +3,10 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="admin-stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
     <!-- Stats Cards -->
     <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700">
-        <div class="p-5">
+        <div class="p-4 sm:p-5">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,7 +24,7 @@
     </div>
 
     <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700">
-        <div class="p-5">
+        <div class="p-4 sm:p-5">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@
     </div>
 
     <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700">
-        <div class="p-5">
+        <div class="p-4 sm:p-5">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,8 +59,8 @@
         </div>
     </div>
 
-    <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700 cursor-pointer hover:border-primary transition-colors" onclick="window.location='{{ route('admin.bookings.index') }}'">
-        <div class="p-5">
+    <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700 cursor-pointer hover:border-primary transition-colors" onclick="window.location='{{ route('admin.bookings.index') }}'" role="button" tabindex="0">
+        <div class="p-4 sm:p-5">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,7 +75,7 @@
                 </div>
             </div>
             <div class="mt-3">
-                <a href="{{ route('admin.bookings.index') }}" class="text-primary text-sm hover:text-purple-400">View bookings →</a>
+                <a href="{{ route('admin.bookings.index') }}" role="button" class="inline-flex items-center min-h-[44px] text-primary text-sm hover:text-purple-400">View bookings →</a>
             </div>
         </div>
     </div>
@@ -86,14 +86,14 @@
     <div class="px-4 py-5 sm:p-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg leading-6 font-medium text-white">Recent Bookings</h3>
-            <a href="{{ route('admin.bookings.index') }}" class="text-primary hover:text-purple-400 text-sm font-medium">
+            <a href="{{ route('admin.bookings.index') }}" role="button" class="inline-flex items-center min-h-[44px] text-primary hover:text-purple-400 text-sm font-medium">
                 View all bookings →
             </a>
         </div>
 
         @if($recentBookings->count() > 0)
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-700">
+                <table class="admin-table min-w-full divide-y divide-gray-700">
                     <thead class="bg-gray-700">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Member</th>
@@ -180,15 +180,15 @@
                     </h3>
                 </div>
                 
-                <div class="flex items-center space-x-4">
+                <div class="admin-top-controls flex items-center space-x-4 overflow-x-auto -mx-2 px-2 sm:overflow-visible sm:mx-0 sm:px-0">
                     <!-- View Toggle -->
                     <div class="flex bg-gray-700 rounded-lg p-1">
                         <a href="{{ route('admin.dashboard', ['view' => 'weekly', 'week' => $weekOffset]) }}" 
-                           class="px-3 py-1 text-sm font-medium rounded-md transition-colors {{ $view === 'weekly' ? 'bg-primary text-white' : 'text-gray-300 hover:text-white' }}">
+                           class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-md transition-colors {{ $view === 'weekly' ? 'bg-primary text-white' : 'text-gray-300 hover:text-white' }}" role="button">
                             Weekly
                         </a>
                         <a href="{{ route('admin.dashboard', ['view' => 'monthly', 'week' => $weekOffset]) }}" 
-                           class="px-3 py-1 text-sm font-medium rounded-md transition-colors {{ $view === 'monthly' ? 'bg-primary text-white' : 'text-gray-300 hover:text-white' }}">
+                           class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-md transition-colors {{ $view === 'monthly' ? 'bg-primary text-white' : 'text-gray-300 hover:text-white' }}" role="button">
                             Monthly
                         </a>
                     </div>
@@ -196,19 +196,19 @@
                     <!-- Navigation Controls -->
                     <div class="flex items-center space-x-2">
                         <a href="{{ route('admin.dashboard', ['view' => $view, 'week' => $weekOffset - 1]) }}" 
-                           class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors">
+                           class="inline-flex items-center p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors" role="button">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                             </svg>
                         </a>
                         
                         <a href="{{ route('admin.dashboard', ['view' => $view, 'week' => 0]) }}" 
-                           class="px-3 py-1 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors">
+                           class="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors" role="button">
                             Today
                         </a>
                         
                         <a href="{{ route('admin.dashboard', ['view' => $view, 'week' => $weekOffset + 1]) }}" 
-                           class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors">
+                           class="inline-flex items-center p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors" role="button">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
@@ -285,7 +285,7 @@
                 <div class="text-sm text-gray-400">
                     Showing {{ $calendarData->flatten()->count() }} active classes
                 </div>
-                <a href="{{ route('admin.classes.index') }}" class="text-primary hover:text-purple-400 text-sm font-medium">
+                <a href="{{ route('admin.classes.index') }}" role="button" class="inline-flex items-center min-h-[44px] text-primary hover:text-purple-400 text-sm font-medium">
                     View all classes →
                 </a>
             </div>
@@ -299,19 +299,19 @@
         <div class="px-4 py-5 sm:p-6">
             <h3 class="text-lg leading-6 font-medium text-white">Quick Actions</h3>
             <div class="mt-5 grid grid-cols-1 gap-3">
-                <a href="{{ route('admin.classes.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-purple-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                <a href="{{ route('admin.classes.create') }}" role="button" class="w-full inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-purple-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                     Add New Class
                 </a>
-                <a href="{{ route('admin.instructors.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-transparent hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                <a href="{{ route('admin.instructors.create') }}" role="button" class="w-full inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-transparent hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                     Add New Instructor
                 </a>
-                <a href="{{ route('admin.memberships.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-transparent hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                <a href="{{ route('admin.memberships.create') }}" role="button" class="w-full inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-transparent hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
