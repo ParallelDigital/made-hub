@@ -75,24 +75,24 @@
         </div>
 
         <!-- Hero Section -->
-        <div class="relative h-[550px] md:h-[550px] flex items-center overflow-hidden">
+        <div class="hero-section relative h-[550px] md:h-[550px] flex items-center overflow-hidden">
             <!-- Background Image -->
             <div class="absolute inset-0 bg-cover bg-center bg-no-repeat z-5" style="background-image: url('{{ asset('made-club.jpg') }}');"></div>
             <div class="absolute inset-0 bg-black/70 z-20"></div>
 
             <!-- Content -->
-            <div class="relative z-30 px-6 max-w-6xl container mx-auto">
+            <div class="relative z-30 px-4 sm:px-6 max-w-6xl container mx-auto">
 
-                <h1 class="text-5xl md:text-8xl font-black mb-6 tracking-tight">
+                <h1 class="hero-title text-4xl sm:text-5xl md:text-8xl font-black mb-6 tracking-tight">
                     <span class="block text-white">MADE TO</span>
                     <span class="block text-primary">ELEVATE</span>
                 </h1>
 
-                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                    <a href="{{ route('register') }}" class="w-full sm:w-auto bg-primary text-black px-8 py-4 text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">
+                <div class="button-group flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <a href="{{ route('register') }}" class="w-full sm:w-auto bg-primary text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">
                         BOOK YOUR CLASS
                     </a>
-                    <a href="#schedule" class="w-full sm:w-auto border-2 border-white text-white px-8 py-4 text-lg font-bold rounded hover:bg-white hover:text-black transition-all text-center">
+                    <a href="#schedule" class="w-full sm:w-auto border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded hover:bg-white hover:text-black transition-all text-center">
                         VIEW SCHEDULE
                     </a>
                 </div>
@@ -100,18 +100,18 @@
         </div>
 
         <!-- Membership Section -->
-        <div id="membership" class="bg-white text-black py-12 sm:py-16">
+        <div id="membership" class="bg-white text-black py-8 sm:py-12 lg:py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="membership-grid grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                     <!-- Image Column -->
-                    <div>
+                    <div class="membership-image">
                         <img src="{{ asset('made-club.jpg') }}" alt="Group fitness class" class="rounded-lg shadow-lg w-full h-full object-cover">
                     </div>
                     <!-- Content Column -->
-                    <div class="text-left">
-                        <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">ARE YOU READY <br>TO ELEVATE</h2>
+                    <div class="membership-content text-left">
+                        <h2 class="membership-title text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight">ARE YOU READY <br>TO ELEVATE</h2>
                         <p class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">PERKS OF MEMBERSHIP</p>
-                        <ul class="space-y-4 mb-8">
+                        <ul class="membership-list space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                             <li class="flex items-center">
                                 <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 <span class="font-semibold text-gray-700 uppercase">Personal Accountability Adviser</span>
@@ -158,34 +158,34 @@
         </div>
 
         <!-- Schedule Section -->
-        <div id="schedule" class="bg-white text-black py-8">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="schedule" class="bg-white text-black py-6 sm:py-8">
+            <div class="schedule-container max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
                 <!-- Week Navigation -->
-                <div class="px-4 sm:px-6 py-4">
+                <div class="px-2 sm:px-4 lg:px-6 py-4">
                         <div class="flex items-center justify-between">
                             <!-- Previous Week Arrow -->
-                            <button onclick="loadDate('{{ $prevWeek }}')" class="p-2 text-gray-700 transition-colors" id="prev-week-btn">
+                            <button onclick="loadDate('{{ $prevWeek }}')" class="p-2 text-gray-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" id="prev-week-btn">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
                             </button>
 
                             <!-- Week Days -->
-                            <div class="flex space-x-2 flex-1 overflow-x-auto px-2" id="week-days">
+                            <div class="week-navigation flex space-x-1 sm:space-x-2 flex-1 overflow-x-auto px-1 sm:px-2" id="week-days">
                                 <?php foreach($weekDays as $day): ?>
-                                <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-3 py-2 transition-colors cursor-pointer flex-1 min-w-[60px]
+                                <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-2 sm:px-3 py-2 transition-colors cursor-pointer flex-1 min-w-[50px] sm:min-w-[60px] min-h-[44px]
                                     {{ $day['is_selected'] ? 'text-black' : ($day['is_today'] ? 'text-white font-bold' : 'text-gray-400') }}">
                                     <div class="text-xs font-medium">{{ $day['day'] }}</div>
-                                    <div class="text-xl font-bold">{{ $day['date'] }}</div>
+                                    <div class="text-lg sm:text-xl font-bold">{{ $day['date'] }}</div>
                                     <?php if(!empty($day['is_selected'])): ?>
-                                        <div class="w-8 h-1 bg-primary mx-auto mt-1"></div>
+                                        <div class="w-6 sm:w-8 h-1 bg-primary mx-auto mt-1"></div>
                                     <?php endif; ?>
                                 </button>
                                 <?php endforeach; ?>
                             </div>
 
                             <!-- Next Week Arrow -->
-                            <button onclick="loadDate('{{ $nextWeek }}')" class="p-2 text-gray-700 transition-colors" id="next-week-btn">
+                            <button onclick="loadDate('{{ $nextWeek }}')" class="p-2 text-gray-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" id="next-week-btn">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
@@ -194,13 +194,13 @@
                 </div>
 
                 <!-- Selected Date Header -->
-                <div class="px-4 sm:px-6 py-4 bg-gray-100 border-t border-b border-gray-300">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-black" id="selected-date-header">{{ $selectedDate->format('l, F j, Y') }}</h3>
+                <div class="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 bg-gray-100 border-t border-b border-gray-300">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <h3 class="text-base sm:text-lg font-semibold text-black" id="selected-date-header">{{ $selectedDate->format('l, F j, Y') }}</h3>
                             <button
                                 type="button"
                                 onclick="loadDate('{{ now()->toDateString() }}')"
-                                class="inline-flex items-center px-3 py-1 rounded-md bg-white border border-gray-300 text-black text-sm hover:bg-gray-50">
+                                class="inline-flex items-center px-3 py-2 rounded-md bg-white border border-gray-300 text-black text-sm hover:bg-gray-50 min-h-[44px]">
                                 Today
                             </button>
                         </div>
@@ -215,28 +215,28 @@
                     </div>
 
                     <!-- Selected Date Classes -->
-                    <div class="px-6 py-4" id="classes-container">
+                    <div class="px-2 sm:px-4 lg:px-6 py-4" id="classes-container">
                         <?php if($selectedDateClasses->count() > 0): ?>
-                            <div class="space-y-2 sm:space-y-3" id="classes-list">
+                            <div class="space-y-3 sm:space-y-4" id="classes-list">
                                 <?php foreach($selectedDateClasses as $class): ?>
-                                    <div class="flex items-center py-6 border-b border-gray-300 last:border-b-0">
-                                    <div class="flex-shrink-0 w-20 text-left">
-                                        <div class="text-lg font-bold text-black">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</div>
+                                    <div class="class-card flex flex-col sm:flex-row items-start sm:items-center py-4 sm:py-6 border-b border-gray-300 last:border-b-0 gap-3 sm:gap-4">
+                                    <div class="class-time flex-shrink-0 w-full sm:w-20 text-left">
+                                        <div class="text-base sm:text-lg font-bold text-black">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</div>
                                         <div class="text-sm text-gray-600">{{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} min.</div>
                                     </div>
                                     
-                                    <div class="flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center ml-6">
+                                    <div class="class-instructor flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
                                         <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
                                              alt="{{ $class->instructor->name ?? 'Instructor' }}" 
                                              class="w-12 h-12 rounded-full object-cover">
                                     </div>
                                     
-                                    <div class="flex-1 ml-0 sm:ml-4">
-                                        <div class="font-semibold text-gray-900">{{ $class->name }} ({{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} Min)</div>
+                                    <div class="class-details flex-1">
+                                        <div class="font-semibold text-gray-900 text-sm sm:text-base">{{ $class->name }} ({{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} Min)</div>
                                         <div class="text-sm text-gray-600">{{ $class->instructor->name ?? 'No Instructor' }}</div>
                                     </div>
                                     
-                                    <div class="flex-shrink-0 w-full sm:w-auto ml-0 sm:ml-4 mt-4 sm:mt-0">
+                                    <div class="class-booking flex-shrink-0 w-full sm:w-auto">
                                         @php
                                             $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
                                             $availableSpots = max(0, $class->max_spots - $currentBookings);
@@ -245,12 +245,12 @@
                                         
                                         @if($isFull)
                                             <button disabled 
-                                                    class="w-full sm:w-auto px-6 py-2 bg-gray-400 text-white text-md font-medium rounded-md cursor-not-allowed">
+                                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gray-400 text-white text-sm sm:text-base font-medium rounded-md cursor-not-allowed min-h-[44px]">
                                                 Class Full
                                             </button>
                                         @else
                                             <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" 
-                                                    class="w-full sm:w-auto px-6 py-2 bg-primary text-white text-md font-medium rounded-md transition-colors hover:opacity-90">
+                                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary text-black text-sm sm:text-base font-medium rounded-md transition-colors hover:opacity-90 min-h-[44px]">
                                                 Book Class ({{ $availableSpots }} left)
                                             </button>
                                         @endif
@@ -380,19 +380,19 @@
         </div>
 
         <!-- Footer -->
-        <footer class="bg-black border-t border-gray-800 py-12">
-            <div class="max-w-6xl mx-auto px-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
-                    <div>
+        <footer class="bg-black border-t border-gray-800 py-8 sm:py-12">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="footer-grid grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 text-center md:text-left">
+                    <div class="footer-section">
                         <div class="flex items-center justify-center md:justify-start space-x-2 mb-4">
-                            <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20">
+                            <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-12 sm:h-15 w-16 sm:w-20">
                         </div>
                         <p class="text-gray-400 text-sm">
                             Transform your fitness journey with our high-intensity training programs designed to push your limits.
                         </p>
                     </div>
 
-                    <div>
+                    <div class="footer-section">
                         <h3 class="text-white font-semibold mb-4">COMPANY</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
                             <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
@@ -401,7 +401,7 @@
                         </ul>
                     </div>
 
-                    <div>
+                    <div class="footer-section">
                         <h3 class="text-white font-semibold mb-4">SUPPORT</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
                             <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
@@ -410,7 +410,7 @@
                         </ul>
                     </div>
 
-                    <div>
+                    <div class="footer-section">
                         <h3 class="text-white font-semibold mb-4">CONNECT</h3>
                         <div class="flex space-x-4 justify-center md:justify-start">
                             <a href="#" class="text-gray-400 hover:text-white transition-colors">
