@@ -146,10 +146,63 @@
                 <span class="text-white ml-2">{{ $user->last_login ? $user->last_login->format('M j, Y g:i A') : 'Never' }}</span>
             </div>
             <div>
-                <span class="text-gray-400">Credits:</span>
+                <span class="text-gray-400">Legacy Credits:</span>
                 <span class="text-white ml-2">{{ $user->credits ?? 0 }}</span>
             </div>
+            <div>
+                <span class="text-gray-400">Monthly Credits:</span>
+                <span class="text-white ml-2">{{ $user->monthly_credits ?? 0 }}</span>
+            </div>
         </div>
+    </div>
+
+    <!-- Credits Management -->
+    <div class="mt-6 bg-gray-800 shadow rounded-lg border border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-white mb-4">Credits Management</h3>
+
+        @if(session('success'))
+            <div class="mb-4 p-3 rounded border border-green-700 bg-green-900/30 text-green-300 text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if($errors->any())
+            <div class="mb-4 p-3 rounded border border-red-700 bg-red-900/30 text-red-300 text-sm">
+                <ul class="list-disc ml-5">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('admin.users.credits.add', $user) }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            @csrf
+
+            <div>
+                <label for="credit_type" class="block text-sm font-medium text-gray-400">Credit Type</label>
+                <select id="credit_type" name="credit_type" class="mt-1 block w-full bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm h-10 px-3">
+                    <option value="legacy">Legacy Credits (one-off)</option>
+                    <option value="monthly">Monthly Credits (membership top-up)</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="amount" class="block text-sm font-medium text-gray-400">Amount</label>
+                <input type="number" id="amount" name="amount" min="1" max="1000" value="1" class="mt-1 block w-full bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm h-10 px-3">
+            </div>
+
+            <div class="md:col-span-3">
+                <label for="note" class="block text-sm font-medium text-gray-400">Note (optional)</label>
+                <input type="text" id="note" name="note" maxlength="500" placeholder="Reason or internal note (optional)" class="mt-1 block w-full bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm h-10 px-3">
+            </div>
+
+            <div class="md:col-span-3 flex justify-end">
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary hover:bg-purple-400 text-white rounded-md text-sm font-semibold shadow-sm">
+                    Add Credits
+                </button>
+            </div>
+        </form>
+        <p class="mt-3 text-xs text-gray-400">Tip: Use Legacy Credits for ad-hoc bookings without a membership. Use Monthly Credits to top-up members for the current month.</p>
     </div>
 </div>
 @endsection

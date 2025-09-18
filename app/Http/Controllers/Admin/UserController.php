@@ -87,6 +87,44 @@ class UserController extends Controller
     }
 
     /**
+     * Add credits to a user (legacy credits or monthly credits).
+     */
+    public function addCredits(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'amount' => 'required|integer|min:1|max:1000',
+            'credit_type' => 'required|in:legacy,monthly',
+            'note' => 'nullable|string|max:500',
+        ]);
+
+        $amount = (int) $data['amount'];
+        $type = $data['credit_type'];
+
+        if ($type === 'legacy') {
+            // One-off legacy credits used when no active membership
+            $user->increment('credits', $amount);
+            $label = 'credits';
+        } else {
+            // Monthly credit top-up for members
+            $user->increment('monthly_credits', $amount);
+            $label = 'monthly credits';
+        }
+
+        $note = isset($data['note']) ? $data['note'] : null;
+
+        \Log::info('Admin added user credits', [
+            'admin_id' => $request->user()->id,
+            'user_id' => $user->id,
+            'amount' => $amount,
+            'credit_type' => $type,
+            'note' => $note,
+        ]);
+
+        $userLabel = $user->name ?: $user->email;
+        return back()->with('success', "Added {$amount} {$label} to {$userLabel}.");
+    }
+
+    /**
      * Export filtered users as CSV.
      */
     public function export(Request $request)
