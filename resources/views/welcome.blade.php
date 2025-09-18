@@ -316,7 +316,41 @@
                 }
                 
                 .week-nav-container {
-                    display: none; /* Hide week navigation on mobile */
+                    padding: 1rem;
+                    margin-bottom: 0;
+                }
+                
+                .week-navigation {
+                    gap: 0.5rem;
+                    padding: 0.5rem 0;
+                }
+                
+                .week-day-btn {
+                    min-width: 50px;
+                    padding: 0.5rem 0.25rem;
+                    font-size: 0.875rem;
+                }
+                
+                .week-day-btn .day-name {
+                    font-size: 0.75rem;
+                    font-weight: 500;
+                    color: #6b7280;
+                    margin-bottom: 0.25rem;
+                }
+                
+                .week-day-btn .day-number {
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    color: #000;
+                }
+                
+                .week-day-btn.selected .day-name {
+                    color: #000;
+                }
+                
+                .week-day-btn.today .day-name {
+                    color: #000;
+                    font-weight: 600;
                 }
                 
                 .date-header {
