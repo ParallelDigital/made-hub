@@ -123,6 +123,46 @@ html, body {
     }
 }
 
+/* Enhanced Calendar Styling */
+#bookClass {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+}
+
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: #374151;
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Calendar day button animations */
+#dash-week-days button {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#dash-week-days button:hover {
+    transform: translateY(-1px);
+}
+
+#dash-week-days button.selected {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
 /* Dashboard mobile improvements */
 @media (max-width: 1024px) {
     /* Dashboard grid mobile */
@@ -242,6 +282,29 @@ html, body {
     
     .class-booking {
         margin-top: 0.75rem;
+    }
+    
+    /* Enhanced calendar mobile improvements */
+    #bookClass {
+        margin-bottom: 1.5rem;
+    }
+    
+    #dash-week-days {
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+    }
+    
+    #dash-week-days button {
+        min-width: 50px;
+        padding: 0.5rem;
+    }
+    
+    #dash-week-days button div:first-child {
+        font-size: 0.625rem;
+    }
+    
+    #dash-week-days button div:last-child {
+        font-size: 1rem;
     }
 }
 

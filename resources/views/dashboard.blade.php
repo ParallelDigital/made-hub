@@ -3,9 +3,9 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="dashboard-grid max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
- <!-- Book a Class (User Schedule) - Top, Single Column -->
- <div id="bookClass" class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-1 lg:order-1 lg:col-span-1">
+<!-- Book a Class Section - Full Width Container -->
+<div class="max-w-7xl mx-auto mb-6">
+    <div id="bookClass" class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-6">
         <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
             <h3 class="text-base sm:text-lg font-semibold text-white">Book a Class</h3>
             <div class="flex items-center gap-2">
@@ -13,16 +13,24 @@
                 <input id="dash-class-date" type="date" class="hidden md:block bg-gray-900 border border-gray-700 text-gray-100 text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary" value="{{ now()->format('Y-m-d') }}" />
             </div>
         </div>
-        <!-- Week Navigation -->
-        <div class="bg-gray-900 border border-gray-700 rounded-md p-2 mb-3">
-            <div class="flex items-center">
-                <button id="dash-prev-week" class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-800 text-gray-300" type="button" aria-label="Previous week">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <div id="dash-week-days" class="flex-1 flex items-center gap-3 overflow-x-auto no-scrollbar px-2"></div>
-                <button id="dash-next-week" class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-800 text-gray-300" type="button" aria-label="Next week">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
+        <!-- Enhanced Week Navigation -->
+        <div class="bg-gray-900 border border-gray-700 rounded-lg p-3 mb-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="text-sm font-medium text-gray-300">Select Date</h4>
+                <div class="flex items-center gap-2">
+                    <button id="dash-prev-week" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors" type="button" aria-label="Previous week">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button id="dash-next-week" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors" type="button" aria-label="Next week">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="relative">
+                <div id="dash-week-days" class="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pb-2"></div>
+                <!-- Scroll indicators -->
+                <div class="absolute left-0 top-0 bottom-2 w-4 bg-gradient-to-r from-gray-900 to-transparent pointer-events-none opacity-0 transition-opacity" id="scroll-left-indicator"></div>
+                <div class="absolute right-0 top-0 bottom-2 w-4 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none opacity-0 transition-opacity" id="scroll-right-indicator"></div>
             </div>
         </div>
 
@@ -54,7 +62,10 @@
             </div>
         </template>
     </div>
-    
+</div>
+
+<!-- Main Dashboard Grid for Other Cards -->
+<div class="dashboard-grid max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
     <!-- QR Code Card -->
     <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-2 lg:order-2">
         <h3 class="text-base sm:text-lg font-semibold text-white mb-3">Your Check-in QR</h3>
@@ -233,17 +244,45 @@
             weekDaysContainer.innerHTML = '';
             weekDays.forEach(day => {
                 const btn = document.createElement('button');
-                btn.className = 'flex-shrink-0 text-center px-1 py-1 min-w-[48px]';
+                btn.className = `flex-shrink-0 text-center px-3 py-2 min-w-[60px] rounded-lg transition-all duration-200 ${
+                    day.is_selected 
+                        ? 'bg-primary text-black font-semibold shadow-md transform scale-105' 
+                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white hover:scale-102'
+                }`;
                 btn.setAttribute('data-date', day.full_date);
-                btn.innerHTML = `<div class="text-[11px] ${day.is_selected ? 'text-white font-semibold' : 'text-gray-400'}">${day.day}</div><div class="text-lg font-bold ${day.is_selected ? 'text-white' : 'text-gray-200'}">${day.date}</div>`;
+                btn.innerHTML = `
+                    <div class="text-xs font-medium ${day.is_selected ? 'text-black' : 'text-gray-400'}">${day.day}</div>
+                    <div class="text-lg font-bold ${day.is_selected ? 'text-black' : 'text-gray-200'}">${day.date}</div>
+                `;
                 btn.addEventListener('click', () => dashLoadDate(day.full_date));
                 weekDaysContainer.appendChild(btn);
             });
+            
             prevWeekBtn.onclick = () => dashLoadDate(prevWeek);
             nextWeekBtn.onclick = () => dashLoadDate(nextWeek);
-            const selected = weekDaysContainer.querySelector('[data-date][class]');
-            if (selected && selected.scrollIntoView) {
-                selected.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+            
+            // Scroll selected day into view
+            const selected = weekDaysContainer.querySelector(`[data-date="${dashCurrentDate}"]`);
+            if (selected) {
+                setTimeout(() => {
+                    selected.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+                }, 100);
+            }
+            
+            // Update scroll indicators
+            updateScrollIndicators();
+        }
+
+        function updateScrollIndicators() {
+            const leftIndicator = document.getElementById('scroll-left-indicator');
+            const rightIndicator = document.getElementById('scroll-right-indicator');
+            
+            if (leftIndicator && rightIndicator) {
+                const canScrollLeft = weekDaysContainer.scrollLeft > 0;
+                const canScrollRight = weekDaysContainer.scrollLeft < (weekDaysContainer.scrollWidth - weekDaysContainer.clientWidth);
+                
+                leftIndicator.style.opacity = canScrollLeft ? '1' : '0';
+                rightIndicator.style.opacity = canScrollRight ? '1' : '0';
             }
         }
 
@@ -280,6 +319,11 @@
             })
             .catch(()=> alert('Network error. Please try again.'));
         });
+
+        // Add scroll event listener for indicators
+        if (weekDaysContainer) {
+            weekDaysContainer.addEventListener('scroll', updateScrollIndicators);
+        }
 
         // Init
         fetchClasses(dashCurrentDate);
