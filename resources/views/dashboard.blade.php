@@ -3,9 +3,9 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="dashboard-grid max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+<div class="dashboard-grid max-w-7xl mx-auto grid grid-cols-1 gap-4 sm:gap-6">
     <!-- QR Code Card -->
-    <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 lg:col-span-1">
+    <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-2">
         <h3 class="text-base sm:text-lg font-semibold text-white mb-3">Your Check-in QR</h3>
         <p class="text-sm text-gray-300 mb-4">Show this QR at the studio to check in quickly.</p>
         <div class="qr-container bg-gray-900 rounded-lg p-3 sm:p-4 flex items-center justify-center">
@@ -85,14 +85,15 @@
     </div>
     
     <!-- Book a Class (User Schedule) -->
-    <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 lg:col-span-3">
-        <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+    <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-1">
+        <div class="flex items-center justify-between gap-3 flex-wrap mb-2">
             <h3 class="text-base sm:text-lg font-semibold text-white">Book a Class</h3>
             <div class="flex items-center gap-2">
                 <label for="dash-class-date" class="text-sm text-gray-300">Date</label>
                 <input id="dash-class-date" type="date" class="bg-gray-900 border border-gray-700 text-gray-100 text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary" value="{{ now()->format('Y-m-d') }}" />
             </div>
         </div>
+        <p class="text-xs text-gray-400 mb-3">Choose a date to see classes you can book. Buttons are disabled for full or past classes.</p>
         <div id="dash-classes-loading" class="text-gray-300 text-sm py-6 hidden">Loading classes...</div>
         <div id="dash-classes-empty" class="text-gray-300 text-sm py-6 hidden">No classes scheduled for this date.</div>
         <div id="dash-classes-list" class="divide-y divide-gray-700"></div>
@@ -106,8 +107,11 @@
                 <div class="flex-1 min-w-0">
                     <div class="text-white font-medium truncate" data-field="title">Class Name</div>
                     <div class="text-gray-300 text-xs" data-field="instructor">Instructor</div>
+                    <div class="mt-1">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-100" data-field="spots">0 left</span>
+                    </div>
                 </div>
-                <div class="shrink-0 flex items-center gap-2" data-field="actions">
+                <div class="shrink-0 flex items-stretch gap-2 w-full sm:w-auto sm:items-center sm:justify-end" data-field="actions">
                     <!-- Buttons injected here -->
                 </div>
             </div>
@@ -161,15 +165,17 @@
                 node.querySelector('[data-field="duration"]').textContent = `${c.duration || 60} min.`;
                 node.querySelector('[data-field="title"]').textContent = `${c.name}`;
                 node.querySelector('[data-field="instructor"]').textContent = c.instructor?.name || 'No Instructor';
+                const spotsTxt = (c.available_spots ?? 0) > 0 ? `${c.available_spots} left` : 'Full';
+                node.querySelector('[data-field="spots"]').textContent = spotsTxt;
                 const actions = node.querySelector('[data-field="actions"]');
 
                 if (c.is_past){
-                    actions.appendChild(btn(`<button class="px-3 py-2 rounded border border-gray-600 text-gray-400 text-xs cursor-not-allowed" disabled>Past</button>`));
+                    actions.appendChild(btn(`<button class="px-3 py-2 rounded border border-gray-600 text-gray-400 text-xs cursor-not-allowed w-full sm:w-auto" disabled>Past</button>`));
                 } else if ((c.available_spots ?? 0) <= 0){
-                    actions.appendChild(btn(`<button class="px-3 py-2 rounded border border-gray-600 text-gray-400 text-xs cursor-not-allowed" disabled>Full</button>`));
+                    actions.appendChild(btn(`<button class="px-3 py-2 rounded border border-gray-600 text-gray-400 text-xs cursor-not-allowed w-full sm:w-auto" disabled>Full</button>`));
                 } else {
-                    actions.appendChild(btn(`<a href="{{ url('/checkout') }}/${c.id}" class="px-3 py-2 rounded border border-primary text-black bg-primary hover:opacity-90 text-xs">Reserve</a>`));
-                    actions.appendChild(btn(`<button data-class-id="${c.id}" class="px-3 py-2 rounded border border-gray-300 text-white hover:bg-gray-700 text-xs dash-use-credits" ${USER_CREDITS>0?'':'disabled title="No credits" class="cursor-not-allowed opacity-60"'}>Use Credits</button>`));
+                    actions.appendChild(btn(`<a href="{{ url('/checkout') }}/${c.id}" class="px-3 py-2 rounded border border-primary text-black bg-primary hover:opacity-90 text-xs w-full sm:w-auto">Reserve</a>`));
+                    actions.appendChild(btn(`<button data-class-id="${c.id}" class="px-3 py-2 rounded border border-gray-300 text-white hover:bg-gray-700 text-xs dash-use-credits w-full sm:w-auto" ${USER_CREDITS>0?'':'disabled title=\"No credits\" class=\"cursor-not-allowed opacity-60\"'}>Use Credits</button>`));
                 }
                 listEl.appendChild(node);
             });
