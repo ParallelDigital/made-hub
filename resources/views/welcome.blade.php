@@ -40,6 +40,8 @@
                 border-bottom: 1px solid #e5e7eb;
             }
             
+            html { scroll-behavior: smooth; }
+            
             .week-navigation {
                 display: flex;
                 align-items: center;
@@ -564,7 +566,6 @@
                     <!-- Content Column -->
                     <div class="membership-content text-left">
                         <h2 class="membership-title text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight">ARE YOU READY <br>TO ELEVATE</h2>
-                        <p class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">PERKS OF MEMBERSHIP</p>
                         <a href="#" class="inline-block bg-black text-white px-10 py-4 text-sm font-bold uppercase tracking-widest rounded hover:bg-gray-800 transition-all">
                             SIGN UP NOW
                         </a>
@@ -956,6 +957,12 @@
                 // Update arrow buttons
                 document.getElementById('prev-week-btn').setAttribute('onclick', `loadDate('${prevWeek}')`);
                 document.getElementById('next-week-btn').setAttribute('onclick', `loadDate('${nextWeek}')`);
+
+                // Smoothly center the selected day in the scroll container
+                const selectedBtn = weekDaysContainer.querySelector('.week-day-btn.selected') || weekDaysContainer.querySelector('.week-day-btn.today');
+                if (selectedBtn && typeof selectedBtn.scrollIntoView === 'function') {
+                    selectedBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
             }
 
             // Delegated click listener to ensure date selection works even if inline handlers fail
@@ -1082,6 +1089,12 @@
                     // Add a small delay to ensure all fonts and styles are loaded
                     setTimeout(() => {
                         scheduleContainer.style.opacity = '1';
+                        // After reveal, center currently selected week day
+                        const container = document.getElementById('week-days');
+                        const selected = container?.querySelector('.week-day-btn.selected') || container?.querySelector('.week-day-btn.today');
+                        if (selected && typeof selected.scrollIntoView === 'function') {
+                            selected.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        }
                     }, 100);
                 }
             }
