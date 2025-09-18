@@ -110,7 +110,7 @@ Route::get('/qr-code/{user}', [App\Http\Controllers\UserController::class, 'gene
 Route::get('/dashboard', function () {
     $user = Auth::user();
 
-    if ($user->role === 'admin') {
+    if (in_array($user->role, ['admin', 'administrator'], true)) {
         return redirect()->route('admin.dashboard');
     }
 

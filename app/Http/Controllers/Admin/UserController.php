@@ -58,7 +58,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = ['subscriber', 'administrator', 'editor', 'author', 'contributor', 'wpamelia-customer'];
+        // Include both 'administrator' and 'admin' so either can be assigned
+        $roles = ['subscriber', 'administrator', 'admin', 'editor', 'author', 'contributor', 'wpamelia-customer'];
         return view('admin.users.edit', compact('user', 'roles'));
     }
 

@@ -92,7 +92,7 @@
                 $currentCredits = $hasMembership ? Auth::user()->getAvailableCredits() : (Auth::user()->credits ?? 0);
                 $hasAnyCredits = ($currentCredits ?? 0) > 0;
             @endphp
-            @if($role === 'admin' || $role === 'instructor' || $hasAnyCredits)
+            @if($role === 'admin' || $role === 'administrator' || $role === 'instructor' || $hasAnyCredits)
                 <p class="break-words"><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white text-sm sm:text-base">{{ Auth::user()->pin_code ?? '— — — —' }}</span></p>
             @else
                 <p class="break-words"><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white text-sm sm:text-base">{{ Auth::user()->pin_code ? '••••' : '— — — —' }}</span></p>
