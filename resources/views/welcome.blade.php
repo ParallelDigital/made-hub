@@ -18,7 +18,6 @@
         <style>
             /* Override ProFontWindows enforcement for homepage */
             body.font-inter, body.font-inter *,
-            body.font-inter *::before, body.font-inter *::after,
             .font-inter, .font-inter *, .font-inter *::before, .font-inter *::after {
                 font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif !important;
                 font-weight: 400 !important;
@@ -733,7 +732,8 @@
                                 </div>
                                 <div class="text-left">
                                     <div id="useCreditsLabel" class="font-medium text-gray-900">Use Credits</div>
-                                    <div class="text-sm text-gray-500">You have {{ auth()->user()->getAvailableCredits() }} {{ auth()->user()->hasActiveMembership() ? 'monthly credits' : 'credits' }}</div>
+                                    <div class="text-sm text-gray-500">You have {{ auth()->user()->hasActiveMembership() ? auth()->user()->getAvailableCredits() : (auth()->user()->credits ?? 0) }} {{ auth()->user()->hasActiveMembership() ? 'monthly credits' : 'credits' }}</div>
+                                    <span id="availableCreditsData" data-credits="{{ auth()->user()->hasActiveMembership() ? auth()->user()->getAvailableCredits() : (auth()->user()->credits ?? 0) }}" class="hidden"></span>
                                 </div>
                             </div>
                             <div class="text-primary font-semibold" id="useCreditsRight">1 Credit</div>
@@ -778,6 +778,48 @@
                             class="w-full px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
                         Cancel
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PIN Modal (for confirming credit booking) -->
+        <div id="pinModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Confirm with Credits</h3>
+                    <button onclick="closePinModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <p class="text-gray-700 mb-3">Enter your 4-digit booking code (PIN) to confirm booking with credits.</p>
+                <div class="relative mb-2">
+                    <input id="pinModalInput" type="password" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="0000" class="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                    <button type="button" onclick="togglePinVisibility('pinModalInput', this)" aria-label="Show PIN" class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3C5 3 1.73 7.11 1 10c.73 2.89 4 7 9 7s8.27-4.11 9-7c-.73-2.89-4-7-9-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="10" cy="10" r="3" fill="currentColor"/></svg>
+                    </button>
+                </div>
+                <p id="pinModalError" class="text-sm text-red-600 hidden">Please enter your 4-digit PIN.</p>
+                <div class="mt-4 flex justify-end gap-3">
+                    <button onclick="closePinModal()" class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button onclick="confirmPinAndBook()" class="px-4 py-2 rounded bg-primary text-black font-semibold hover:bg-opacity-90">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Credits Modal (prompt to purchase) -->
+        <div id="noCreditsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">You don’t have enough credits</h3>
+                    <button onclick="closeNoCreditsModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <p class="text-gray-700 mb-4">Would you like to buy credits or start a membership?</p>
+                <div class="grid grid-cols-1 gap-3">
+                    <a href="{{ route('purchase.package.checkout', ['type' => 'package_5']) }}" class="w-full px-4 py-3 rounded border border-gray-300 text-black font-semibold hover:bg-gray-50 text-center">Buy 5-Class Pack</a>
+                    <a href="{{ route('purchase.package.checkout', ['type' => 'membership']) }}" class="w-full px-4 py-3 rounded bg-primary text-black font-semibold hover:bg-opacity-90 text-center">Become a Member</a>
+                    <button onclick="closeNoCreditsModal()" class="w-full px-4 py-2 rounded text-gray-700 hover:bg-gray-50">Cancel</button>
                 </div>
             </div>
         </div>
@@ -1140,38 +1182,18 @@
 
             function bookWithCredits(classId) {
                 closeBookingModal();
-                
-                // Check if user is authenticated
                 @auth
-                    // User is logged in, proceed with credit booking
-                    if (confirm('Book this class using your credits?')) {
-                        fetch(`/book-with-credits/${classId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('Class booked successfully with credits!');
-                                // Optionally refresh the page or update the UI
-                                location.reload();
-                            } else {
-                                alert(data.message || 'Booking failed. Please try again.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('An error occurred. Please try again.');
-                        });
+                    // Determine available credits from hidden data attribute
+                    const span = document.getElementById('availableCreditsData');
+                    const available = span ? (parseInt(span.getAttribute('data-credits')) || 0) : 0;
+                    if (available > 0) {
+                        openPinModal();
+                    } else {
+                        openNoCreditsModal();
                     }
                 @else
-                    // User not logged in, redirect to login
-                    if (confirm('You need to sign in to use credits. Redirect to login?')) {
-                        window.location.href = '/login';
-                    }
+                    // Fallback: ensure guests are directed to login
+                    redirectToLogin();
                 @endauth
             }
 
@@ -1183,9 +1205,11 @@
 
             function redirectToLogin(classId, price) {
                 closeBookingModal();
-                const priceNum = parseInt(price || 0) || 0;
+                const cid = (typeof classId !== 'undefined' && classId !== null) ? classId : window.selectedClassId;
+                const prRaw = (typeof price !== 'undefined' && price !== null) ? price : window.selectedClassPrice;
+                const priceNum = parseInt(prRaw || 0) || 0;
                 // Pass a plain absolute path as redirect so backend accepts it
-                const redirectPath = `/?openBooking=1&classId=${classId||''}&price=${priceNum}`;
+                const redirectPath = `/?openBooking=1&classId=${cid||''}&price=${priceNum}`;
                 window.location.href = `/login?redirect=${redirectPath}`;
             }
 
