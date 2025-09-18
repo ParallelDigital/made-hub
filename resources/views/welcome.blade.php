@@ -842,10 +842,10 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <p class="text-gray-700 mb-4">Would you like to buy credits or start a membership?</p>
+                <p class="text-gray-700 mb-4">Would you like to buy credits or buy a class pass?</p>
                 <div class="grid grid-cols-1 gap-3">
-                    <a href="{{ route('purchase.package.checkout', ['type' => 'package_5']) }}" class="w-full px-4 py-3 rounded border border-gray-300 text-black font-semibold hover:bg-gray-50 text-center">Buy 5-Class Pack</a>
-                    <a href="{{ route('purchase.package.checkout', ['type' => 'membership']) }}" class="w-full px-4 py-3 rounded bg-primary text-black font-semibold hover:bg-opacity-90 text-center">Become a Member</a>
+                    <a href="{{ route('purchase.package.checkout', ['type' => 'package_5']) }}" class="w-full px-4 py-3 rounded border border-gray-300 text-black font-semibold hover:bg-gray-50 text-center">Buy Credits</a>
+                    <a href="{{ route('purchase.package.checkout', ['type' => 'package_10']) }}" class="w-full px-4 py-3 rounded bg-primary text-black font-semibold hover:bg-opacity-90 text-center">Buy Class Pass</a>
                     <button onclick="closeNoCreditsModal()" class="w-full px-4 py-2 rounded text-gray-700 hover:bg-gray-50">Cancel</button>
                 </div>
             </div>
@@ -1214,7 +1214,9 @@
                     const span = document.getElementById('availableCreditsData');
                     const available = span ? (parseInt(span.getAttribute('data-credits')) || 0) : 0;
                     if (available > 0) {
-                        openPinModal();
+                        openConfirmModal('Use 1 credit to book this class?', function() {
+                            performCreditBooking(window.selectedClassId);
+                        });
                     } else {
                         openNoCreditsModal();
                     }
@@ -1363,6 +1365,8 @@
             // Perform booking with credits (AJAX) after confirmation
             function performCreditBooking(classId, pin) {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const payload = {};
+                if (pin && /^\d{4}$/.test(pin)) payload.pin_code = pin;
                 fetch(`/book-with-credits/${classId}`, {
                     method: 'POST',
                     headers: {
@@ -1370,7 +1374,7 @@
                         'X-CSRF-TOKEN': token,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ pin_code: pin })
+                    body: JSON.stringify(payload)
                 })
                 .then(async (res) => {
                     const data = await res.json().catch(() => ({}));
