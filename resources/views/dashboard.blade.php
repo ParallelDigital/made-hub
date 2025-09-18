@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Book a Class Section - Full Width Container -->
-<div class="max-w-7xl mx-auto mb-6">
+<div class="max-w-7xl mx-auto mb-6 px-2 sm:px-4">
     <div id="bookClass" class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-6">
         <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
             <h3 class="text-base sm:text-lg font-semibold text-white">Book a Class</h3>
@@ -65,7 +65,7 @@
 </div>
 
 <!-- Main Dashboard Grid for Other Cards -->
-<div class="dashboard-grid max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+<div class="dashboard-grid max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 px-2 sm:px-4">
     <!-- QR Code Card -->
     <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-2 lg:order-2">
         <h3 class="text-base sm:text-lg font-semibold text-white mb-3">Your Check-in QR</h3>
@@ -242,17 +242,32 @@
 
         function dashUpdateWeekNavigation(weekDays, prevWeek, nextWeek){
             weekDaysContainer.innerHTML = '';
+            const isMobile = window.innerWidth <= 640;
+            const isTablet = window.innerWidth <= 768;
+            
             weekDays.forEach(day => {
                 const btn = document.createElement('button');
-                btn.className = `flex-shrink-0 text-center px-3 py-2 min-w-[60px] rounded-lg transition-all duration-200 ${
+                // Responsive button sizing
+                const buttonClasses = isMobile 
+                    ? 'flex-shrink-0 text-center px-1 py-1 min-w-[38px] max-w-[38px]'
+                    : isTablet 
+                    ? 'flex-shrink-0 text-center px-2 py-1.5 min-w-[42px] max-w-[42px]'
+                    : 'flex-shrink-0 text-center px-3 py-2 min-w-[60px]';
+                    
+                btn.className = `${buttonClasses} rounded-lg transition-all duration-200 ${
                     day.is_selected 
                         ? 'bg-primary text-black font-semibold shadow-md transform scale-105' 
                         : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white hover:scale-102'
                 }`;
                 btn.setAttribute('data-date', day.full_date);
+                
+                // Responsive text sizing
+                const dayTextSize = isMobile ? 'text-[0.4rem]' : isTablet ? 'text-[0.5rem]' : 'text-xs';
+                const dateTextSize = isMobile ? 'text-xs' : isTablet ? 'text-sm' : 'text-lg';
+                
                 btn.innerHTML = `
-                    <div class="text-xs font-medium ${day.is_selected ? 'text-black' : 'text-gray-400'}">${day.day}</div>
-                    <div class="text-lg font-bold ${day.is_selected ? 'text-black' : 'text-gray-200'}">${day.date}</div>
+                    <div class="${dayTextSize} font-medium leading-none ${day.is_selected ? 'text-black' : 'text-gray-400'}">${day.day}</div>
+                    <div class="${dateTextSize} font-bold leading-none mt-0.5 ${day.is_selected ? 'text-black' : 'text-gray-200'}">${day.date}</div>
                 `;
                 btn.addEventListener('click', () => dashLoadDate(day.full_date));
                 weekDaysContainer.appendChild(btn);
@@ -324,6 +339,16 @@
         if (weekDaysContainer) {
             weekDaysContainer.addEventListener('scroll', updateScrollIndicators);
         }
+
+        // Add resize listener to update calendar on screen size change
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Re-render the current week with new responsive sizing
+                fetchClasses(dashCurrentDate);
+            }, 150);
+        });
 
         // Init
         fetchClasses(dashCurrentDate);
