@@ -1006,10 +1006,6 @@
                         const instrName = (classItem && classItem.instructor && classItem.instructor.name) ? classItem.instructor.name : 'No Instructor';
 
                         return `
-                            <div class="date-header">
-                            <h2 id="selected-date-display">{{ $formattedDate }}</h2>
-                            <button class="today-button">Today</button>
-                        </div>
                             <div class="class-card">
                                 <div class="class-time-section">
                                     <div class="class-time">${startLabel}</div>
