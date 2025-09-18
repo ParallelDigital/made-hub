@@ -55,7 +55,10 @@ class BookingConfirmed extends Mailable
         $this->booking->load(['user', 'fitnessClass.instructor']);
 
         // Generate the QR code URL and the image data directly within the mailer.
-        $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $this->booking->id]);
+        $qrUrl = URL::signedRoute('user.checkin', [
+            'user' => $this->booking->user->id,
+            'qr_code' => $this->booking->user->qr_code,
+        ]);
         // Ensure QR image bytes are prepared (JPEG preferred, PNG fallback)
         $qrCodeBase64 = $this->prepareQrImage($qrUrl);
 
@@ -79,7 +82,11 @@ class BookingConfirmed extends Mailable
     {
         // Ensure QR is prepared in case attachments() is evaluated before content()
         if (empty($this->qrCodeRaw)) {
-            $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $this->booking->id]);
+            $this->booking->loadMissing('user');
+            $qrUrl = URL::signedRoute('user.checkin', [
+                'user' => $this->booking->user->id,
+                'qr_code' => $this->booking->user->qr_code,
+            ]);
             $this->prepareQrImage($qrUrl);
         }
 
@@ -161,7 +168,11 @@ class BookingConfirmed extends Mailable
 
         try {
             // Ensure we have base64 image data for embedding in PDF
-            $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $this->booking->id]);
+            $this->booking->loadMissing('user');
+            $qrUrl = URL::signedRoute('user.checkin', [
+                'user' => $this->booking->user->id,
+                'qr_code' => $this->booking->user->qr_code,
+            ]);
             $base64 = $this->prepareQrImage($qrUrl);
             if (empty($base64) || empty($this->qrMime)) {
                 return null;

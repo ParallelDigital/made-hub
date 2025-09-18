@@ -18,8 +18,8 @@ class UserController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // Generate QR code with user check-in URL
-        $qrUrl = route('user.checkin', [
+        // Generate QR code with SIGNED user check-in URL (required by route middleware)
+        $qrUrl = \Illuminate\Support\Facades\URL::signedRoute('user.checkin', [
             'user' => $user->id,
             'qr_code' => $user->qr_code
         ]);
