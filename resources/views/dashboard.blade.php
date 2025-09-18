@@ -83,5 +83,148 @@
             </ul>
         @endif
     </div>
+    
+    <!-- Book a Class (User Schedule) -->
+    <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 lg:col-span-3">
+        <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+            <h3 class="text-base sm:text-lg font-semibold text-white">Book a Class</h3>
+            <div class="flex items-center gap-2">
+                <label for="dash-class-date" class="text-sm text-gray-300">Date</label>
+                <input id="dash-class-date" type="date" class="bg-gray-900 border border-gray-700 text-gray-100 text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary" value="{{ now()->format('Y-m-d') }}" />
+            </div>
+        </div>
+        <div id="dash-classes-loading" class="text-gray-300 text-sm py-6 hidden">Loading classes...</div>
+        <div id="dash-classes-empty" class="text-gray-300 text-sm py-6 hidden">No classes scheduled for this date.</div>
+        <div id="dash-classes-list" class="divide-y divide-gray-700"></div>
+        
+        <template id="dash-class-item-template">
+            <div class="py-3 flex items-start justify-between gap-3">
+                <div class="min-w-[72px] text-gray-300 text-sm">
+                    <div class="font-semibold text-white" data-field="time">6:00 AM</div>
+                    <div class="text-xs" data-field="duration">60 min.</div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-white font-medium truncate" data-field="title">Class Name</div>
+                    <div class="text-gray-300 text-xs" data-field="instructor">Instructor</div>
+                </div>
+                <div class="shrink-0 flex items-center gap-2" data-field="actions">
+                    <!-- Buttons injected here -->
+                </div>
+            </div>
+        </template>
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function(){
+        const dateInput = document.getElementById('dash-class-date');
+        const listEl = document.getElementById('dash-classes-list');
+        const emptyEl = document.getElementById('dash-classes-empty');
+        const loadingEl = document.getElementById('dash-classes-loading');
+        const tmpl = document.getElementById('dash-class-item-template');
+        const CLASSES_API = '{{ url('/api/classes') }}';
+        const USER_CREDITS = Number({{ isset($credits) ? (int) $credits : 0 }});
+
+        function parseTimeToMinutes(t){
+            if(!t) return null;
+            const [h,m] = t.split(':').map(n=>parseInt(n,10));
+            return h*60+m;
+        }
+        function formatTime12(t){
+            const mins = parseTimeToMinutes(t);
+            if(mins===null) return '';
+            let h = Math.floor(mins/60);
+            const m = mins%60;
+            const ampm = h>=12? 'PM':'AM';
+            h = h%12; if(h===0) h=12;
+            return `${h}:${String(m).padStart(2,'0')} ${ampm}`;
+        }
+
+        function btn(html){
+            const span = document.createElement('span');
+            span.innerHTML = html.trim();
+            return span.firstChild;
+        }
+
+        function renderClasses(classes){
+            listEl.innerHTML='';
+            if(!classes || classes.length===0){
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            classes.forEach(c=>{
+                const node = tmpl.content.cloneNode(true);
+                node.querySelector('[data-field="time"]').textContent = formatTime12(c.start_time);
+                node.querySelector('[data-field="duration"]').textContent = `${c.duration || 60} min.`;
+                node.querySelector('[data-field="title"]').textContent = `${c.name}`;
+                node.querySelector('[data-field="instructor"]').textContent = c.instructor?.name || 'No Instructor';
+                const actions = node.querySelector('[data-field="actions"]');
+
+                if (c.is_past){
+                    actions.appendChild(btn(`<button class="px-3 py-2 rounded border border-gray-600 text-gray-400 text-xs cursor-not-allowed" disabled>Past</button>`));
+                } else if ((c.available_spots ?? 0) <= 0){
+                    actions.appendChild(btn(`<button class="px-3 py-2 rounded border border-gray-600 text-gray-400 text-xs cursor-not-allowed" disabled>Full</button>`));
+                } else {
+                    actions.appendChild(btn(`<a href="{{ url('/checkout') }}/${c.id}" class="px-3 py-2 rounded border border-primary text-black bg-primary hover:opacity-90 text-xs">Reserve</a>`));
+                    actions.appendChild(btn(`<button data-class-id="${c.id}" class="px-3 py-2 rounded border border-gray-300 text-white hover:bg-gray-700 text-xs dash-use-credits" ${USER_CREDITS>0?'':'disabled title="No credits" class="cursor-not-allowed opacity-60"'}>Use Credits</button>`));
+                }
+                listEl.appendChild(node);
+            });
+        }
+
+        function fetchClasses(date){
+            loadingEl.classList.remove('hidden');
+            listEl.innerHTML='';
+            emptyEl.classList.add('hidden');
+            const url = new URL(CLASSES_API, window.location.origin);
+            url.searchParams.set('date', date);
+            fetch(url.toString())
+                .then(r=>r.json())
+                .then(data=>{
+                    renderClasses(data.classes || []);
+                })
+                .catch(()=>{
+                    emptyEl.textContent = 'Unable to load classes.';
+                    emptyEl.classList.remove('hidden');
+                })
+                .finally(()=>{
+                    loadingEl.classList.add('hidden');
+                });
+        }
+
+        document.addEventListener('click', (e)=>{
+            const btnEl = e.target.closest('.dash-use-credits');
+            if(!btnEl) return;
+            const classId = btnEl.getAttribute('data-class-id');
+            const pin = prompt('Enter your 4-digit PIN to use credits:');
+            if(!pin) return;
+            fetch(`{{ url('/book-with-credits') }}/${classId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ pin_code: pin })
+            })
+            .then(r=>r.json())
+            .then(data=>{
+                if(data.success){
+                    alert(data.message || 'Booked with credits!');
+                    fetchClasses(dateInput.value);
+                } else {
+                    alert(data.message || 'Booking failed.');
+                }
+            })
+            .catch(()=> alert('Network error. Please try again.'));
+        });
+
+        // Init
+        fetchClasses(dateInput.value);
+        dateInput.addEventListener('change', ()=> fetchClasses(dateInput.value));
+    })();
+</script>
+@endpush
