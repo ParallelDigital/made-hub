@@ -316,53 +316,99 @@
                 }
                 
                 .week-nav-container {
-                    padding: 1rem;
-                }
-                
-                .week-navigation {
-                    gap: 1rem;
-                    padding: 0.25rem 0;
-                }
-                
-                .week-day-btn {
-                    min-width: 60px;
-                    padding: 0.25rem;
-                }
-                
-                .week-day-btn .day-name {
-                    font-size: 0.75rem;
-                }
-                
-                .week-day-btn .day-number {
-                    font-size: 1.25rem;
+                    display: none; /* Hide week navigation on mobile */
                 }
                 
                 .date-header {
-                    padding: 1rem;
-                }
-                
-                .class-card {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 1rem;
-                    padding: 1rem;
-                }
-                
-                .class-time-section,
-                .class-location,
-                .instructor-section,
-                .class-info-section,
-                .book-section {
-                    width: 100%;
-                }
-                
-                .instructor-section {
-                    flex-direction: row;
+                    padding: 1.5rem;
+                    text-align: left;
+                    display: flex;
+                    justify-content: space-between;
                     align-items: center;
                 }
                 
+                .date-header h2 {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: #000;
+                }
+                
+                .today-btn {
+                    background: transparent;
+                    border: 1px solid #d1d5db;
+                    color: #6b7280;
+                    padding: 0.5rem 1rem;
+                    border-radius: 0.375rem;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                }
+                
+                .class-card {
+                    flex-direction: row;
+                    align-items: flex-start;
+                    gap: 1rem;
+                    padding: 1.5rem;
+                    border-bottom: 1px solid #f3f4f6;
+                }
+                
+                .class-time-section {
+                    width: 80px;
+                    flex-shrink: 0;
+                }
+                
+                .class-time {
+                    font-size: 1.125rem;
+                    font-weight: 700;
+                    color: #6b7280;
+                    line-height: 1.2;
+                }
+                
+                .class-duration {
+                    font-size: 0.875rem;
+                    color: #9ca3af;
+                    margin-top: 0.25rem;
+                }
+                
+                .instructor-section {
+                    width: 60px;
+                    flex-shrink: 0;
+                    display: flex;
+                    justify-content: center;
+                }
+                
+                .instructor-avatar {
+                    width: 48px;
+                    height: 48px;
+                }
+                
                 .class-info-section {
-                    order: -1;
+                    flex: 1;
+                    min-width: 0;
+                }
+                
+                .class-title {
+                    font-size: 1rem;
+                    font-weight: 700;
+                    color: #000;
+                    margin: 0 0 0.5rem 0;
+                    text-decoration: underline;
+                }
+                
+                .class-instructor-name {
+                    font-size: 0.875rem;
+                    color: #6b7280;
+                    margin: 0 0 0.25rem 0;
+                }
+                
+                .class-room {
+                    font-size: 0.875rem;
+                    color: #6b7280;
+                    margin: 0 0 0.125rem 0;
+                }
+                
+                .class-location,
+                .book-section {
+                    display: none; /* Hide on mobile */
                 }
             }
         </style>
@@ -960,6 +1006,10 @@
                         const instrName = (classItem && classItem.instructor && classItem.instructor.name) ? classItem.instructor.name : 'No Instructor';
 
                         return `
+                            <div class="date-header">
+                            <h2 id="selected-date-display">{{ $formattedDate }}</h2>
+                            <button class="today-button">Today</button>
+                        </div>
                             <div class="class-card">
                                 <div class="class-time-section">
                                     <div class="class-time">${startLabel}</div>

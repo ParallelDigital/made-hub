@@ -13,9 +13,9 @@ class HomeController extends Controller
         // Get selected date or default to today
         $selectedDate = $request->get('date') ? Carbon::parse($request->get('date')) : Carbon::now();
         
-        // Get current week's classes based on selected date
-        $startOfWeek = $selectedDate->copy()->startOfWeek();
-        $endOfWeek = $selectedDate->copy()->endOfWeek();
+        // Get current week's classes based on selected date (Monday to Sunday)
+        $startOfWeek = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek = $selectedDate->copy()->endOfWeek(Carbon::SUNDAY);
         
         // Get selected date's classes for the schedule display
         $selectedDateString = $selectedDate->toDateString();
@@ -60,8 +60,8 @@ class HomeController extends Controller
     {
         $selectedDate = $request->get('date') ? Carbon::parse($request->get('date')) : Carbon::now();
         
-        // Get current week's classes based on selected date
-        $startOfWeek = $selectedDate->copy()->startOfWeek();
+        // Get current week's classes based on selected date (Monday to Sunday)
+        $startOfWeek = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
         
         // Get selected date's classes for the schedule display
         $selectedDateString = $selectedDate->toDateString();
