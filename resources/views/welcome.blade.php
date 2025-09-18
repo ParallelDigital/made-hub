@@ -739,7 +739,7 @@
                             <div class="text-primary font-semibold" id="useCreditsRight">1 Credit</div>
                         </button>
                     @else
-                        <button onclick="redirectToLogin()" 
+                        <button onclick="openLoginModal()" 
                                 class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
                             <div class="flex items-center">
                                 <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
@@ -778,6 +778,33 @@
                             class="w-full px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
                         Cancel
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Modal (for guests clicking Use Credits) -->
+        <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Sign in to continue</h3>
+                    <button onclick="closeLoginModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <label for="loginEmail" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input id="loginEmail" type="email" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="you@example.com">
+                    </div>
+                    <div>
+                        <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input id="loginPassword" type="password" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="••••••••">
+                    </div>
+                    <p id="loginError" class="text-sm text-red-600 hidden"></p>
+                </div>
+                <div class="mt-5 flex justify-end gap-3">
+                    <button onclick="closeLoginModal()" class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button onclick="submitModalLogin()" class="px-4 py-2 rounded bg-primary text-black font-semibold hover:bg-opacity-90">Sign In</button>
                 </div>
             </div>
         </div>
@@ -1192,8 +1219,8 @@
                         openNoCreditsModal();
                     }
                 @else
-                    // Fallback: ensure guests are directed to login
-                    redirectToLogin();
+                    // Open inline login modal for guests
+                    openLoginModal();
                 @endauth
             }
 
@@ -1284,6 +1311,24 @@
                     });
                 }
             })();
+
+            // Login modal helpers
+            function openLoginModal() {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                    const email = document.getElementById('loginEmail');
+                    setTimeout(() => { email && email.focus(); }, 0);
+                }
+            }
+            function closeLoginModal() {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            }
 
             // Modal utilities (confirm + feedback)
             function openConfirmModal(message, onConfirm) {
