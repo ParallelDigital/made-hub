@@ -5,7 +5,7 @@
 @section('content')
 <div class="dashboard-grid max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
     <!-- Book a Class (User Schedule) - Full Width, Top -->
-    <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-1 lg:order-1 lg:col-span-3">
+    <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-1 lg:order-1 lg:col-span-3 grid grid-cols-1 gap-3">
         <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
             <h3 class="text-base sm:text-lg font-semibold text-white">Book a Class</h3>
             <div class="flex items-center gap-2">
