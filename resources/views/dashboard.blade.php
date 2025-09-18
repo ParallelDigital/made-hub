@@ -247,11 +247,11 @@
             
             weekDays.forEach(day => {
                 const btn = document.createElement('button');
-                // Responsive button sizing
+                // Responsive button sizing - ultra-compact for mobile
                 const buttonClasses = isMobile 
-                    ? 'flex-shrink-0 text-center px-1 py-1 min-w-[38px] max-w-[38px]'
+                    ? 'flex-shrink-0 text-center px-0.5 py-1 w-[32px] min-w-[32px] max-w-[32px]'
                     : isTablet 
-                    ? 'flex-shrink-0 text-center px-2 py-1.5 min-w-[42px] max-w-[42px]'
+                    ? 'flex-shrink-0 text-center px-1 py-1.5 w-[36px] min-w-[36px] max-w-[36px]'
                     : 'flex-shrink-0 text-center px-3 py-2 min-w-[60px]';
                     
                 btn.className = `${buttonClasses} rounded-lg transition-all duration-200 ${
@@ -261,9 +261,9 @@
                 }`;
                 btn.setAttribute('data-date', day.full_date);
                 
-                // Responsive text sizing
-                const dayTextSize = isMobile ? 'text-[0.4rem]' : isTablet ? 'text-[0.5rem]' : 'text-xs';
-                const dateTextSize = isMobile ? 'text-xs' : isTablet ? 'text-sm' : 'text-lg';
+                // Responsive text sizing - ultra-small for mobile
+                const dayTextSize = isMobile ? 'text-[0.35rem]' : isTablet ? 'text-[0.4rem]' : 'text-xs';
+                const dateTextSize = isMobile ? 'text-[0.6rem]' : isTablet ? 'text-xs' : 'text-lg';
                 
                 btn.innerHTML = `
                     <div class="${dayTextSize} font-medium leading-none ${day.is_selected ? 'text-black' : 'text-gray-400'}">${day.day}</div>
