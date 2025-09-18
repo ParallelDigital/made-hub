@@ -674,15 +674,16 @@
                                                 $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
                                                 $availableSpots = max(0, $class->max_spots - $currentBookings);
                                                 $isFull = $availableSpots <= 0;
-                                                // Determine if class is in the past relative to selected date
                                                 $startDateTime = \Carbon\Carbon::parse($selectedDate->toDateString() . ' ' . ($class->start_time ?? '00:00'));
                                                 $isPast = $startDateTime->lt(now());
+                                                $isBookedByMe = auth()->check() ? $class->bookings->contains('user_id', auth()->id()) : false;
                                             @endphp
-                                            
-                                            @if($isFull)
-                                                <button disabled class="reserve-button">Class Full</button>
-                                            @elseif($isPast)
+                                            @if($isPast)
                                                 <button disabled class="reserve-button">Past</button>
+                                            @elseif($isBookedByMe)
+                                                <button disabled class="reserve-button bg-green-100 text-green-700 border-green-300">Booked</button>
+                                            @elseif($isFull)
+                                                <button disabled class="reserve-button">Class Full</button>
                                             @else
                                                 <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" class="reserve-button">Reserve</button>
                                             @endif
@@ -1125,9 +1126,12 @@
                                 <div class="book-section">
                                     ${classItem.is_past
                                         ? `<button disabled class="reserve-button">Past</button>`
-                                        : (classItem.available_spots <= 0
-                                            ? `<button disabled class="reserve-button">Class Full</button>`
-                                            : `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" class="reserve-button">Reserve</button>`
+                                        : (classItem.is_booked_by_me
+                                            ? `<button disabled class="reserve-button bg-green-100 text-green-700 border-green-300">Booked</button>`
+                                            : (classItem.available_spots <= 0
+                                                ? `<button disabled class="reserve-button">Class Full</button>`
+                                                : `<button onclick=\"openBookingModal(${classItem.id}, ${classItem.price})\" class=\"reserve-button\">Reserve</button>`
+                                              )
                                           )
                                     }
                                 </div>

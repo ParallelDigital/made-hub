@@ -101,7 +101,7 @@ class HomeController extends Controller
 
 
         return response()->json([
-            'classes' => $selectedDateClasses->map(function($class) use ($selectedDate) {
+            'classes' => $selectedDateClasses->map(function($class) use ($selectedDate, $request) {
                 $bookedCount = $class->bookings()->count();
                 $availableSpots = $class->max_spots - $bookedCount;
                 
@@ -130,6 +130,9 @@ class HomeController extends Controller
                 }
                 $isPast = $selectedStart ? $selectedStart->lessThan(now()) : false;
                 
+                $user = $request->user();
+                $isBookedByMe = $user ? ($class->relationLoaded('bookings') ? $class->bookings->contains('user_id', $user->id) : $class->bookings()->where('user_id', $user->id)->exists()) : false;
+
                 return [
                     'id' => $class->id,
                     'name' => $class->name,
@@ -146,7 +149,8 @@ class HomeController extends Controller
                         'name' => $class->instructor->name ?? 'No Instructor',
                         'initials' => substr($class->instructor->name ?? 'IN', 0, 2),
                         'photo_url' => $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100'
-                    ]
+                    ],
+                    'is_booked_by_me' => $isBookedByMe,
                 ];
             }),
             'weekDays' => $weekDays,
