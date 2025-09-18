@@ -5,7 +5,7 @@
 @section('content')
 <!-- Book a Class Section - Full Width Container -->
 <div class="max-w-7xl mx-auto mb-6 px-2 sm:px-4">
-    <div id="bookClass" class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-6">
+    <div id="bookClass" class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-6 w-full overflow-hidden">
         <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
             <h3 class="text-base sm:text-lg font-semibold text-white">Book a Class</h3>
             <div class="flex items-center gap-2">
@@ -27,7 +27,7 @@
                 </div>
             </div>
             <div class="relative">
-                <div id="dash-week-days" class="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pb-2"></div>
+                <div id="dash-week-days" class="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pb-2 w-full"></div>
                 <!-- Scroll indicators -->
                 <div class="absolute left-0 top-0 bottom-2 w-4 bg-gradient-to-r from-gray-900 to-transparent pointer-events-none opacity-0 transition-opacity" id="scroll-left-indicator"></div>
                 <div class="absolute right-0 top-0 bottom-2 w-4 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none opacity-0 transition-opacity" id="scroll-right-indicator"></div>
@@ -44,8 +44,8 @@
         <div id="dash-classes-list" class="divide-y divide-gray-700"></div>
 
         <template id="dash-class-item-template">
-            <div class="py-3 flex items-start justify-between gap-3">
-                <div class="min-w-[72px] text-gray-300 text-sm">
+            <div class="py-3 flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+                <div class="w-full sm:min-w-[72px] sm:w-auto text-gray-300 text-sm">
                     <div class="font-semibold text-white" data-field="time">6:00 AM</div>
                     <div class="text-xs" data-field="duration">60 min.</div>
                 </div>
@@ -56,7 +56,7 @@
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-100" data-field="spots">0 left</span>
                     </div>
                 </div>
-                <div class="shrink-0 flex items-stretch gap-2 w-full sm:w-auto sm:items-center sm:justify-end" data-field="actions">
+                <div class="shrink-0 flex items-stretch gap-2 w-full sm:w-auto sm:items-center sm:justify-end mt-2 sm:mt-0" data-field="actions">
                     <!-- Buttons injected here -->
                 </div>
             </div>
@@ -254,10 +254,10 @@
                     ? 'flex-shrink-0 text-center px-1 py-1.5 w-[36px] min-w-[36px] max-w-[36px]'
                     : 'flex-shrink-0 text-center px-3 py-2 min-w-[60px]';
                     
-                btn.className = `${buttonClasses} rounded-lg transition-all duration-200 ${
+                btn.className = `${buttonClasses} rounded-lg transition-colors duration-200 ${
                     day.is_selected 
-                        ? 'bg-primary text-black font-semibold shadow-md transform scale-105' 
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white hover:scale-102'
+                        ? 'bg-primary text-black font-semibold shadow-md' 
+                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`;
                 btn.setAttribute('data-date', day.full_date);
                 

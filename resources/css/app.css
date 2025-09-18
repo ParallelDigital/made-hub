@@ -35,17 +35,20 @@ html, body {
     overflow-x: hidden;
 }
 
-/* Critical mobile overflow prevention */
+/* Targeted mobile overflow guards */
 @media (max-width: 768px) {
-    * {
-        max-width: 100vw !important;
-        box-sizing: border-box !important;
-    }
-    
     body, html {
-        overflow-x: hidden !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
+        overflow-x: hidden;
+    }
+    #bookClass, .dashboard-grid, .max-w-7xl {
+        max-width: 100%;
+        width: 100%;
+    }
+    #bookClass, #bookClass * {
+        box-sizing: border-box;
+    }
+    #bookClass {
+        overflow-x: hidden;
     }
 }
 
