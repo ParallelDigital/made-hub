@@ -105,11 +105,28 @@ class HomeController extends Controller
                 $bookedCount = $class->bookings()->count();
                 $availableSpots = $class->max_spots - $bookedCount;
                 
+                // Calculate duration properly handling overnight classes
+                $duration = null;
+                if (!empty($class->start_time) && !empty($class->end_time)) {
+                    $classDate = $class->class_date instanceof \Carbon\Carbon ? $class->class_date->toDateString() : (string) $class->class_date;
+                    $start = \Carbon\Carbon::parse(trim(($classDate ?: now()->toDateString()) . ' ' . $class->start_time));
+                    $end = \Carbon\Carbon::parse(trim(($classDate ?: now()->toDateString()) . ' ' . $class->end_time));
+                    
+                    // Handle overnight classes
+                    if ($end->lessThan($start)) {
+                        $end->addDay();
+                    }
+                    $duration = $start->diffInMinutes($end);
+                } else {
+                    $duration = $class->duration ?? 60; // Default fallback
+                }
+                
                 return [
                     'id' => $class->id,
                     'name' => $class->name,
                     'start_time' => $class->start_time,
                     'end_time' => $class->end_time,
+                    'duration' => $duration,
                     'class_date' => $class->class_date->toDateString(),
                     'price' => $class->price,
                     'max_spots' => $class->max_spots,

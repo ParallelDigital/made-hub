@@ -14,6 +14,13 @@
 
         <!-- Vite Assets (single source of CSS/JS to keep styles stable) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <!-- Force Inter on homepage only; overrides global ProFontWindows enforcement -->
+        <style>
+            .font-inter, .font-inter *, .font-inter *::before, .font-inter *::after {
+                font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif !important;
+                font-weight: 400;
+            }
+        </style>
     </head>
     <body class="bg-black text-white font-inter">
         <!-- Navigation -->
@@ -159,7 +166,7 @@
 
         <!-- Schedule Section -->
         <div id="schedule" class="bg-white text-black py-6 sm:py-8">
-            <div class="schedule-container max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+            <div class="schedule-container max-w-7xl mx-auto px-2 sm:px-4 lg:px-8" style="opacity: 0; transition: opacity 0.3s ease-in-out;">
                 <!-- Week Navigation -->
                 <div class="px-2 sm:px-4 lg:px-6 py-4">
                         <div class="flex items-center justify-between">
@@ -219,10 +226,25 @@
                         <?php if($selectedDateClasses->count() > 0): ?>
                             <div class="space-y-3 sm:space-y-4" id="classes-list">
                                 <?php foreach($selectedDateClasses as $class): ?>
+                                    @php
+                                        $classDate = $class->class_date instanceof \Carbon\Carbon ? $class->class_date->toDateString() : (string) $class->class_date;
+                                        $start = !empty($class->start_time)
+                                            ? \Carbon\Carbon::parse(trim(($classDate ?: now()->toDateString()) . ' ' . $class->start_time))
+                                            : null;
+                                        $end = !empty($class->end_time)
+                                            ? \Carbon\Carbon::parse(trim(($classDate ?: now()->toDateString()) . ' ' . $class->end_time))
+                                            : null;
+                                        if ($start && $end) {
+                                            $endForDiff = $end->lessThan($start) ? $end->copy()->addDay() : $end;
+                                            $duration = $start->diffInMinutes($endForDiff);
+                                        } else {
+                                            $duration = $class->duration ?? null;
+                                        }
+                                    @endphp
                                     <div class="class-card flex flex-col sm:flex-row items-start sm:items-center py-4 sm:py-6 border-b border-gray-300 last:border-b-0 gap-3 sm:gap-4">
                                     <div class="class-time flex-shrink-0 w-full sm:w-20 text-left">
-                                        <div class="text-base sm:text-lg font-bold text-black">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</div>
-                                        <div class="text-sm text-gray-600">{{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} min.</div>
+                                        <div class="text-base sm:text-lg font-bold text-black">{{ $start ? $start->format('g:i A') : '' }}</div>
+                                        <div class="text-sm text-gray-600">{{ $duration !== null ? $duration . ' min.' : '' }}</div>
                                     </div>
                                     
                                     <div class="class-instructor flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
@@ -232,7 +254,7 @@
                                     </div>
                                     
                                     <div class="class-details flex-1">
-                                        <div class="font-semibold text-gray-900 text-sm sm:text-base">{{ $class->name }} ({{ \Carbon\Carbon::parse($class->end_time)->diffInMinutes(\Carbon\Carbon::parse($class->start_time)) }} Min)</div>
+                                        <div class="font-semibold text-gray-900 text-sm sm:text-base">{{ $class->name }} {{ $duration !== null ? '(' . $duration . ' Min)' : '' }}</div>
                                         <div class="text-sm text-gray-600">{{ $class->instructor->name ?? 'No Instructor' }}</div>
                                     </div>
                                     
@@ -542,6 +564,28 @@
                 }
             }
 
+            // Helpers to safely parse and format times from "HH:mm" or "HH:mm:ss"
+            function parseTimeToMinutes(t) {
+                if (!t || typeof t !== 'string') return null;
+                const parts = t.split(':').map(v => parseInt(v, 10));
+                if (Number.isNaN(parts[0])) return null;
+                const h = parts[0] || 0;
+                const m = parts[1] || 0;
+                return h * 60 + m;
+            }
+
+            function formatTime12(t) {
+                const mins = parseTimeToMinutes(t);
+                if (mins === null) return '';
+                let h = Math.floor(mins / 60);
+                const m = mins % 60;
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12;
+                if (h === 0) h = 12;
+                const mm = m.toString().padStart(2, '0');
+                return `${h}:${mm} ${ampm}`;
+            }
+
             function updateClassesList(classes) {
                 const container = document.getElementById('classes-container');
 
@@ -555,41 +599,35 @@
                     `;
                 } else {
                     const classesHTML = classes.map(classItem => {
-                    // Ensure price is defined and a number
-                    classItem.price = classItem.price || 0;
-                        const startTime = new Date(`2000-01-01T${classItem.start_time}`);
-                        const endTime = new Date(`2000-01-01T${classItem.end_time}`);
-                        const duration = Math.round((endTime - startTime) / (1000 * 60));
-                        
+                        // Ensure price is defined and a number
+                        classItem.price = classItem.price || 0;
+
+                        const startMins = parseTimeToMinutes(classItem.start_time);
+                        const endMins = parseTimeToMinutes(classItem.end_time);
+                        // Use duration from API if available, otherwise calculate
+                        const duration = classItem.duration || 60;
+
+                        const startLabel = formatTime12(classItem.start_time);
+                        const photo = (classItem && classItem.instructor && classItem.instructor.photo_url) ? classItem.instructor.photo_url : 'https://www.gravatar.com/avatar/?d=mp&s=100';
+                        const instrName = (classItem && classItem.instructor && classItem.instructor.name) ? classItem.instructor.name : 'No Instructor';
+
                         return `
-                            <div class="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
-                                
-                                <div class="flex-shrink-0 w-16 text-center">
-                                    <div class="text-sm font-semibold text-gray-900">${startTime.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true})}</div>
-                                    <div class="text-xs text-gray-500">${duration} min</div>
+                            <div class="class-card flex flex-col sm:flex-row items-start sm:items-center py-4 sm:py-6 border-b border-gray-300 last:border-b-0 gap-3 sm:gap-4">
+                                <div class="class-time flex-shrink-0 w-full sm:w-20 text-left">
+                                    <div class="text-base sm:text-lg font-bold text-black">${startLabel}</div>
+                                    <div class="text-sm text-gray-600">${duration} min.</div>
                                 </div>
-
-                                <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-4">
-                                    <img src="${classItem.instructor.photo_url}"
-                                         alt="${classItem.instructor.name}"
-                                         class="w-10 h-10 rounded-full object-cover">
+                                <div class="class-instructor flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
+                                    <img src="${photo}" alt="${instrName}" class="w-12 h-12 rounded-full object-cover">
                                 </div>
-
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="text-sm font-semibold text-gray-900 truncate">${classItem.name}</h3>
-                                    <p class="text-xs text-gray-600">${classItem.instructor.name}</p>
-                                    <p class="text-xs text-gray-500">${classItem.available_spots} spots available</p>
+                                <div class="class-details flex-1">
+                                    <div class="font-semibold text-gray-900 text-sm sm:text-base">${classItem.name} ${duration ? `(${duration} Min)` : ''}</div>
+                                    <div class="text-sm text-gray-600">${instrName}</div>
                                 </div>
-
-                                <div class="flex-shrink-0 ml-4">
-                                    ${classItem.available_spots <= 0 ? 
-                                        `<button disabled class="whitespace-nowrap px-4 py-2 bg-gray-400 text-white text-xs font-medium rounded-md cursor-not-allowed">
-                                            Class Full
-                                        </button>` :
-                                        `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" 
-                                                class="whitespace-nowrap px-4 py-2 bg-primary text-white text-md font-medium rounded-md transition-colors hover:opacity-90">
-                                            Book Class (${classItem.available_spots} left)
-                                        </button>`
+                                <div class="class-booking flex-shrink-0 w-full sm:w-auto">
+                                    ${classItem.available_spots <= 0
+                                        ? `<button disabled class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gray-400 text-white text-sm sm:text-base font-medium rounded-md cursor-not-allowed min-h-[44px]">Class Full</button>`
+                                        : `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary text-black text-sm sm:text-base font-medium rounded-md transition-colors hover:opacity-90 min-h-[44px]">Book Class (${classItem.available_spots} left)</button>`
                                     }
                                 </div>
                             </div>
@@ -608,6 +646,35 @@
                     loadDate(date);
                 }
             });
+
+            // Ensure calendar shows only after page is fully loaded and layout is stable
+            function initializeCalendar() {
+                const scheduleContainer = document.querySelector('.schedule-container');
+                if (scheduleContainer) {
+                    // Force a layout reflow to ensure all CSS is applied
+                    scheduleContainer.offsetHeight;
+                    
+                    // Add a small delay to ensure all fonts and styles are loaded
+                    setTimeout(() => {
+                        scheduleContainer.style.opacity = '1';
+                    }, 100);
+                }
+            }
+
+            // Wait for DOM and all resources to be fully loaded
+            if (document.readyState === 'complete') {
+                initializeCalendar();
+            } else {
+                window.addEventListener('load', initializeCalendar);
+            }
+
+            // Fallback: ensure calendar shows after a reasonable timeout
+            setTimeout(() => {
+                const scheduleContainer = document.querySelector('.schedule-container');
+                if (scheduleContainer && scheduleContainer.style.opacity === '0') {
+                    scheduleContainer.style.opacity = '1';
+                }
+            }, 1000);
         </script>
 
         <script>

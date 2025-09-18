@@ -193,6 +193,58 @@ html, body {
     scroll-snap-align: start;
 }
 
+/* Homepage schedule fixes */
+.schedule-container {
+    background: white;
+    color: black;
+}
+
+/* Ensure proper spacing and alignment for class cards */
+.class-card {
+    background: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 0.75rem;
+    padding: 1rem;
+}
+
+.class-card:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+/* Fix week navigation styling */
+.week-navigation {
+    background: white;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+/* Ensure proper button styling */
+.class-booking button {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+/* Mobile improvements for homepage */
+@media (max-width: 768px) {
+    .class-card {
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .class-time {
+        margin-bottom: 0.5rem;
+    }
+    
+    .class-booking {
+        margin-top: 0.75rem;
+    }
+}
+
 /* Compact tables and better wrapping on small screens */
 @media (max-width: 640px) {
     .admin-table th,
