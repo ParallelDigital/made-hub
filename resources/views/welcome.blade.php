@@ -25,26 +25,26 @@
                 font-style: normal !important;
             }
             
-            /* Mobile-first calendar design */
+            /* Clean minimalist calendar design matching brand */
             .schedule-container {
-                background: #f8fafc;
-                border-radius: 16px;
+                background: white;
+                border-radius: 8px;
                 overflow: hidden;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                border: 1px solid #e5e7eb;
             }
             
             /* Week navigation styling */
             .week-nav-container {
-                background: white;
-                padding: 1rem;
-                border-bottom: 1px solid #e2e8f0;
+                background: #f9fafb;
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid #e5e7eb;
             }
             
             .week-navigation {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 0.5rem;
+                gap: 1.5rem;
                 max-width: 100%;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -59,9 +59,8 @@
             
             .week-day-btn {
                 flex-shrink: 0;
-                min-width: 60px;
-                padding: 0.75rem 0.5rem;
-                border-radius: 12px;
+                min-width: 80px;
+                padding: 0.5rem;
                 text-align: center;
                 border: none;
                 background: transparent;
@@ -70,31 +69,54 @@
                 font-family: inherit;
             }
             
-            .week-day-btn.selected {
-                background: #1f2937;
-                color: white;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(31, 41, 55, 0.3);
+            .week-day-btn .day-name {
+                font-size: 0.875rem;
+                color: #6b7280;
+                font-weight: 500;
+                margin-bottom: 0.25rem;
             }
             
-            .week-day-btn.today:not(.selected) {
-                background: #e5e7eb;
-                color: #1f2937;
+            .week-day-btn .day-number {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #374151;
+            }
+            
+            .week-day-btn.selected .day-name {
+                color: #000;
                 font-weight: 600;
             }
             
-            .week-day-btn:not(.selected):not(.today):hover {
-                background: #f1f5f9;
-                color: #475569;
+            .week-day-btn.selected .day-number {
+                color: #000;
+            }
+            
+            .week-day-btn.selected::after {
+                content: '';
+                display: block;
+                width: 24px;
+                height: 3px;
+                background: #000;
+                margin: 0.5rem auto 0;
+                border-radius: 2px;
+            }
+            
+            .week-day-btn.today:not(.selected) .day-name {
+                color: #000;
+                font-weight: 600;
+            }
+            
+            .week-day-btn.today:not(.selected) .day-number {
+                color: #000;
+                font-weight: 800;
             }
             
             .nav-arrow {
                 flex-shrink: 0;
-                width: 44px;
-                height: 44px;
-                border-radius: 50%;
-                background: white;
-                border: 1px solid #e2e8f0;
+                width: 32px;
+                height: 32px;
+                background: transparent;
+                border: none;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -104,157 +126,182 @@
             }
             
             .nav-arrow:hover {
-                background: #f8fafc;
-                border-color: #cbd5e1;
-                transform: scale(1.05);
+                background: #f3f4f6;
+                border-radius: 50%;
             }
             
             /* Date header styling */
             .date-header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 1.5rem;
-                text-align: center;
+                background: white;
+                color: #000;
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid #e5e7eb;
             }
             
             .date-header h2 {
-                font-size: 1.5rem;
-                font-weight: 700;
+                font-size: 1.125rem;
+                font-weight: 600;
                 margin: 0;
+                color: #000;
             }
             
             .today-btn {
-                background: rgba(255, 255, 255, 0.2);
-                color: white;
-                border: 1px solid rgba(255, 255, 255, 0.3);
+                background: transparent;
+                color: #6b7280;
+                border: 1px solid #d1d5db;
                 padding: 0.5rem 1rem;
-                border-radius: 8px;
+                border-radius: 6px;
                 font-size: 0.875rem;
                 font-weight: 500;
                 cursor: pointer;
                 transition: all 0.2s ease;
-                margin-top: 0.5rem;
             }
             
             .today-btn:hover {
-                background: rgba(255, 255, 255, 0.3);
-                border-color: rgba(255, 255, 255, 0.5);
+                background: #f9fafb;
+                border-color: #9ca3af;
             }
             
             /* Class cards styling */
             .classes-section {
-                padding: 1.5rem;
+                padding: 0;
                 background: white;
             }
             
             .class-card {
                 background: white;
-                border-radius: 16px;
+                border: none;
+                border-bottom: 1px solid #f3f4f6;
                 padding: 1.5rem;
-                margin-bottom: 1rem;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-                border: 1px solid #f1f5f9;
-                transition: all 0.2s ease;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                transition: background-color 0.2s ease;
             }
             
             .class-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+                background: #fafafa;
             }
             
-            .class-header {
-                display: flex;
-                align-items: flex-start;
-                gap: 1rem;
-                margin-bottom: 1rem;
+            .class-card:last-child {
+                border-bottom: none;
             }
             
-            .class-time-badge {
-                background: #f0f9ff;
-                color: #0369a1;
-                padding: 0.5rem 0.75rem;
-                border-radius: 8px;
-                font-weight: 600;
-                font-size: 0.875rem;
-                white-space: nowrap;
-                min-width: 80px;
-                text-align: center;
+            .class-time-section {
+                flex-shrink: 0;
+                width: 80px;
+                text-align: left;
+            }
+            
+            .class-time {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #000;
+                line-height: 1.2;
             }
             
             .class-duration {
-                background: #f8fafc;
-                color: #64748b;
-                font-size: 0.75rem;
-                padding: 0.25rem 0.5rem;
-                border-radius: 4px;
-                margin-top: 0.25rem;
+                font-size: 0.875rem;
+                color: #6b7280;
+                margin-top: 0.125rem;
             }
             
-            .class-info {
-                flex: 1;
+            .class-location {
+                flex-shrink: 0;
+                width: 100px;
+                font-size: 0.875rem;
+                color: #6b7280;
+                text-align: left;
             }
             
-            .class-title {
-                font-size: 1.125rem;
-                font-weight: 700;
-                color: #1e293b;
-                margin: 0 0 0.5rem 0;
-                line-height: 1.3;
-            }
-            
-            .class-instructor {
+            .instructor-section {
+                flex-shrink: 0;
                 display: flex;
                 align-items: center;
                 gap: 0.75rem;
-                color: #64748b;
-                font-size: 0.875rem;
+                width: 60px;
             }
             
             .instructor-avatar {
-                width: 32px;
-                height: 32px;
+                width: 48px;
+                height: 48px;
                 border-radius: 50%;
                 object-fit: cover;
-                border: 2px solid #e2e8f0;
             }
             
-            .book-button {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                border: none;
-                padding: 0.875rem 1.5rem;
-                border-radius: 12px;
+            .class-info-section {
+                flex: 1;
+                min-width: 0;
+            }
+            
+            .class-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #000;
+                margin: 0 0 0.25rem 0;
+                line-height: 1.3;
+            }
+            
+            .class-instructor-name {
+                font-size: 0.875rem;
+                color: #6b7280;
+                margin: 0 0 0.25rem 0;
+            }
+            
+            .class-room {
+                font-size: 0.875rem;
+                color: #6b7280;
+                margin: 0;
+            }
+            
+            .book-section {
+                flex-shrink: 0;
+                width: 120px;
+            }
+            
+            .reserve-button {
+                background: transparent;
+                color: #000;
+                border: 1px solid #000;
+                padding: 0.75rem 1.5rem;
+                border-radius: 4px;
                 font-weight: 600;
                 font-size: 0.875rem;
                 cursor: pointer;
                 transition: all 0.2s ease;
                 width: 100%;
-                margin-top: 1rem;
                 min-height: 44px;
+                text-transform: uppercase;
+                letter-spacing: 0.025em;
             }
             
-            .book-button:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            .reserve-button:hover {
+                background: #000;
+                color: white;
             }
             
-            .book-button:disabled {
-                background: #e2e8f0;
-                color: #94a3b8;
+            .reserve-button:disabled {
+                background: #f3f4f6;
+                color: #9ca3af;
+                border-color: #d1d5db;
                 cursor: not-allowed;
-                transform: none;
-                box-shadow: none;
+            }
+            
+            .reserve-button:disabled:hover {
+                background: #f3f4f6;
+                color: #9ca3af;
             }
             
             .no-classes {
                 text-align: center;
                 padding: 3rem 1rem;
-                color: #64748b;
+                color: #6b7280;
             }
             
             .no-classes-icon {
-                width: 64px;
-                height: 64px;
+                width: 48px;
+                height: 48px;
                 margin: 0 auto 1rem;
                 opacity: 0.5;
             }
@@ -264,42 +311,58 @@
                 .schedule-container {
                     margin: 0 -1rem;
                     border-radius: 0;
+                    border-left: none;
+                    border-right: none;
+                }
+                
+                .week-nav-container {
+                    padding: 1rem;
                 }
                 
                 .week-navigation {
+                    gap: 1rem;
                     padding: 0.25rem 0;
                 }
                 
                 .week-day-btn {
-                    min-width: 50px;
-                    padding: 0.5rem 0.25rem;
-                    font-size: 0.875rem;
+                    min-width: 60px;
+                    padding: 0.25rem;
+                }
+                
+                .week-day-btn .day-name {
+                    font-size: 0.75rem;
+                }
+                
+                .week-day-btn .day-number {
+                    font-size: 1.25rem;
                 }
                 
                 .date-header {
                     padding: 1rem;
                 }
                 
-                .date-header h2 {
-                    font-size: 1.25rem;
-                }
-                
-                .classes-section {
-                    padding: 1rem;
-                }
-                
                 .class-card {
-                    padding: 1rem;
-                    margin-bottom: 0.75rem;
-                }
-                
-                .class-header {
                     flex-direction: column;
-                    gap: 0.75rem;
+                    align-items: flex-start;
+                    gap: 1rem;
+                    padding: 1rem;
                 }
                 
-                .class-time-badge {
-                    align-self: flex-start;
+                .class-time-section,
+                .class-location,
+                .instructor-section,
+                .class-info-section,
+                .book-section {
+                    width: 100%;
+                }
+                
+                .instructor-section {
+                    flex-direction: row;
+                    align-items: center;
+                }
+                
+                .class-info-section {
+                    order: -1;
                 }
             }
         </style>
@@ -463,11 +526,8 @@
                         <div class="week-navigation" id="week-days">
                             <?php foreach($weekDays as $day): ?>
                             <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="week-day-btn {{ $day['is_selected'] ? 'selected' : ($day['is_today'] ? 'today' : '') }}">
-                                <div class="text-xs font-medium uppercase">{{ $day['day'] }}</div>
-                                <div class="text-lg font-bold">{{ $day['date'] }}</div>
-                                <?php if(!empty($day['is_selected'])): ?>
-                                    <div class="w-6 h-1 bg-blue-400 mx-auto mt-1 rounded"></div>
-                                <?php endif; ?>
+                                <div class="day-name">{{ $day['day'] }}</div>
+                                <div class="day-number">{{ $day['date'] }}</div>
                             </button>
                             <?php endforeach; ?>
                         </div>
@@ -523,44 +583,52 @@
                                         }
                                     @endphp
                                     <div class="class-card">
-                                        <div class="class-header">
-                                            <div>
-                                                <div class="class-time-badge">{{ $start ? $start->format('g:i A') : '' }}</div>
-                                                <div class="class-duration">{{ $duration }} min</div>
-                                            </div>
-                                            <div class="class-info">
-                                                <h3 class="class-title">{{ $class->name }}</h3>
-                                                <div class="class-instructor">
-                                                    <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
-                                                         alt="{{ $class->instructor->name ?? 'Instructor' }}" 
-                                                         class="instructor-avatar">
-                                                    <span>{{ $class->instructor->name ?? 'No Instructor' }}</span>
-                                                </div>
-                                            </div>
+                                        <div class="class-time-section">
+                                            <div class="class-time">{{ $start ? $start->format('g:i A') : '' }}</div>
+                                            <div class="class-duration">{{ $duration }} min.</div>
                                         </div>
                                         
-                                        @php
-                                            $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
-                                            $availableSpots = max(0, $class->max_spots - $currentBookings);
-                                            $isFull = $availableSpots <= 0;
-                                        @endphp
+                                        <div class="class-location">
+                                            Manchester
+                                        </div>
                                         
-                                        @if($isFull)
-                                            <button disabled class="book-button">
-                                                Class Full
-                                            </button>
-                                        @else
-                                            <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" class="book-button">
-                                                Book Class ({{ $availableSpots }} left)
-                                            </button>
-                                        @endif
+                                        <div class="instructor-section">
+                                            <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
+                                                 alt="{{ $class->instructor->name ?? 'Instructor' }}" 
+                                                 class="instructor-avatar">
+                                        </div>
+                                        
+                                        <div class="class-info-section">
+                                            <h3 class="class-title">{{ $class->name }} ({{ $duration }} Min)</h3>
+                                            <p class="class-instructor-name">{{ $class->instructor->name ?? 'No Instructor' }}</p>
+                                            <p class="class-room">Manchester Red Room</p>
+                                            <p class="class-room">Manchester</p>
+                                        </div>
+                                        
+                                        <div class="book-section">
+                                            @php
+                                                $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
+                                                $availableSpots = max(0, $class->max_spots - $currentBookings);
+                                                $isFull = $availableSpots <= 0;
+                                            @endphp
+                                            
+                                            @if($isFull)
+                                                <button disabled class="reserve-button">
+                                                    Class Full
+                                                </button>
+                                            @else
+                                                <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" class="reserve-button">
+                                                    Reserve
+                                                </button>
+                                            @endif
+                                        </div>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
                             <div class="no-classes" id="no-classes">
                                 <svg class="no-classes-icon mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"></path>
                                 </svg>
                                 <h3 class="text-lg font-medium text-gray-900 mb-2">No classes scheduled</h3>
                                 <p class="text-gray-600">There are no classes scheduled for this date.</p>
@@ -813,9 +881,8 @@
 
                     button.className = classes;
                     button.innerHTML = `
-                        <div class="text-xs font-medium uppercase">${day.day}</div>
-                        <div class="text-lg font-bold">${day.date}</div>
-                        ${day.is_selected ? '<div class="w-6 h-1 bg-blue-400 mx-auto mt-1 rounded"></div>' : ''}
+                        <div class="day-name">${day.day}</div>
+                        <div class="day-number">${day.date}</div>
                     `;
 
                     weekDaysContainer.appendChild(button);
@@ -872,7 +939,7 @@
                     container.innerHTML = `
                         <div class="no-classes">
                             <svg class="no-classes-icon mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z"></path>
                             </svg>
                             <h3 class="text-lg font-medium text-gray-900 mb-2">No classes scheduled</h3>
                             <p class="text-gray-600">There are no classes scheduled for this date.</p>
@@ -894,23 +961,32 @@
 
                         return `
                             <div class="class-card">
-                                <div class="class-header">
-                                    <div>
-                                        <div class="class-time-badge">${startLabel}</div>
-                                        <div class="class-duration">${duration} min</div>
-                                    </div>
-                                    <div class="class-info">
-                                        <h3 class="class-title">${classItem.name}</h3>
-                                        <div class="class-instructor">
-                                            <img src="${photo}" alt="${instrName}" class="instructor-avatar">
-                                            <span>${instrName}</span>
-                                        </div>
-                                    </div>
+                                <div class="class-time-section">
+                                    <div class="class-time">${startLabel}</div>
+                                    <div class="class-duration">${duration} min.</div>
                                 </div>
-                                ${classItem.available_spots <= 0
-                                    ? `<button disabled class="book-button">Class Full</button>`
-                                    : `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" class="book-button">Book Class (${classItem.available_spots} left)</button>`
-                                }
+                                
+                                <div class="class-location">
+                                    Manchester
+                                </div>
+                                
+                                <div class="instructor-section">
+                                    <img src="${photo}" alt="${instrName}" class="instructor-avatar">
+                                </div>
+                                
+                                <div class="class-info-section">
+                                    <h3 class="class-title">${classItem.name} (${duration} Min)</h3>
+                                    <p class="class-instructor-name">${instrName}</p>
+                                    <p class="class-room">Manchester Red Room</p>
+                                    <p class="class-room">Manchester</p>
+                                </div>
+                                
+                                <div class="book-section">
+                                    ${classItem.available_spots <= 0
+                                        ? `<button disabled class="reserve-button">Class Full</button>`
+                                        : `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" class="reserve-button">Reserve</button>`
+                                    }
+                                </div>
                             </div>
                         `;
                     }).join('');
