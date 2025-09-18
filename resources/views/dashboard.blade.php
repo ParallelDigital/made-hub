@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="dashboard-grid max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-    <!-- Book a Class (User Schedule) - Full Width, Top -->
-    <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-1 lg:order-1 lg:col-span-3 grid grid-cols-1 gap-3">
+ <!-- Book a Class (User Schedule) - Full Width, Top -->
+ <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-1 lg:order-1 lg:col-span-3">
         <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
             <h3 class="text-base sm:text-lg font-semibold text-white">Book a Class</h3>
             <div class="flex items-center gap-2">
@@ -54,7 +54,7 @@
             </div>
         </template>
     </div>
-
+    
     <!-- QR Code Card -->
     <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-2 lg:order-2">
         <h3 class="text-base sm:text-lg font-semibold text-white mb-3">Your Check-in QR</h3>
@@ -135,56 +135,7 @@
         @endif
     </div>
     
-    <!-- Book a Class (User Schedule) - Full Width, Top -->
-    <div class="dashboard-card bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-5 order-1 lg:order-1 lg:col-span-3">
-        <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
-            <h3 class="text-base sm:text-lg font-semibold text-white">Book a Class</h3>
-            <div class="flex items-center gap-2">
-                <button id="dash-today-btn" class="px-3 py-1.5 rounded border border-gray-600 text-gray-200 hover:bg-gray-700 text-sm">Today</button>
-                <input id="dash-class-date" type="date" class="hidden md:block bg-gray-900 border border-gray-700 text-gray-100 text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary" value="{{ now()->format('Y-m-d') }}" />
-            </div>
-        </div>
-        <!-- Week Navigation -->
-        <div class="bg-gray-900 border border-gray-700 rounded-md p-2 mb-3">
-            <div class="flex items-center">
-                <button id="dash-prev-week" class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-800 text-gray-300" type="button" aria-label="Previous week">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <div id="dash-week-days" class="flex-1 flex items-center gap-3 overflow-x-auto no-scrollbar px-2"></div>
-                <button id="dash-next-week" class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-800 text-gray-300" type="button" aria-label="Next week">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- Selected Date Header -->
-        <div class="flex items-center justify-between mb-2">
-            <h4 id="dash-selected-date" class="text-white text-base font-semibold">—</h4>
-        </div>
-
-        <div id="dash-classes-loading" class="text-gray-300 text-sm py-6 hidden">Loading classes...</div>
-        <div id="dash-classes-empty" class="text-gray-300 text-sm py-6 hidden">No classes scheduled for this date.</div>
-        <div id="dash-classes-list" class="divide-y divide-gray-700"></div>
-
-        <template id="dash-class-item-template">
-            <div class="py-3 flex items-start justify-between gap-3">
-                <div class="min-w-[72px] text-gray-300 text-sm">
-                    <div class="font-semibold text-white" data-field="time">6:00 AM</div>
-                    <div class="text-xs" data-field="duration">60 min.</div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="text-white font-medium truncate" data-field="title">Class Name</div>
-                    <div class="text-gray-300 text-xs" data-field="instructor">Instructor</div>
-                    <div class="mt-1">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-100" data-field="spots">0 left</span>
-                    </div>
-                </div>
-                <div class="shrink-0 flex items-stretch gap-2 w-full sm:w-auto sm:items-center sm:justify-end" data-field="actions">
-                    <!-- Buttons injected here -->
-                </div>
-            </div>
-        </template>
-    </div>
+   
 </div>
 @endsection
 
