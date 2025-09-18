@@ -16,9 +16,55 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <!-- Force Inter on homepage only; overrides global ProFontWindows enforcement -->
         <style>
+            /* Override ProFontWindows enforcement for homepage */
+            body.font-inter, body.font-inter *,
+            body.font-inter *::before, body.font-inter *::after,
             .font-inter, .font-inter *, .font-inter *::before, .font-inter *::after {
                 font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif !important;
-                font-weight: 400;
+                font-weight: 400 !important;
+                font-style: normal !important;
+            }
+            
+            /* Fix calendar layout issues */
+            .schedule-container {
+                min-height: 400px;
+                position: relative;
+            }
+            
+            .week-navigation {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+            }
+            
+            .week-navigation button {
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+            
+            /* Ensure proper class card layout */
+            .class-card {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-height: 80px;
+                width: 100%;
+            }
+            
+            @media (max-width: 640px) {
+                .class-card {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    min-height: auto;
+                    padding: 1rem;
+                }
+                
+                .class-time, .class-instructor, .class-details, .class-booking {
+                    width: 100%;
+                    margin: 0.25rem 0;
+                }
             }
         </style>
     </head>
@@ -169,30 +215,30 @@
             <div class="schedule-container max-w-7xl mx-auto px-2 sm:px-4 lg:px-8" style="opacity: 0; transition: opacity 0.3s ease-in-out;">
                 <!-- Week Navigation -->
                 <div class="px-2 sm:px-4 lg:px-6 py-4">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-2">
                             <!-- Previous Week Arrow -->
-                            <button onclick="loadDate('{{ $prevWeek }}')" class="p-2 text-gray-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" id="prev-week-btn">
+                            <button onclick="loadDate('{{ $prevWeek }}')" class="p-2 text-gray-700 hover:text-gray-900 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0" id="prev-week-btn">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
                             </button>
 
                             <!-- Week Days -->
-                            <div class="week-navigation flex space-x-1 sm:space-x-2 flex-1 overflow-x-auto px-1 sm:px-2" id="week-days">
+                            <div class="flex space-x-1 sm:space-x-2 flex-1 overflow-x-auto px-1 sm:px-2 justify-center" id="week-days">
                                 <?php foreach($weekDays as $day): ?>
-                                <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-2 sm:px-3 py-2 transition-colors cursor-pointer flex-1 min-w-[50px] sm:min-w-[60px] min-h-[44px]
-                                    {{ $day['is_selected'] ? 'text-black' : ($day['is_today'] ? 'text-white font-bold' : 'text-gray-400') }}">
-                                    <div class="text-xs font-medium">{{ $day['day'] }}</div>
+                                <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-2 sm:px-3 py-2 transition-colors cursor-pointer flex-shrink-0 min-w-[60px] sm:min-w-[80px] min-h-[44px] rounded-lg
+                                    {{ $day['is_selected'] ? 'bg-gray-800 text-white' : ($day['is_today'] ? 'bg-gray-200 text-black font-bold' : 'text-gray-600 hover:bg-gray-100') }}">
+                                    <div class="text-xs font-medium uppercase">{{ $day['day'] }}</div>
                                     <div class="text-lg sm:text-xl font-bold">{{ $day['date'] }}</div>
                                     <?php if(!empty($day['is_selected'])): ?>
-                                        <div class="w-6 sm:w-8 h-1 bg-primary mx-auto mt-1"></div>
+                                        <div class="w-6 sm:w-8 h-1 bg-primary mx-auto mt-1 rounded"></div>
                                     <?php endif; ?>
                                 </button>
                                 <?php endforeach; ?>
                             </div>
 
                             <!-- Next Week Arrow -->
-                            <button onclick="loadDate('{{ $nextWeek }}')" class="p-2 text-gray-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" id="next-week-btn">
+                            <button onclick="loadDate('{{ $nextWeek }}')" class="p-2 text-gray-700 hover:text-gray-900 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0" id="next-week-btn">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
@@ -521,22 +567,23 @@
 
                 weekDays.forEach(day => {
                     const button = document.createElement('button');
+                    button.setAttribute('data-date', day.full_date);
                     button.onclick = () => loadDate(day.full_date);
                     
-                    let classes = 'text-center px-6 py-4 rounded-lg transition-colors cursor-pointer flex-1 ';
+                    let classes = 'text-center px-2 sm:px-3 py-2 transition-colors cursor-pointer flex-shrink-0 min-w-[60px] sm:min-w-[80px] min-h-[44px] rounded-lg ';
                     if (day.is_selected) {
-                        classes += 'text-black';
+                        classes += 'bg-gray-800 text-white';
                     } else if (day.is_today) {
-                        classes += 'bg-gray-200 text-black font-semibold';
+                        classes += 'bg-gray-200 text-black font-bold';
                     } else {
-                        classes += 'text-gray-700 hover:bg-gray-100';
+                        classes += 'text-gray-600 hover:bg-gray-100';
                     }
 
                     button.className = classes;
                     button.innerHTML = `
-                        <div class="text-sm font-medium uppercase">${day.day}</div>
-                        <div class="text-xl font-bold">${day.date}</div>
-                        ${day.is_selected ? '<div class="w-8 h-1 bg-primary mx-auto mt-1"></div>' : ''}
+                        <div class="text-xs font-medium uppercase">${day.day}</div>
+                        <div class="text-lg sm:text-xl font-bold">${day.date}</div>
+                        ${day.is_selected ? '<div class="w-6 sm:w-8 h-1 bg-primary mx-auto mt-1 rounded"></div>' : ''}
                     `;
 
                     weekDaysContainer.appendChild(button);
