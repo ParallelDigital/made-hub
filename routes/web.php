@@ -14,19 +14,21 @@ Route::get('/test-email-send', function () {
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
         
-        // Get the first user and booking
-        $user = \App\Models\User::first();
-        if (!$user) {
-            return 'No users found in the database';
-        }
-        
-        $booking = \App\Models\Booking::first();
+        // Get a booking with its user; ensure the email goes to the booking's user
+        $booking = \App\Models\Booking::with('user')->latest('id')->first();
         if (!$booking) {
             return 'No bookings found in the database';
         }
+        $user = $booking->user;
+        if (!$user) {
+            return 'The selected booking has no associated user';
+        }
         
-        // Generate QR URL
-        $qrUrl = URL::signedRoute('booking.checkin', ['booking' => $booking->id]);
+        // Generate user QR URL for logging (mailer generates its own)
+        $qrUrl = URL::signedRoute('user.checkin', [
+            'user' => $user->id,
+            'qr_code' => $user->qr_code,
+        ]);
         
         // Log the attempt
         \Log::info('Manual test email send attempt', [
@@ -36,7 +38,7 @@ Route::get('/test-email-send', function () {
             'qr_url' => $qrUrl
         ]);
         
-        // Send the email
+        // Send the email to the user who owns the booking
         $email = new \App\Mail\BookingConfirmed($booking, $qrUrl);
         $result = \Mail::to($user->email)->send($email);
         

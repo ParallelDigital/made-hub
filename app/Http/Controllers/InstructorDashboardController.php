@@ -94,32 +94,57 @@ class InstructorDashboardController extends Controller
         // Normalize to uppercase to avoid collation issues
         $qr = strtoupper($parsed['qr']);
 
-        // Find user by exact QR code
-        $user = User::whereRaw('UPPER(qr_code) = ?', [$qr])->first();
-        
-        if (!$user) {
-            return response()->json([
-                'success' => false, 
-                'message' => 'Invalid QR code. User not found.',
-                'debug' => [
-                    'parsed_qr' => $qr,
-                    'parsed_user_id' => $parsed['user_id'] ?? null,
-                ],
-            ]);
-        }
-
-        // If payload included a user_id, verify it matches the resolved user to avoid mismatches
-        if (!empty($parsed['user_id']) && (int)$parsed['user_id'] !== (int)$user->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'QR does not match the encoded user.',
-                'user_name' => $user->name,
-                'debug' => [
-                    'parsed_qr' => $qr,
-                    'parsed_user_id' => (int)$parsed['user_id'],
-                    'matched_user_id' => (int)$user->id,
-                ],
-            ]);
+        // Prefer user_id from signed URL payload when available
+        $user = null;
+        if (!empty($parsed['user_id'])) {
+            $user = User::find((int)$parsed['user_id']);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid QR: encoded user not found.',
+                    'debug' => [
+                        'parsed_qr' => $qr,
+                        'parsed_user_id' => (int)$parsed['user_id']
+                    ],
+                ]);
+            }
+            if (strtoupper((string) $user->qr_code) !== $qr) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'QR does not match the encoded user.',
+                    'user_name' => $user->name,
+                    'debug' => [
+                        'parsed_qr' => $qr,
+                        'parsed_user_id' => (int)$parsed['user_id'],
+                        'matched_user_id' => (int)$user->id,
+                        'matched_user_qr' => strtoupper((string) $user->qr_code),
+                    ],
+                ]);
+            }
+        } else {
+            // Fallback to lookup by QR code; detect duplicates to avoid misattribution
+            $matches = User::whereRaw('UPPER(qr_code) = ?', [$qr])->limit(2)->get();
+            if ($matches->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid QR code. User not found.',
+                    'debug' => [
+                        'parsed_qr' => $qr,
+                        'parsed_user_id' => null,
+                    ],
+                ]);
+            }
+            if ($matches->count() > 1) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Duplicate QR code detected. Please ask the user to open their latest QR email or regenerate their QR.',
+                    'debug' => [
+                        'parsed_qr' => $qr,
+                        'duplicate_user_ids' => $matches->pluck('id')->values(),
+                    ],
+                ]);
+            }
+            $user = $matches->first();
         }
 
         // Check if user has a booking for this class
