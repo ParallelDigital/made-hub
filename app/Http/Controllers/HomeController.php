@@ -101,12 +101,14 @@ class HomeController extends Controller
 
 
         return response()->json([
-            'classes' => $selectedDateClasses->map(function($class) {
+            'classes' => $selectedDateClasses->map(function($class) use ($selectedDate) {
                 $bookedCount = $class->bookings()->count();
                 $availableSpots = $class->max_spots - $bookedCount;
                 
                 // Calculate duration properly handling overnight classes
                 $duration = null;
+                $start = null;
+                $end = null;
                 if (!empty($class->start_time) && !empty($class->end_time)) {
                     $classDate = $class->class_date instanceof \Carbon\Carbon ? $class->class_date->toDateString() : (string) $class->class_date;
                     $start = \Carbon\Carbon::parse(trim(($classDate ?: now()->toDateString()) . ' ' . $class->start_time));
@@ -120,6 +122,13 @@ class HomeController extends Controller
                 } else {
                     $duration = $class->duration ?? 60; // Default fallback
                 }
+
+                // Determine if the class (for the selected day) is in the past
+                $selectedStart = null;
+                if (!empty($class->start_time)) {
+                    $selectedStart = \Carbon\Carbon::parse($selectedDate->toDateString() . ' ' . $class->start_time);
+                }
+                $isPast = $selectedStart ? $selectedStart->lessThan(now()) : false;
                 
                 return [
                     'id' => $class->id,
@@ -132,6 +141,7 @@ class HomeController extends Controller
                     'max_spots' => $class->max_spots,
                     'booked_count' => $bookedCount,
                     'available_spots' => $availableSpots,
+                    'is_past' => $isPast,
                     'instructor' => [
                         'name' => $class->instructor->name ?? 'No Instructor',
                         'initials' => substr($class->instructor->name ?? 'IN', 0, 2),

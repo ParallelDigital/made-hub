@@ -440,9 +440,31 @@
                     margin: 0 0 0.125rem 0;
                 }
                 
-                .class-location,
-                .book-section {
+                .class-location {
                     display: none; /* Hide on mobile */
+                }
+
+                /* Show a compact Reserve button on mobile */
+                .book-section {
+                    display: block;
+                    margin-left: auto;
+                    flex-shrink: 0;
+                }
+
+                .book-section .reserve-button {
+                    padding: 0.5rem 0.75rem;
+                    font-size: 0.875rem;
+                    line-height: 1rem;
+                    border: 1px solid #111827; /* near-black */
+                    color: #111827;
+                    background: transparent;
+                    border-radius: 0.375rem;
+                    font-weight: 600;
+                }
+
+                .book-section .reserve-button:disabled {
+                    border-color: #d1d5db;
+                    color: #9ca3af;
                 }
             }
         </style>
@@ -690,16 +712,17 @@
                                                 $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
                                                 $availableSpots = max(0, $class->max_spots - $currentBookings);
                                                 $isFull = $availableSpots <= 0;
+                                                // Determine if class is in the past relative to selected date
+                                                $startDateTime = \Carbon\Carbon::parse($selectedDate->toDateString() . ' ' . ($class->start_time ?? '00:00'));
+                                                $isPast = $startDateTime->lt(now());
                                             @endphp
                                             
                                             @if($isFull)
-                                                <button disabled class="reserve-button">
-                                                    Class Full
-                                                </button>
+                                                <button disabled class="reserve-button">Class Full</button>
+                                            @elseif($isPast)
+                                                <button disabled class="reserve-button">Past</button>
                                             @else
-                                                <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" class="reserve-button">
-                                                    Reserve
-                                                </button>
+                                                <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" class="reserve-button">Reserve</button>
                                             @endif
                                         </div>
                                     </div>
@@ -1062,9 +1085,12 @@
                                 </div>
                                 
                                 <div class="book-section">
-                                    ${classItem.available_spots <= 0
-                                        ? `<button disabled class="reserve-button">Class Full</button>`
-                                        : `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" class="reserve-button">Reserve</button>`
+                                    ${classItem.is_past
+                                        ? `<button disabled class="reserve-button">Past</button>`
+                                        : (classItem.available_spots <= 0
+                                            ? `<button disabled class="reserve-button">Class Full</button>`
+                                            : `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" class="reserve-button">Reserve</button>`
+                                          )
                                     }
                                 </div>
                             </div>
