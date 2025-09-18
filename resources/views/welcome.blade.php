@@ -25,45 +25,281 @@
                 font-style: normal !important;
             }
             
-            /* Fix calendar layout issues */
+            /* Mobile-first calendar design */
             .schedule-container {
-                min-height: 400px;
-                position: relative;
+                background: #f8fafc;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+            
+            /* Week navigation styling */
+            .week-nav-container {
+                background: white;
+                padding: 1rem;
+                border-bottom: 1px solid #e2e8f0;
             }
             
             .week-navigation {
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
-                flex-wrap: nowrap;
+                justify-content: center;
                 gap: 0.5rem;
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding: 0.5rem 0;
             }
             
-            .week-navigation button {
+            .week-navigation::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .week-day-btn {
                 flex-shrink: 0;
-                white-space: nowrap;
+                min-width: 60px;
+                padding: 0.75rem 0.5rem;
+                border-radius: 12px;
+                text-align: center;
+                border: none;
+                background: transparent;
+                transition: all 0.2s ease;
+                cursor: pointer;
+                font-family: inherit;
             }
             
-            /* Ensure proper class card layout */
-            .class-card {
+            .week-day-btn.selected {
+                background: #1f2937;
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(31, 41, 55, 0.3);
+            }
+            
+            .week-day-btn.today:not(.selected) {
+                background: #e5e7eb;
+                color: #1f2937;
+                font-weight: 600;
+            }
+            
+            .week-day-btn:not(.selected):not(.today):hover {
+                background: #f1f5f9;
+                color: #475569;
+            }
+            
+            .nav-arrow {
+                flex-shrink: 0;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: white;
+                border: 1px solid #e2e8f0;
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
-                min-height: 80px;
-                width: 100%;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin: 0 0.5rem;
             }
             
-            @media (max-width: 640px) {
-                .class-card {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    min-height: auto;
+            .nav-arrow:hover {
+                background: #f8fafc;
+                border-color: #cbd5e1;
+                transform: scale(1.05);
+            }
+            
+            /* Date header styling */
+            .date-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 1.5rem;
+                text-align: center;
+            }
+            
+            .date-header h2 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin: 0;
+            }
+            
+            .today-btn {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                font-size: 0.875rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin-top: 0.5rem;
+            }
+            
+            .today-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+                border-color: rgba(255, 255, 255, 0.5);
+            }
+            
+            /* Class cards styling */
+            .classes-section {
+                padding: 1.5rem;
+                background: white;
+            }
+            
+            .class-card {
+                background: white;
+                border-radius: 16px;
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                border: 1px solid #f1f5f9;
+                transition: all 0.2s ease;
+            }
+            
+            .class-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            }
+            
+            .class-header {
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .class-time-badge {
+                background: #f0f9ff;
+                color: #0369a1;
+                padding: 0.5rem 0.75rem;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 0.875rem;
+                white-space: nowrap;
+                min-width: 80px;
+                text-align: center;
+            }
+            
+            .class-duration {
+                background: #f8fafc;
+                color: #64748b;
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                margin-top: 0.25rem;
+            }
+            
+            .class-info {
+                flex: 1;
+            }
+            
+            .class-title {
+                font-size: 1.125rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin: 0 0 0.5rem 0;
+                line-height: 1.3;
+            }
+            
+            .class-instructor {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                color: #64748b;
+                font-size: 0.875rem;
+            }
+            
+            .instructor-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid #e2e8f0;
+            }
+            
+            .book-button {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 0.875rem 1.5rem;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 0.875rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                width: 100%;
+                margin-top: 1rem;
+                min-height: 44px;
+            }
+            
+            .book-button:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            }
+            
+            .book-button:disabled {
+                background: #e2e8f0;
+                color: #94a3b8;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+            
+            .no-classes {
+                text-align: center;
+                padding: 3rem 1rem;
+                color: #64748b;
+            }
+            
+            .no-classes-icon {
+                width: 64px;
+                height: 64px;
+                margin: 0 auto 1rem;
+                opacity: 0.5;
+            }
+            
+            /* Mobile optimizations */
+            @media (max-width: 768px) {
+                .schedule-container {
+                    margin: 0 -1rem;
+                    border-radius: 0;
+                }
+                
+                .week-navigation {
+                    padding: 0.25rem 0;
+                }
+                
+                .week-day-btn {
+                    min-width: 50px;
+                    padding: 0.5rem 0.25rem;
+                    font-size: 0.875rem;
+                }
+                
+                .date-header {
                     padding: 1rem;
                 }
                 
-                .class-time, .class-instructor, .class-details, .class-booking {
-                    width: 100%;
-                    margin: 0.25rem 0;
+                .date-header h2 {
+                    font-size: 1.25rem;
+                }
+                
+                .classes-section {
+                    padding: 1rem;
+                }
+                
+                .class-card {
+                    padding: 1rem;
+                    margin-bottom: 0.75rem;
+                }
+                
+                .class-header {
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+                
+                .class-time-badge {
+                    align-self: flex-start;
                 }
             }
         </style>
@@ -212,51 +448,50 @@
 
         <!-- Schedule Section -->
         <div id="schedule" class="bg-white text-black py-6 sm:py-8">
-            <div class="schedule-container max-w-7xl mx-auto px-2 sm:px-4 lg:px-8" style="opacity: 0; transition: opacity 0.3s ease-in-out;">
+            <div class="schedule-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style="opacity: 0; transition: opacity 0.3s ease-in-out;">
                 <!-- Week Navigation -->
-                <div class="px-2 sm:px-4 lg:px-6 py-4">
-                        <div class="flex items-center justify-between gap-2">
-                            <!-- Previous Week Arrow -->
-                            <button onclick="loadDate('{{ $prevWeek }}')" class="p-2 text-gray-700 hover:text-gray-900 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0" id="prev-week-btn">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                </svg>
-                            </button>
+                <div class="week-nav-container">
+                    <div class="flex items-center justify-between">
+                        <!-- Previous Week Arrow -->
+                        <button onclick="loadDate('{{ $prevWeek }}')" class="nav-arrow" id="prev-week-btn">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
 
-                            <!-- Week Days -->
-                            <div class="flex space-x-1 sm:space-x-2 flex-1 overflow-x-auto px-1 sm:px-2 justify-center" id="week-days">
-                                <?php foreach($weekDays as $day): ?>
-                                <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="text-center px-2 sm:px-3 py-2 transition-colors cursor-pointer flex-shrink-0 min-w-[60px] sm:min-w-[80px] min-h-[44px] rounded-lg
-                                    {{ $day['is_selected'] ? 'bg-gray-800 text-white' : ($day['is_today'] ? 'bg-gray-200 text-black font-bold' : 'text-gray-600 hover:bg-gray-100') }}">
-                                    <div class="text-xs font-medium uppercase">{{ $day['day'] }}</div>
-                                    <div class="text-lg sm:text-xl font-bold">{{ $day['date'] }}</div>
-                                    <?php if(!empty($day['is_selected'])): ?>
-                                        <div class="w-6 sm:w-8 h-1 bg-primary mx-auto mt-1 rounded"></div>
-                                    <?php endif; ?>
-                                </button>
-                                <?php endforeach; ?>
-                            </div>
-
-                            <!-- Next Week Arrow -->
-                            <button onclick="loadDate('{{ $nextWeek }}')" class="p-2 text-gray-700 hover:text-gray-900 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0" id="next-week-btn">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
+                        <!-- Week Days -->
+                        <div class="week-navigation" id="week-days">
+                            <?php foreach($weekDays as $day): ?>
+                            <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="week-day-btn {{ $day['is_selected'] ? 'selected' : ($day['is_today'] ? 'today' : '') }}">
+                                <div class="text-xs font-medium uppercase">{{ $day['day'] }}</div>
+                                <div class="text-lg font-bold">{{ $day['date'] }}</div>
+                                <?php if(!empty($day['is_selected'])): ?>
+                                    <div class="w-6 h-1 bg-blue-400 mx-auto mt-1 rounded"></div>
+                                <?php endif; ?>
                             </button>
+                            <?php endforeach; ?>
                         </div>
+
+                        <!-- Next Week Arrow -->
+                        <button onclick="loadDate('{{ $nextWeek }}')" class="nav-arrow" id="next-week-btn">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Selected Date Header -->
-                <div class="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 bg-gray-100 border-t border-b border-gray-300">
-                        <div class="flex items-center justify-between flex-wrap gap-2">
-                            <h3 class="text-base sm:text-lg font-semibold text-black" id="selected-date-header">{{ $selectedDate->format('l, F j, Y') }}</h3>
-                            <button
-                                type="button"
-                                onclick="loadDate('{{ now()->toDateString() }}')"
-                                class="inline-flex items-center px-3 py-2 rounded-md bg-white border border-gray-300 text-black text-sm hover:bg-gray-50 min-h-[44px]">
-                                Today
-                            </button>
-                        </div>
+                <div class="date-header">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <h2 id="selected-date-header">{{ $selectedDate->format('l, F j, Y') }}</h2>
+                        <button
+                            type="button"
+                            onclick="loadDate('{{ now()->toDateString() }}')"
+                            class="today-btn">
+                            Today
+                        </button>
+                    </div>
                 </div>
 
                     <!-- Loading Spinner -->
@@ -268,9 +503,9 @@
                     </div>
 
                     <!-- Selected Date Classes -->
-                    <div class="px-2 sm:px-4 lg:px-6 py-4" id="classes-container">
+                    <div class="classes-section" id="classes-container">
                         <?php if($selectedDateClasses->count() > 0): ?>
-                            <div class="space-y-3 sm:space-y-4" id="classes-list">
+                            <div id="classes-list">
                                 <?php foreach($selectedDateClasses as $class): ?>
                                     @php
                                         $classDate = $class->class_date instanceof \Carbon\Carbon ? $class->class_date->toDateString() : (string) $class->class_date;
@@ -284,27 +519,26 @@
                                             $endForDiff = $end->lessThan($start) ? $end->copy()->addDay() : $end;
                                             $duration = $start->diffInMinutes($endForDiff);
                                         } else {
-                                            $duration = $class->duration ?? null;
+                                            $duration = $class->duration ?? 60;
                                         }
                                     @endphp
-                                    <div class="class-card flex flex-col sm:flex-row items-start sm:items-center py-4 sm:py-6 border-b border-gray-300 last:border-b-0 gap-3 sm:gap-4">
-                                    <div class="class-time flex-shrink-0 w-full sm:w-20 text-left">
-                                        <div class="text-base sm:text-lg font-bold text-black">{{ $start ? $start->format('g:i A') : '' }}</div>
-                                        <div class="text-sm text-gray-600">{{ $duration !== null ? $duration . ' min.' : '' }}</div>
-                                    </div>
-                                    
-                                    <div class="class-instructor flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                                        <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
-                                             alt="{{ $class->instructor->name ?? 'Instructor' }}" 
-                                             class="w-12 h-12 rounded-full object-cover">
-                                    </div>
-                                    
-                                    <div class="class-details flex-1">
-                                        <div class="font-semibold text-gray-900 text-sm sm:text-base">{{ $class->name }} {{ $duration !== null ? '(' . $duration . ' Min)' : '' }}</div>
-                                        <div class="text-sm text-gray-600">{{ $class->instructor->name ?? 'No Instructor' }}</div>
-                                    </div>
-                                    
-                                    <div class="class-booking flex-shrink-0 w-full sm:w-auto">
+                                    <div class="class-card">
+                                        <div class="class-header">
+                                            <div>
+                                                <div class="class-time-badge">{{ $start ? $start->format('g:i A') : '' }}</div>
+                                                <div class="class-duration">{{ $duration }} min</div>
+                                            </div>
+                                            <div class="class-info">
+                                                <h3 class="class-title">{{ $class->name }}</h3>
+                                                <div class="class-instructor">
+                                                    <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
+                                                         alt="{{ $class->instructor->name ?? 'Instructor' }}" 
+                                                         class="instructor-avatar">
+                                                    <span>{{ $class->instructor->name ?? 'No Instructor' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
                                         @php
                                             $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
                                             $availableSpots = max(0, $class->max_spots - $currentBookings);
@@ -312,23 +546,23 @@
                                         @endphp
                                         
                                         @if($isFull)
-                                            <button disabled 
-                                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gray-400 text-white text-sm sm:text-base font-medium rounded-md cursor-not-allowed min-h-[44px]">
+                                            <button disabled class="book-button">
                                                 Class Full
                                             </button>
                                         @else
-                                            <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" 
-                                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary text-black text-sm sm:text-base font-medium rounded-md transition-colors hover:opacity-90 min-h-[44px]">
+                                            <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" class="book-button">
                                                 Book Class ({{ $availableSpots }} left)
                                             </button>
                                         @endif
                                     </div>
-                                </div>
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
-                            <div class="text-center py-12" id="no-classes">
-                                <h3 class="text-lg font-medium text-black mb-2">No classes scheduled</h3>
+                            <div class="no-classes" id="no-classes">
+                                <svg class="no-classes-icon mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No classes scheduled</h3>
                                 <p class="text-gray-600">There are no classes scheduled for this date.</p>
                             </div>
                         <?php endif; ?>
@@ -570,20 +804,18 @@
                     button.setAttribute('data-date', day.full_date);
                     button.onclick = () => loadDate(day.full_date);
                     
-                    let classes = 'text-center px-2 sm:px-3 py-2 transition-colors cursor-pointer flex-shrink-0 min-w-[60px] sm:min-w-[80px] min-h-[44px] rounded-lg ';
+                    let classes = 'week-day-btn ';
                     if (day.is_selected) {
-                        classes += 'bg-gray-800 text-white';
+                        classes += 'selected';
                     } else if (day.is_today) {
-                        classes += 'bg-gray-200 text-black font-bold';
-                    } else {
-                        classes += 'text-gray-600 hover:bg-gray-100';
+                        classes += 'today';
                     }
 
                     button.className = classes;
                     button.innerHTML = `
                         <div class="text-xs font-medium uppercase">${day.day}</div>
-                        <div class="text-lg sm:text-xl font-bold">${day.date}</div>
-                        ${day.is_selected ? '<div class="w-6 sm:w-8 h-1 bg-primary mx-auto mt-1 rounded"></div>' : ''}
+                        <div class="text-lg font-bold">${day.date}</div>
+                        ${day.is_selected ? '<div class="w-6 h-1 bg-blue-400 mx-auto mt-1 rounded"></div>' : ''}
                     `;
 
                     weekDaysContainer.appendChild(button);
@@ -638,9 +870,11 @@
 
                 if (classes.length === 0) {
                     container.innerHTML = `
-                        <div class="text-center py-12">
-                           
-                            <h3 class="text-lg font-medium text-black mb-2">No classes scheduled</h3>
+                        <div class="no-classes">
+                            <svg class="no-classes-icon mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No classes scheduled</h3>
                             <p class="text-gray-600">There are no classes scheduled for this date.</p>
                         </div>
                     `;
@@ -659,29 +893,29 @@
                         const instrName = (classItem && classItem.instructor && classItem.instructor.name) ? classItem.instructor.name : 'No Instructor';
 
                         return `
-                            <div class="class-card flex flex-col sm:flex-row items-start sm:items-center py-4 sm:py-6 border-b border-gray-300 last:border-b-0 gap-3 sm:gap-4">
-                                <div class="class-time flex-shrink-0 w-full sm:w-20 text-left">
-                                    <div class="text-base sm:text-lg font-bold text-black">${startLabel}</div>
-                                    <div class="text-sm text-gray-600">${duration} min.</div>
+                            <div class="class-card">
+                                <div class="class-header">
+                                    <div>
+                                        <div class="class-time-badge">${startLabel}</div>
+                                        <div class="class-duration">${duration} min</div>
+                                    </div>
+                                    <div class="class-info">
+                                        <h3 class="class-title">${classItem.name}</h3>
+                                        <div class="class-instructor">
+                                            <img src="${photo}" alt="${instrName}" class="instructor-avatar">
+                                            <span>${instrName}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="class-instructor flex-shrink-0 w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                                    <img src="${photo}" alt="${instrName}" class="w-12 h-12 rounded-full object-cover">
-                                </div>
-                                <div class="class-details flex-1">
-                                    <div class="font-semibold text-gray-900 text-sm sm:text-base">${classItem.name} ${duration ? `(${duration} Min)` : ''}</div>
-                                    <div class="text-sm text-gray-600">${instrName}</div>
-                                </div>
-                                <div class="class-booking flex-shrink-0 w-full sm:w-auto">
-                                    ${classItem.available_spots <= 0
-                                        ? `<button disabled class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gray-400 text-white text-sm sm:text-base font-medium rounded-md cursor-not-allowed min-h-[44px]">Class Full</button>`
-                                        : `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary text-black text-sm sm:text-base font-medium rounded-md transition-colors hover:opacity-90 min-h-[44px]">Book Class (${classItem.available_spots} left)</button>`
-                                    }
-                                </div>
+                                ${classItem.available_spots <= 0
+                                    ? `<button disabled class="book-button">Class Full</button>`
+                                    : `<button onclick="openBookingModal(${classItem.id}, ${classItem.price})" class="book-button">Book Class (${classItem.available_spots} left)</button>`
+                                }
                             </div>
                         `;
                     }).join('');
 
-                    container.innerHTML = `<div class="space-y-3" id="classes-list">${classesHTML}</div>`;
+                    container.innerHTML = `<div class="classes-section">${classesHTML}</div>`;
                 }
             }
 
