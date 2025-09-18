@@ -84,7 +84,7 @@
                         name="name"
                         type="text"
                         label="Full Name"
-                        :value="old('name')"
+                        :value="old('name', auth()->check() ? auth()->user()->name : '')"
                         required
                         helper=""
                     />
@@ -97,7 +97,7 @@
                         name="email"
                         type="email"
                         label="Email Address"
-                        :value="old('email')"
+                        :value="old('email', auth()->check() ? auth()->user()->email : '')"
                         required
                         helper="We'll send your receipt to this email"
                     />

@@ -1204,24 +1204,28 @@
             function closeBookingModal() {
                 document.getElementById('bookingModal').classList.add('hidden');
                 document.body.style.overflow = 'auto';
-                window.selectedClassId = null;
+                // Do not clear selectedClassId so we can continue flows (login/confirm) reliably
             }
 
             function bookWithCredits(classId) {
-                closeBookingModal();
+                // Capture the class id before any UI changes
+                const cid = classId || window.selectedClassId;
                 @auth
                     // Determine available credits from hidden data attribute
                     const span = document.getElementById('availableCreditsData');
                     const available = span ? (parseInt(span.getAttribute('data-credits')) || 0) : 0;
                     if (available > 0) {
+                        // Hide the booking modal then confirm using the captured id
+                        closeBookingModal();
                         openConfirmModal('Use 1 credit to book this class?', function() {
-                            performCreditBooking(window.selectedClassId);
+                            performCreditBooking(cid);
                         });
                     } else {
+                        closeBookingModal();
                         openNoCreditsModal();
                     }
                 @else
-                    // Open inline login modal for guests
+                    // Keep booking modal in background, and open login so we preserve cid for redirect
                     openLoginModal();
                 @endauth
             }
