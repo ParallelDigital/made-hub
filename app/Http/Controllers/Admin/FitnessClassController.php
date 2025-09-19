@@ -68,7 +68,8 @@ class FitnessClassController extends Controller
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'max_spots' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
+            'price' => 'required_unless:members_only,1|numeric|min:0',
+            'members_only' => 'sometimes|boolean',
             'location' => 'required|string|max:255',
             'active' => 'boolean',
             'recurring' => 'boolean',
@@ -78,6 +79,14 @@ class FitnessClassController extends Controller
             'recurring_frequency' => 'nullable|integer|min:1',
             'recurring_until' => 'nullable|date|after:class_date',
         ]);
+
+        // Ensure members-only classes are free
+        if ($request->boolean('members_only')) {
+            $validated['members_only'] = true;
+            $validated['price'] = 0;
+        } else {
+            $validated['members_only'] = false;
+        }
 
         // Convert recurring_days array to comma-separated string
         if (isset($validated['recurring_days'])) {
@@ -127,7 +136,8 @@ class FitnessClassController extends Controller
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
             'max_spots' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
+            'price' => 'required_unless:members_only,1|numeric|min:0',
+            'members_only' => 'sometimes|boolean',
             'location' => 'required|string|max:255',
             'active' => 'boolean',
             'recurring' => 'boolean',
@@ -137,6 +147,14 @@ class FitnessClassController extends Controller
             'recurring_frequency' => 'nullable|integer|min:1',
             'recurring_until' => 'nullable|date|after:class_date',
         ]);
+
+        // Ensure members-only classes are free
+        if ($request->boolean('members_only')) {
+            $validated['members_only'] = true;
+            $validated['price'] = 0;
+        } else {
+            $validated['members_only'] = false;
+        }
 
         // Convert recurring_days array to comma-separated string
         if (isset($validated['recurring_days'])) {
@@ -263,6 +281,7 @@ class FitnessClassController extends Controller
                     'instructor_id' => $parentClass->instructor_id,
                     'max_spots' => $parentClass->max_spots,
                     'price' => $parentClass->price,
+                    'members_only' => (bool) $parentClass->members_only,
                     'start_time' => $parentClass->start_time,
                     'end_time' => $parentClass->end_time,
                     'active' => $parentClass->active,

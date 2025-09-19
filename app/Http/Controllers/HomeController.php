@@ -145,6 +145,7 @@ class HomeController extends Controller
                     'booked_count' => $bookedCount,
                     'available_spots' => $availableSpots,
                     'is_past' => $isPast,
+                    'members_only' => (bool) $class->members_only,
                     'instructor' => [
                         'name' => $class->instructor->name ?? 'No Instructor',
                         'initials' => substr($class->instructor->name ?? 'IN', 0, 2),

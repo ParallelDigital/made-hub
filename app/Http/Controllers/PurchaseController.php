@@ -30,6 +30,16 @@ class PurchaseController extends Controller
         }
 
         $user = $request->user();
+
+        // Block checkout for members-only classes; guide user appropriately
+        if ($class->members_only) {
+            if (!$user || !$user->hasActiveMembership()) {
+                return redirect()->route('welcome')->with('error', 'This class is for members only. Please become a member to attend.');
+            }
+            // Members should book for free via the normal booking flow
+            return redirect()->route('welcome', ['openBooking' => 1, 'classId' => $class->id, 'price' => 0]);
+        }
+
         $hasMembership = $user ? $user->hasActiveMembership() : false;
         $availableCredits = 0;
         if ($user) {

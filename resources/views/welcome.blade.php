@@ -489,6 +489,23 @@
                     <div class="flex items-center space-x-2">
                         <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20">
                     </div>
+
+        <!-- Members Only Modal -->
+        <div id="membersOnlyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Members Only</h3>
+                    <button onclick="closeMembersOnlyModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <p class="text-gray-700 mb-4">This class is for members only. Become a member to attend this class and others for free.</p>
+                <div class="grid grid-cols-1 gap-3">
+                    <a href="{{ route('purchase.package.checkout', ['type' => 'membership']) }}" class="w-full px-4 py-3 rounded bg-primary text-black font-semibold hover:bg-opacity-90 text-center">Become a Member</a>
+                    <button onclick="closeMembersOnlyModal()" class="w-full px-4 py-2 rounded text-gray-700 hover:bg-gray-50 border border-gray-300">Close</button>
+                </div>
+            </div>
+        </div>
                     <div class="hidden lg:flex space-x-6">
                         <a href="{{ route('welcome') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
                         <a href="{{ route('purchase.index') }}" class="text-white hover:text-primary transition-colors">PURCHASE</a>
@@ -642,61 +659,70 @@
                         <?php if($selectedDateClasses->count() > 0): ?>
                             <div id="classes-list">
                                 <?php foreach($selectedDateClasses as $class): ?>
-                                    @php
-                                        $classDate = $class->class_date instanceof \Carbon\Carbon ? $class->class_date->toDateString() : (string) $class->class_date;
-                                        $start = !empty($class->start_time)
-                                            ? \Carbon\Carbon::parse(trim(($classDate ?: now()->toDateString()) . ' ' . $class->start_time))
-                                            : null;
-                                        $end = !empty($class->end_time)
-                                            ? \Carbon\Carbon::parse(trim(($classDate ?: now()->toDateString()) . ' ' . $class->end_time))
-                                            : null;
-                                        if ($start && $end) {
-                                            $endForDiff = $end->lessThan($start) ? $end->copy()->addDay() : $end;
-                                            $duration = $start->diffInMinutes($endForDiff);
-                                        } else {
-                                            $duration = $class->duration ?? 60;
-                                        }
-                                        // Compute booking state for data attributes and reuse below
-                                        $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
-                                        $availableSpots = max(0, $class->max_spots - $currentBookings);
-                                        $isFull = $availableSpots <= 0;
-                                        $startDateTime = \Carbon\Carbon::parse($selectedDate->toDateString() . ' ' . ($class->start_time ?? '00:00'));
-                                        $isPast = $startDateTime->lt(now());
-                                        $isBookedByMe = auth()->check() ? $class->bookings->contains('user_id', auth()->id()) : false;
-                                    @endphp
-                                    <div class="class-card" data-class-id="{{ $class->id }}" data-price="{{ $class->price ?? 0 }}" data-is-past="{{ $isPast ? '1' : '0' }}" data-is-full="{{ $isFull ? '1' : '0' }}" data-is-booked="{{ $isBookedByMe ? '1' : '0' }}">
-                                        <div class="class-time-section">
-                                            <div class="class-time">{{ $start ? $start->format('g:i A') : '' }}</div>
-                                            <div class="class-duration">{{ $duration }} min.</div>
-                                        </div>
-                                        
-                                        <div class="class-location">
-                                            Manchester
-                                        </div>
-                                        
-                                        <div class="instructor-section">
-                                            <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
-                                                 alt="{{ $class->instructor->name ?? 'Instructor' }}" 
-                                                 class="instructor-avatar">
-                                        </div>
-                                        
-                                        <div class="class-info-section">
-                                            <h3 class="class-title">{{ $class->name }} ({{ $duration }} Min)</h3>
-                                            <p class="class-instructor-name">{{ $class->instructor->name ?? 'No Instructor' }}</p>
-                                        </div>
-                                        
-                                        <div class="book-section">
-                                            @if($isPast)
-                                                <button disabled class="reserve-button">Past</button>
-                                            @elseif($isBookedByMe)
-                                                <button disabled class="reserve-button bg-green-100 text-green-700 border-green-300">Booked</button>
-                                            @elseif($isFull)
-                                                <button disabled class="reserve-button">Class Full</button>
+                                @php
+                                    $classDate = $class->class_date instanceof \Carbon\Carbon ? $class->class_date->toDateString() : (string) $class->class_date;
+                                    $start = !empty($class->start_time)
+                                        ? \Carbon\Carbon::parse(trim(($classDate ?: now()->toDateString()) . ' ' . $class->start_time))
+                                        : null;
+                                    $end = !empty($class->end_time)
+                                        ? \Carbon\Carbon::parse(trim(($classDate ?: now()->toDateString()) . ' ' . $class->end_time))
+                                        : null;
+                                    if ($start && $end) {
+                                        $endForDiff = $end->lessThan($start) ? $end->copy()->addDay() : $end;
+                                        $duration = $start->diffInMinutes($endForDiff);
+                                    } else {
+                                        $duration = $class->duration ?? 60;
+                                    }
+                                    // Compute booking state for data attributes and reuse below
+                                    $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
+                                    $availableSpots = max(0, $class->max_spots - $currentBookings);
+                                    $isFull = $availableSpots <= 0;
+                                    $startDateTime = \Carbon\Carbon::parse($selectedDate->toDateString() . ' ' . ($class->start_time ?? '00:00'));
+                                    $isPast = $startDateTime->lt(now());
+                                    $isBookedByMe = auth()->check() ? $class->bookings->contains('user_id', auth()->id()) : false;
+                                    $isMembersOnly = (bool) ($class->members_only ?? false);
+                                @endphp
+                                <div class="class-card" data-class-id="{{ $class->id }}" data-price="{{ $class->price ?? 0 }}" data-is-past="{{ $isPast ? '1' : '0' }}" data-is-full="{{ $isFull ? '1' : '0' }}" data-is-booked="{{ $isBookedByMe ? '1' : '0' }}" data-members-only="{{ $isMembersOnly ? '1' : '0' }}">
+                                    <div class="class-time-section">
+                                        <div class="class-time">{{ $start ? $start->format('g:i A') : '' }}</div>
+                                        <div class="class-duration">{{ $duration }} min.</div>
+                                    </div>
+                                    
+                                    <div class="class-location">
+                                        Manchester
+                                    </div>
+                                    
+                                    <div class="instructor-section">
+                                        <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
+                                             alt="{{ $class->instructor->name ?? 'Instructor' }}" 
+                                             class="instructor-avatar">
+                                    </div>
+                                    
+                                    <div class="class-info-section">
+                                        <h3 class="class-title">{{ $class->name }} ({{ $duration }} Min)</h3>
+                                        <p class="class-instructor-name">{{ $class->instructor->name ?? 'No Instructor' }}</p>
+                                    </div>
+                                    
+                                    <div class="book-section">
+                                        @if($isPast)
+                                            <button disabled class="reserve-button">Past</button>
+                                        @elseif($isBookedByMe)
+                                            <button disabled class="reserve-button bg-green-100 text-green-700 border-green-300">Booked</button>
+                                        @elseif($isFull)
+                                            <button disabled class="reserve-button">Class Full</button>
+                                        @else
+                                            @if($isMembersOnly)
+                                                @if(auth()->check() && auth()->user()->hasActiveMembership())
+                                                    <button onclick="openBookingModal({{ $class->id }}, 0)" class="reserve-button">Book (Members)</button>
+                                                @else
+                                                    <button onclick="openMembersOnlyModal()" class="reserve-button">Members Only</button>
+                                                @endif
                                             @else
                                                 <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" class="reserve-button">Reserve</button>
                                             @endif
-                                        </div>
+                                        @endif
                                     </div>
+                                </div>
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
@@ -765,7 +791,7 @@
                         </button>
                     @endauth
                     
-                    <button onclick="buySpot(window.selectedClassId)" 
+                    <button id="payButton" onclick="buySpot(window.selectedClassId)" 
                             class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
@@ -950,8 +976,10 @@
 
         <script>
             window.IS_AUTH = {{ auth()->check() ? 'true' : 'false' }};
+            window.IS_MEMBER = {{ auth()->check() && auth()->user()->hasActiveMembership() ? 'true' : 'false' }};
             let currentDate = '{{ $selectedDate->format("Y-m-d") }}';
             const CLASSES_API = '{{ url('/api/classes') }}';
+            const MEMBERSHIP_URL = '{{ route('purchase.package.checkout', ['type' => 'membership']) }}';
             let isLoading = false;
 
             // Animate week scroller before loading a new week for a smoother transition
@@ -1124,17 +1152,16 @@
                         // Ensure price is defined and a number
                         classItem.price = classItem.price || 0;
 
-                        const startMins = parseTimeToMinutes(classItem.start_time);
-                        const endMins = parseTimeToMinutes(classItem.end_time);
-                        // Use duration from API if available, otherwise calculate
+                        // Use duration from API if available, otherwise default
                         const duration = classItem.duration || 60;
 
                         const startLabel = formatTime12(classItem.start_time);
                         const photo = (classItem && classItem.instructor && classItem.instructor.photo_url) ? classItem.instructor.photo_url : 'https://www.gravatar.com/avatar/?d=mp&s=100';
                         const instrName = (classItem && classItem.instructor && classItem.instructor.name) ? classItem.instructor.name : 'No Instructor';
+                        const isMembersOnly = !!classItem.members_only;
 
                         return `
-                            <div class="class-card" data-class-id="${classItem.id}" data-price="${classItem.price || 0}" data-is-past="${classItem.is_past ? 1 : 0}" data-is-full="${(classItem.available_spots <= 0) ? 1 : 0}" data-is-booked="${classItem.is_booked_by_me ? 1 : 0}">
+                            <div class="class-card" data-class-id="${classItem.id}" data-price="${classItem.price || 0}" data-is-past="${classItem.is_past ? 1 : 0}" data-is-full="${(classItem.available_spots <= 0) ? 1 : 0}" data-is-booked="${classItem.is_booked_by_me ? 1 : 0}" data-members-only="${isMembersOnly ? 1 : 0}">
                                 <div class="class-time-section">
                                     <div class="class-time">${startLabel}</div>
                                     <div class="class-duration">${duration} min.</div>
@@ -1160,7 +1187,13 @@
                                             ? `<button disabled class="reserve-button bg-green-100 text-green-700 border-green-300">Booked</button>`
                                             : (classItem.available_spots <= 0
                                                 ? `<button disabled class="reserve-button">Class Full</button>`
-                                                : `<button onclick=\"openBookingModal(${classItem.id}, ${classItem.price})\" class=\"reserve-button\">Reserve</button>`
+                                                : (isMembersOnly
+                                                    ? (window.IS_MEMBER
+                                                        ? `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Book (Members)</button>`
+                                                        : `<button onclick=\"openMembersOnlyModal()\" class=\"reserve-button\">Members Only</button>`
+                                                      )
+                                                    : `<button onclick=\"openBookingModal(${classItem.id}, ${classItem.price})\" class=\"reserve-button\">Reserve</button>`
+                                                  )
                                               )
                                           )
                                     }
@@ -1189,9 +1222,11 @@
                         const isPast = ds.isPast === '1';
                         const isFull = ds.isFull === '1';
                         const isBooked = ds.isBooked === '1';
+                        const isMembersOnly = ds.membersOnly === '1';
                         if (isPast) { openFeedbackModal('Unavailable', 'This class has already happened.'); return; }
                         if (isBooked) { openFeedbackModal('Already booked', 'You have already booked this class.'); return; }
                         if (isFull) { openFeedbackModal('Class full', 'This class is fully booked.'); return; }
+                        if (isMembersOnly && !window.IS_MEMBER) { openMembersOnlyModal(); return; }
                         openBookingModal(classId, price);
                     });
                     window.__classCardClickBound = true;
@@ -1256,6 +1291,22 @@
                 // Update the price in the modal
                 document.getElementById('modalClassPrice').textContent = `£${priceNum.toLocaleString()}`;
 
+                // Adjust modal labels for members-only classes
+                const card = document.querySelector(`.class-card[data-class-id="${classId}"]`);
+                const isMembersOnly = card && card.dataset && card.dataset.membersOnly === '1';
+                const useCreditsLabel = document.getElementById('useCreditsLabel');
+                const useCreditsRight = document.getElementById('useCreditsRight');
+                const payBtn = document.getElementById('payButton');
+                if (isMembersOnly && window.IS_MEMBER) {
+                    if (useCreditsLabel) useCreditsLabel.textContent = 'Book (Members)';
+                    if (useCreditsRight) useCreditsRight.textContent = 'Free';
+                    if (payBtn) payBtn.classList.add('hidden');
+                } else {
+                    if (useCreditsLabel) useCreditsLabel.textContent = 'Use Credits';
+                    if (useCreditsRight) useCreditsRight.textContent = '1 Credit';
+                    if (payBtn) payBtn.classList.remove('hidden');
+                }
+
                 document.getElementById('bookingModal').classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
             }
@@ -1270,18 +1321,30 @@
                 // Capture the class id before any UI changes
                 const cid = classId || window.selectedClassId;
                 @auth
-                    // Determine available credits from hidden data attribute
-                    const span = document.getElementById('availableCreditsData');
-                    const available = span ? (parseInt(span.getAttribute('data-credits')) || 0) : 0;
-                    if (available > 0) {
-                        // Hide the booking modal then confirm using the captured id
+                    const card = document.querySelector(`.class-card[data-class-id="${cid}"]`);
+                    const isMembersOnly = card && card.dataset && card.dataset.membersOnly === '1';
+                    if (isMembersOnly && window.IS_MEMBER) {
                         closeBookingModal();
-                        openConfirmModal('Use 1 credit to book this class?', function() {
+                        openConfirmModal('Book this members-only class for free?', function() {
                             performCreditBooking(cid);
                         });
-                    } else {
+                    } else if (isMembersOnly && !window.IS_MEMBER) {
                         closeBookingModal();
-                        openNoCreditsModal();
+                        openMembersOnlyModal();
+                    } else {
+                        // Determine available credits from hidden data attribute
+                        const span = document.getElementById('availableCreditsData');
+                        const available = span ? (parseInt(span.getAttribute('data-credits')) || 0) : 0;
+                        if (available > 0) {
+                            // Hide the booking modal then confirm using the captured id
+                            closeBookingModal();
+                            openConfirmModal('Use 1 credit to book this class?', function() {
+                                performCreditBooking(cid);
+                            });
+                        } else {
+                            closeBookingModal();
+                            openNoCreditsModal();
+                        }
                     }
                 @else
                     // Keep booking modal in background, and open login so we preserve cid for redirect
@@ -1291,6 +1354,12 @@
 
             function buySpot(classId) {
                 closeBookingModal();
+                const card = document.querySelector(`.class-card[data-class-id="${classId}"]`);
+                const isMembersOnly = card && card.dataset && card.dataset.membersOnly === '1';
+                if (isMembersOnly && !window.IS_MEMBER) {
+                    openMembersOnlyModal();
+                    return;
+                }
                 // Redirect to checkout page
                 window.location.href = `/checkout/${classId}`;
             }
@@ -1490,6 +1559,22 @@
             }
             function closeNoCreditsModal() {
                 const modal = document.getElementById('noCreditsModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+
+            // Members-only modal helpers
+            function openMembersOnlyModal() {
+                const modal = document.getElementById('membersOnlyModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            function closeMembersOnlyModal() {
+                const modal = document.getElementById('membersOnlyModal');
                 if (modal) {
                     modal.classList.add('hidden');
                     document.body.style.overflow = 'auto';

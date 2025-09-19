@@ -128,6 +128,16 @@
                 </div>
             </div>
 
+            <div class="flex items-center">
+                <input type="checkbox" name="members_only" id="members_only" value="1" {{ old('members_only') ? 'checked' : '' }}
+                       class="h-4 w-4 text-primary focus:ring-primary border-gray-600 bg-gray-700 rounded">
+                <label for="members_only" class="ml-2 block text-sm text-gray-300">
+                    Members Only (Free for members)
+                </label>
+            </div>
+
+            <p class="text-xs text-gray-400 -mt-3 mb-2">Members-only classes are free and do not use credits. Only users with an active membership can book.</p>
+
             <div id="recurring_options_section" class="hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -181,6 +191,23 @@
                 // Show/hide on page load if already selected
                 if (document.getElementById('recurring_frequency').value !== 'none') {
                     document.getElementById('recurring_options_section').classList.remove('hidden');
+                }
+
+                // Members-only toggle -> set price to 0 and disable field
+                const membersOnly = document.getElementById('members_only');
+                const priceInput = document.getElementById('price');
+                function syncMembersOnlyUI() {
+                    if (!membersOnly || !priceInput) return;
+                    if (membersOnly.checked) {
+                        priceInput.value = 0;
+                        priceInput.setAttribute('disabled', 'disabled');
+                    } else {
+                        priceInput.removeAttribute('disabled');
+                    }
+                }
+                if (membersOnly) {
+                    membersOnly.addEventListener('change', syncMembersOnlyUI);
+                    syncMembersOnlyUI();
                 }
             </script>
 
