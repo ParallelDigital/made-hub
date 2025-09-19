@@ -120,6 +120,35 @@ class UserController extends Controller
             'note' => $note,
         ]);
 
+        // Send notification email to the user
+        try {
+            $user->refresh();
+            $newBalance = $type === 'legacy' ? (int) ($user->credits ?? 0) : (int) ($user->monthly_credits ?? 0);
+            $adminName = $request->user()->name ?? 'Admin';
+
+            $mailable = new \App\Mail\CreditsAllocated(
+                user: $user,
+                amount: $amount,
+                creditLabel: $label,
+                newBalance: $newBalance,
+                note: $note,
+                allocatedBy: $adminName
+            );
+            \Mail::to($user->email)->send($mailable);
+
+            \Log::info('Credits allocation email sent', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'amount' => $amount,
+                'credit_type' => $type,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Failed to send credits allocation email', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         $userLabel = $user->name ?: $user->email;
         return back()->with('success', "Added {$amount} {$label} to {$userLabel}.");
     }
