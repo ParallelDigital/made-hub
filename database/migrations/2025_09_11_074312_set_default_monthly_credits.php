@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,24 +12,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // For SQLite, we'll just update the records since we can't modify the column default directly
-        \DB::table('users')
-            ->where('monthly_credits', 0)
-            ->orWhereNull('monthly_credits')
-            ->update(['monthly_credits' => 5]);
-            
-        // Also set credits to monthly_credits for existing users
-        \DB::table('users')
-            ->where('credits', 0)
-            ->orWhereNull('credits')
-            ->update(['credits' => 5]);
-        
-        // Make sure credits_last_refreshed exists
+        // Ensure credits_last_refreshed exists
         if (!Schema::hasColumn('users', 'credits_last_refreshed')) {
             Schema::table('users', function (Blueprint $table) {
                 $table->date('credits_last_refreshed')->nullable()->after('monthly_credits');
             });
         }
+
+        // Only set monthly_credits for ACTIVE members; leave non-members and legacy credits untouched
+        $today = now()->toDateString();
+        DB::table('users')
+            ->whereNotNull('membership_id')
+            ->whereNotNull('membership_start_date')
+            ->where('membership_start_date', '<=', $today)
+            ->where(function ($q) use ($today) {
+                $q->whereNull('membership_end_date')
+                  ->orWhere('membership_end_date', '>=', $today);
+            })
+            ->where(function ($q) {
+                $q->whereNull('monthly_credits')
+                  ->orWhere('monthly_credits', 0);
+            })
+            ->update(['monthly_credits' => 5]);
     }
 
     /**
