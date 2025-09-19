@@ -333,31 +333,33 @@
                 }
                 
                 .week-navigation {
+                    display: grid;
+                    grid-template-columns: repeat(7, minmax(42px, 1fr));
                     gap: 0.5rem;
                     padding: 0.5rem 0.75rem; /* match desktop spacing */
-                    scroll-behavior: smooth;
-                    scroll-padding-left: 24px;
-                    scroll-padding-right: 24px;
+                    scroll-behavior: auto; /* no horizontal scroll needed */
+                    overflow: visible;
                 }
                 
                 .week-day-btn {
-                    min-width: 50px;
-                    padding: 0.5rem 0.25rem;
-                    font-size: 0.875rem;
-                    scroll-margin-inline: 24px;
+                    min-width: 0;
+                    width: 100%;
+                    padding: 0.25rem 0.25rem;
+                    font-size: 0.9rem;
+                    scroll-margin-inline: 0;
                 }
                 
-                .week-day-btn .day-name {
-                    font-size: 0.75rem;
+                .week-day-btn .day-number {
+                    font-size: 0.8rem;
                     font-weight: 500;
                     color: #6b7280;
                     margin-bottom: 0.25rem;
                 }
                 
-                .week-day-btn .day-number {
-                    font-size: 1.25rem;
+                .week-day-btn .day-name {
+                    font-size: 1.05rem;
                     font-weight: 700;
-                    color: #000;
+                    color: #6b7280;
                 }
                 
                 .week-day-btn.selected .day-name {
@@ -366,7 +368,7 @@
                 
                 .week-day-btn.today .day-name {
                     color: #000;
-                    font-weight: 600;
+                    font-weight: 800;
                 }
                 
                 .date-header {
@@ -599,8 +601,8 @@
                         <div class="week-navigation" id="week-days">
                             <?php foreach($weekDays as $day): ?>
                             <button data-date="{{ $day['full_date'] }}" onclick="loadDate('{{ $day['full_date'] }}')" class="week-day-btn {{ $day['is_selected'] ? 'selected' : ($day['is_today'] ? 'today' : '') }}">
-                                <div class="day-name">{{ $day['day'] }}</div>
-                                <div class="day-number">{{ $day['date'] }}</div>
+                                <div class="day-number">{{ $day['is_today'] ? 'Today' : \Carbon\Carbon::parse($day['full_date'])->format('M j') }}</div>
+                                <div class="day-name">{{ strtoupper($day['day']) }}</div>
                             </button>
                             <?php endforeach; ?>
                         </div>
@@ -1035,9 +1037,11 @@
                     }
 
                     button.className = classes;
+                    const label = day.is_today ? 'Today' : formatMonthDay(day.full_date);
+                    const dayName = (day.day || '').toString().toUpperCase();
                     button.innerHTML = `
-                        <div class="day-name">${day.day}</div>
-                        <div class="day-number">${day.date}</div>
+                        <div class="day-number">${label}</div>
+                        <div class="day-name">${dayName}</div>
                     `;
 
                     weekDaysContainer.appendChild(button);
@@ -1091,6 +1095,15 @@
                 if (h === 0) h = 12;
                 const mm = m.toString().padStart(2, '0');
                 return `${h}:${mm} ${ampm}`;
+            }
+
+            // Format ISO date (YYYY-MM-DD) as "Mon 15" style: "Sep 15"
+            function formatMonthDay(iso) {
+                if (!iso) return '';
+                const d = new Date(iso + 'T00:00:00');
+                if (isNaN(d.getTime())) return '';
+                const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                return `${months[d.getMonth()]} ${d.getDate()}`;
             }
 
             function updateClassesList(classes) {
