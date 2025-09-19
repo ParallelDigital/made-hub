@@ -314,6 +314,8 @@
                     border-radius: 0;
                     border-left: none;
                     border-right: none;
+                    overflow: hidden;
+                    width: 100%;
                 }
                 
                 .week-nav-container {
