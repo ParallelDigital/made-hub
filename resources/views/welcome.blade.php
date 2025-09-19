@@ -23,6 +23,8 @@
                 font-weight: 400 !important;
                 font-style: normal !important;
             }
+
+            /* Week scroller arrow behavior is implemented in the JS script block below */
             
             /* Clean minimalist calendar design matching brand */
             .schedule-container {
@@ -47,11 +49,16 @@
                 justify-content: center;
                 gap: 1.5rem;
                 max-width: 100%;
+                flex: 1; /* fill space between arrows */
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
                 -ms-overflow-style: none;
-                padding: 0.5rem 0;
+                padding: 0.5rem 0.75rem; /* give breathing room near arrows */
+                scroll-behavior: smooth; /* smoother programmatic scrolls */
+                scroll-snap-type: x proximity; /* smoother day snapping */
+                scroll-padding-left: 24px;
+                scroll-padding-right: 24px;
             }
             
             .week-navigation::-webkit-scrollbar {
@@ -68,6 +75,8 @@
                 transition: all 0.2s ease;
                 cursor: pointer;
                 font-family: inherit;
+                scroll-snap-align: center;
+                scroll-margin-inline: 24px; /* avoid clipping near edges */
             }
             
             .week-day-btn .day-name {
@@ -324,13 +333,17 @@
                 
                 .week-navigation {
                     gap: 0.5rem;
-                    padding: 0.5rem 0;
+                    padding: 0.5rem 0.75rem; /* match desktop spacing */
+                    scroll-behavior: smooth;
+                    scroll-padding-left: 24px;
+                    scroll-padding-right: 24px;
                 }
                 
                 .week-day-btn {
                     min-width: 50px;
                     padding: 0.5rem 0.25rem;
                     font-size: 0.875rem;
+                    scroll-margin-inline: 24px;
                 }
                 
                 .week-day-btn .day-name {
@@ -575,7 +588,7 @@
                 <div class="week-nav-container">
                     <div class="flex items-center justify-between">
                         <!-- Previous Week Arrow -->
-                        <button onclick="loadDate('{{ $prevWeek }}')" class="nav-arrow" id="prev-week-btn">
+                        <button onclick="onArrowNav('{{ $prevWeek }}')" class="nav-arrow" id="prev-week-btn">
                             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                             </svg>
@@ -592,7 +605,7 @@
                         </div>
 
                         <!-- Next Week Arrow -->
-                        <button onclick="loadDate('{{ $nextWeek }}')" class="nav-arrow" id="next-week-btn">
+                        <button onclick="onArrowNav('{{ $nextWeek }}')" class="nav-arrow" id="next-week-btn">
                             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
@@ -938,6 +951,19 @@
             const CLASSES_API = '{{ url('/api/classes') }}';
             let isLoading = false;
 
+            // Animate week scroller before loading a new week for a smoother transition
+            function onArrowNav(date) {
+                const weekDaysEl = document.getElementById('week-days');
+                if (weekDaysEl && typeof weekDaysEl.scrollBy === 'function') {
+                    try {
+                        const dir = (new Date(date) < new Date(currentDate)) ? -1 : 1;
+                        const delta = Math.max(weekDaysEl.clientWidth * 0.6, 240);
+                        weekDaysEl.scrollBy({ left: dir * delta, behavior: 'smooth' });
+                    } catch (e) { /* no-op */ }
+                }
+                setTimeout(() => loadDate(date), 160);
+            }
+
             function loadDate(date) {
                 if (isLoading) return;
 
@@ -1017,8 +1043,8 @@
                 });
 
                 // Update arrow buttons
-                document.getElementById('prev-week-btn').setAttribute('onclick', `loadDate('${prevWeek}')`);
-                document.getElementById('next-week-btn').setAttribute('onclick', `loadDate('${nextWeek}')`);
+                document.getElementById('prev-week-btn').setAttribute('onclick', `onArrowNav('${prevWeek}')`);
+                document.getElementById('next-week-btn').setAttribute('onclick', `onArrowNav('${nextWeek}')`);
 
                 // Smoothly center the selected day in the scroll container
                 const selectedBtn = weekDaysContainer.querySelector('.week-day-btn.selected') || weekDaysContainer.querySelector('.week-day-btn.today');
@@ -1413,6 +1439,49 @@
                 .catch((err) => {
                     openFeedbackModal('Booking failed', err.message || 'Unable to book with credits.');
                 });
+            }
+
+            // Optional PIN helpers (modal exists; PIN is optional)
+            function togglePinVisibility(inputId, btn) {
+                const input = document.getElementById(inputId);
+                if (!input) return;
+                input.type = input.type === 'password' ? 'text' : 'password';
+                if (btn && btn.setAttribute) {
+                    const shown = input.type === 'text';
+                    btn.setAttribute('aria-label', shown ? 'Hide PIN' : 'Show PIN');
+                }
+            }
+
+            function closePinModal() {
+                const modal = document.getElementById('pinModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+
+            function confirmPinAndBook() {
+                const input = document.getElementById('pinModalInput');
+                const pin = (input?.value || '').trim();
+                const cid = window.selectedClassId;
+                closePinModal();
+                performCreditBooking(cid, pin);
+            }
+
+            // No-credits modal helpers
+            function openNoCreditsModal() {
+                const modal = document.getElementById('noCreditsModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            function closeNoCreditsModal() {
+                const modal = document.getElementById('noCreditsModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
             }
 
             // Close modal when clicking outside

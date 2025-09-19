@@ -36,9 +36,9 @@ class HomeController extends Controller
             ->orderBy('start_time')
             ->get();
         
-        // Get week data for navigation
+        // Get week data for navigation (Monday–Friday)
         $weekDays = [];
-        for ($i = 0; $i < 7; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $date = $startOfWeek->copy()->addDays($i);
             $weekDays[] = [
                 'day' => $date->format('D'),
@@ -82,9 +82,9 @@ class HomeController extends Controller
             ->orderBy('start_time')
             ->get();
         
-        // Get week data for navigation
+        // Get week data for navigation (Monday–Friday)
         $weekDays = [];
-        for ($i = 0; $i < 7; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $date = $startOfWeek->copy()->addDays($i);
             $weekDays[] = [
                 'day' => $date->format('D'),
