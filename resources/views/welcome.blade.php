@@ -303,6 +303,23 @@
                 background: #f3f4f6;
                 color: #9ca3af;
             }
+
+            /* Ribbon for members-only classes */
+            .class-card { position: relative; }
+            .ribbon-members {
+                position: absolute;
+                top: 0;
+                left: 0;
+                background: #111;
+                color: #fff;
+                font-weight: 800;
+                font-size: 0.65rem;
+                padding: 0.35rem 0.5rem;
+                border-bottom-right-radius: 6px;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                z-index: 2;
+            }
             
             .no-classes {
                 text-align: center;
@@ -683,6 +700,9 @@
                                     $isMembersOnly = (bool) ($class->members_only ?? false);
                                 @endphp
                                 <div class="class-card" data-class-id="{{ $class->id }}" data-price="{{ $class->price ?? 0 }}" data-is-past="{{ $isPast ? '1' : '0' }}" data-is-full="{{ $isFull ? '1' : '0' }}" data-is-booked="{{ $isBookedByMe ? '1' : '0' }}" data-members-only="{{ $isMembersOnly ? '1' : '0' }}">
+                                    @if($isMembersOnly)
+                                        <div class="ribbon-members">Members Class</div>
+                                    @endif
                                     <div class="class-time-section">
                                         <div class="class-time">{{ $start ? $start->format('g:i A') : '' }}</div>
                                         <div class="class-duration">{{ $duration }} min.</div>
@@ -1161,7 +1181,8 @@
                         const isMembersOnly = !!classItem.members_only;
 
                         return `
-                            <div class="class-card" data-class-id="${classItem.id}" data-price="${classItem.price || 0}" data-is-past="${classItem.is_past ? 1 : 0}" data-is-full="${(classItem.available_spots <= 0) ? 1 : 0}" data-is-booked="${classItem.is_booked_by_me ? 1 : 0}" data-members-only="${isMembersOnly ? 1 : 0}">
+                            <div class=\"class-card\" data-class-id=\"${classItem.id}\" data-price=\"${classItem.price || 0}\" data-is-past=\"${classItem.is_past ? 1 : 0}\" data-is-full=\"${(classItem.available_spots <= 0) ? 1 : 0}\" data-is-booked=\"${classItem.is_booked_by_me ? 1 : 0}\" data-members-only=\"${isMembersOnly ? 1 : 0}\">
+                                ${isMembersOnly ? '<div class="ribbon-members">Members Class</div>' : ''}
                                 <div class="class-time-section">
                                     <div class="class-time">${startLabel}</div>
                                     <div class="class-duration">${duration} min.</div>
