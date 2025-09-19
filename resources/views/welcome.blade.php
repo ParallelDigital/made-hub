@@ -451,7 +451,16 @@
                 }
                 .class-card {
                     cursor: pointer;
+                    /* Grid layout: time above image on left, info spanning right */
+                    display: grid;
+                    grid-template-columns: 80px 1fr;
+                    grid-template-rows: auto auto;
+                    grid-template-areas: 'time info' 'instructor info';
+                    gap: 0.75rem;
                 }
+                .class-time-section { grid-area: time; }
+                .instructor-section { grid-area: instructor; }
+                .class-info-section { grid-area: info; }
             }
         </style>
     </head>
