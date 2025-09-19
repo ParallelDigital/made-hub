@@ -310,7 +310,6 @@
             /* Mobile optimizations */
             @media (max-width: 768px) {
                 .schedule-container {
-                    margin: 0 -1rem;
                     border-radius: 0;
                     border-left: none;
                     border-right: none;
