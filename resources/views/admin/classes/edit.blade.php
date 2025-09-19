@@ -54,6 +54,21 @@
                         <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                     @enderror
                 </div>
+                <div>
+                    <label for="class_type_id" class="block text-sm font-medium text-gray-300">Class Type</label>
+                    <select name="class_type_id" id="class_type_id"
+                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                        <option value="">Select Class Type</option>
+                        @foreach($classTypes as $type)
+                            <option value="{{ $type->id }}" {{ old('class_type_id', $class->class_type_id) == $type->id ? 'selected' : '' }}>
+                                {{ $type->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('class_type_id')
+                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -103,6 +118,15 @@
                         <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                     @enderror
                 </div>
+            </div>
+
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-300">Location</label>
+                <input type="text" name="location" id="location" value="{{ old('location', $class->location) }}"
+                       class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., Manchester Studio" required>
+                @error('location')
+                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

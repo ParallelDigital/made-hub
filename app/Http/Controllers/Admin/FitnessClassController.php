@@ -51,7 +51,8 @@ class FitnessClassController extends Controller
     public function create()
     {
         $instructors = Instructor::where('active', true)->get();
-        return view('admin.classes.create', compact('instructors'));
+        $classTypes = \App\Models\ClassType::orderBy('name')->get();
+        return view('admin.classes.create', compact('instructors', 'classTypes'));
     }
 
     /**
@@ -88,6 +89,9 @@ class FitnessClassController extends Controller
             $validated['members_only'] = false;
         }
 
+        // Keep legacy boolean in sync for schedule queries
+        $validated['recurring'] = ($validated['recurring_frequency'] ?? 'none') !== 'none';
+
         // Convert recurring_days array to comma-separated string
         if (isset($validated['recurring_days'])) {
             $validated['recurring_days'] = implode(',', $validated['recurring_days']);
@@ -119,7 +123,8 @@ class FitnessClassController extends Controller
     public function edit(FitnessClass $class)
     {
         $instructors = Instructor::where('active', true)->get();
-        return view('admin.classes.edit', compact('class', 'instructors'));
+        $classTypes = \App\Models\ClassType::orderBy('name')->get();
+        return view('admin.classes.edit', compact('class', 'instructors', 'classTypes'));
     }
 
     /**
@@ -155,6 +160,9 @@ class FitnessClassController extends Controller
         } else {
             $validated['members_only'] = false;
         }
+
+        // Keep legacy boolean in sync for schedule queries
+        $validated['recurring'] = ($validated['recurring_frequency'] ?? 'none') !== 'none';
 
         // Convert recurring_days array to comma-separated string
         if (isset($validated['recurring_days'])) {
