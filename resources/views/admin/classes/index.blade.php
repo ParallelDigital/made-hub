@@ -60,14 +60,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- Calendar Container -->
-    <div class="relative p-4">
-        <div id="calendar-loading" class="absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-10" style="display: none;">
-            <div class="text-white text-lg">Loading calendar...</div>
-        </div>
-        <div id="classes-calendar"></div>
-    </div>
 </div>
 
 <div class="bg-gray-800 shadow rounded-lg border border-gray-700">
