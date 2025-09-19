@@ -445,27 +445,12 @@
                     display: none; /* Hide on mobile */
                 }
 
-                /* Show a compact Reserve button on mobile */
+                /* Hide Reserve button on mobile; make entire card tappable */
                 .book-section {
-                    display: block;
-                    margin-left: auto;
-                    flex-shrink: 0;
+                    display: none !important;
                 }
-
-                .book-section .reserve-button {
-                    padding: 0.5rem 0.75rem;
-                    font-size: 0.875rem;
-                    line-height: 1rem;
-                    border: 1px solid #111827; /* near-black */
-                    color: #111827;
-                    background: transparent;
-                    border-radius: 0.375rem;
-                    font-weight: 600;
-                }
-
-                .book-section .reserve-button:disabled {
-                    border-color: #d1d5db;
-                    color: #9ca3af;
+                .class-card {
+                    cursor: pointer;
                 }
             }
         </style>
@@ -645,8 +630,15 @@
                                         } else {
                                             $duration = $class->duration ?? 60;
                                         }
+                                        // Compute booking state for data attributes and reuse below
+                                        $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
+                                        $availableSpots = max(0, $class->max_spots - $currentBookings);
+                                        $isFull = $availableSpots <= 0;
+                                        $startDateTime = \Carbon\Carbon::parse($selectedDate->toDateString() . ' ' . ($class->start_time ?? '00:00'));
+                                        $isPast = $startDateTime->lt(now());
+                                        $isBookedByMe = auth()->check() ? $class->bookings->contains('user_id', auth()->id()) : false;
                                     @endphp
-                                    <div class="class-card">
+                                    <div class="class-card" data-class-id="{{ $class->id }}" data-price="{{ $class->price ?? 0 }}" data-is-past="{{ $isPast ? '1' : '0' }}" data-is-full="{{ $isFull ? '1' : '0' }}" data-is-booked="{{ $isBookedByMe ? '1' : '0' }}">
                                         <div class="class-time-section">
                                             <div class="class-time">{{ $start ? $start->format('g:i A') : '' }}</div>
                                             <div class="class-duration">{{ $duration }} min.</div>
@@ -668,14 +660,6 @@
                                         </div>
                                         
                                         <div class="book-section">
-                                            @php
-                                                $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
-                                                $availableSpots = max(0, $class->max_spots - $currentBookings);
-                                                $isFull = $availableSpots <= 0;
-                                                $startDateTime = \Carbon\Carbon::parse($selectedDate->toDateString() . ' ' . ($class->start_time ?? '00:00'));
-                                                $isPast = $startDateTime->lt(now());
-                                                $isBookedByMe = auth()->check() ? $class->bookings->contains('user_id', auth()->id()) : false;
-                                            @endphp
                                             @if($isPast)
                                                 <button disabled class="reserve-button">Past</button>
                                             @elseif($isBookedByMe)
@@ -1100,7 +1084,7 @@
                         const instrName = (classItem && classItem.instructor && classItem.instructor.name) ? classItem.instructor.name : 'No Instructor';
 
                         return `
-                            <div class="class-card">
+                            <div class="class-card" data-class-id="${classItem.id}" data-price="${classItem.price || 0}" data-is-past="${classItem.is_past ? 1 : 0}" data-is-full="${(classItem.available_spots <= 0) ? 1 : 0}" data-is-booked="${classItem.is_booked_by_me ? 1 : 0}">
                                 <div class="class-time-section">
                                     <div class="class-time">${startLabel}</div>
                                     <div class="class-duration">${duration} min.</div>
@@ -1136,6 +1120,31 @@
                     }).join('');
 
                     container.innerHTML = `<div class="classes-section">${classesHTML}</div>`;
+                }
+            }
+
+            // Mobile: tap class card to open booking modal
+            if (!window.__classCardClickBound) {
+                const container = document.getElementById('classes-container');
+                if (container) {
+                    container.addEventListener('click', function(e) {
+                        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                        if (!isMobile) return;
+                        const card = e.target.closest('.class-card');
+                        if (!card || !container.contains(card)) return;
+                        const ds = card.dataset || {};
+                        const classId = parseInt(ds.classId || '0', 10);
+                        if (!classId) return;
+                        const price = parseInt(ds.price || '0', 10) || 0;
+                        const isPast = ds.isPast === '1';
+                        const isFull = ds.isFull === '1';
+                        const isBooked = ds.isBooked === '1';
+                        if (isPast) { openFeedbackModal('Unavailable', 'This class has already happened.'); return; }
+                        if (isBooked) { openFeedbackModal('Already booked', 'You have already booked this class.'); return; }
+                        if (isFull) { openFeedbackModal('Class full', 'This class is fully booked.'); return; }
+                        openBookingModal(classId, price);
+                    });
+                    window.__classCardClickBound = true;
                 }
             }
 
