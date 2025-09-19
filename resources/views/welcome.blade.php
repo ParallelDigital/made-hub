@@ -665,8 +665,6 @@
                                         <div class="class-info-section">
                                             <h3 class="class-title">{{ $class->name }} ({{ $duration }} Min)</h3>
                                             <p class="class-instructor-name">{{ $class->instructor->name ?? 'No Instructor' }}</p>
-                                            <p class="class-room">Manchester Red Room</p>
-                                            <p class="class-room">Manchester</p>
                                         </div>
                                         
                                         <div class="book-section">
@@ -1119,8 +1117,6 @@
                                 <div class="class-info-section">
                                     <h3 class="class-title">${classItem.name} (${duration} Min)</h3>
                                     <p class="class-instructor-name">${instrName}</p>
-                                    <p class="class-room">Manchester Red Room</p>
-                                    <p class="class-room">Manchester</p>
                                 </div>
                                 
                                 <div class="book-section">
