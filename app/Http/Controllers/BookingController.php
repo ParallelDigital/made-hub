@@ -93,7 +93,10 @@ class BookingController extends Controller
         
         return response()->json([
             'success' => true, 
-            'message' => "Class booked successfully with {$creditType}! You have {$remainingCredits} {$creditType} remaining. Confirmation email sent."
+            'message' => "Class booked successfully with {$creditType}! You have {$remainingCredits} {$creditType} remaining. Confirmation email sent.",
+            // Provide a redirect URL so the frontend can navigate to the confirmation page
+            'redirect_url' => route('booking.confirmation', ['classId' => $classId]),
+            'booking_id' => $booking->id ?? null,
         ]);
     }
 

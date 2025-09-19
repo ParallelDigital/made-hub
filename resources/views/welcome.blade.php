@@ -1432,10 +1432,8 @@
                     return data;
                 })
                 .then((data) => {
-                    closeBookingModal();
-                    openFeedbackModal('Booked with credits', data.message || 'Your class has been booked.');
-                    // Refresh after a brief delay to update availability
-                    setTimeout(() => window.location.reload(), 1200);
+                    // Redirect to the same confirmation page used for Stripe flow
+                    window.location.href = `/booking/confirmation/${classId}`;
                 })
                 .catch((err) => {
                     openFeedbackModal('Booking failed', err.message || 'Unable to book with credits.');
