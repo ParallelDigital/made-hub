@@ -133,6 +133,7 @@
                 cursor: pointer;
                 transition: all 0.2s ease;
                 margin: -1rem;
+                z-index: 13;
             }
             
             .nav-arrow:hover {
