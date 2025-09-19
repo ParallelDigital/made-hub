@@ -75,8 +75,8 @@ class FitnessClassController extends Controller
             'recurring' => 'boolean',
             'recurring_weekly' => 'boolean',
             'recurring_days' => 'nullable|array',
-            'recurring_days.*' => 'integer|between:0,6',
-            'recurring_frequency' => 'nullable|integer|min:1',
+            'recurring_days.*' => 'string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'recurring_frequency' => 'required|string|in:none,weekly,biweekly,monthly',
             'recurring_until' => 'nullable|date|after:class_date',
         ]);
 
@@ -143,8 +143,8 @@ class FitnessClassController extends Controller
             'recurring' => 'boolean',
             'recurring_weekly' => 'boolean',
             'recurring_days' => 'nullable|array',
-            'recurring_days.*' => 'integer|between:0,6',
-            'recurring_frequency' => 'nullable|integer|min:1',
+            'recurring_days.*' => 'string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'recurring_frequency' => 'required|string|in:none,weekly,biweekly,monthly',
             'recurring_until' => 'nullable|date|after:class_date',
         ]);
 
