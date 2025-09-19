@@ -63,7 +63,7 @@ class FitnessClassController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'class_type_id' => 'required|exists:class_types,id',
+            'class_type_id' => 'nullable|exists:class_types,id',
             'instructor_id' => 'required|exists:instructors,id',
             'class_date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
@@ -71,7 +71,7 @@ class FitnessClassController extends Controller
             'max_spots' => 'required|integer|min:1',
             'price' => 'required_unless:members_only,1|numeric|min:0',
             'members_only' => 'sometimes|boolean',
-            'location' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',
             'active' => 'boolean',
             'recurring' => 'boolean',
             'recurring_weekly' => 'boolean',
@@ -135,7 +135,7 @@ class FitnessClassController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'class_type_id' => 'required|exists:class_types,id',
+            'class_type_id' => 'nullable|exists:class_types,id',
             'instructor_id' => 'required|exists:instructors,id',
             'class_date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
@@ -143,7 +143,7 @@ class FitnessClassController extends Controller
             'max_spots' => 'required|integer|min:1',
             'price' => 'required_unless:members_only,1|numeric|min:0',
             'members_only' => 'sometimes|boolean',
-            'location' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',
             'active' => 'boolean',
             'recurring' => 'boolean',
             'recurring_weekly' => 'boolean',
@@ -213,7 +213,7 @@ class FitnessClassController extends Controller
         $classes = $query->get()->map(function($class) {
             return [
                 'id' => $class->id,
-                'title' => $class->classType->name . ($class->instructor ? ' - ' . $class->instructor->name : ''),
+                'title' => ($class->classType->name ?? $class->name) . ($class->instructor ? ' - ' . $class->instructor->name : ''),
                 'start' => $class->class_date->format('Y-m-d') . 'T' . $class->start_time,
                 'end' => $class->class_date->format('Y-m-d') . 'T' . $class->end_time,
                 'url' => route('admin.classes.show', $class->id),
@@ -222,17 +222,17 @@ class FitnessClassController extends Controller
                 'textColor' => '#ffffff',
                 'extendedProps' => [
                     'instructor' => $class->instructor ? $class->instructor->name : 'No Instructor',
-                    'location' => $class->location,
+                    'location' => $class->location ?? 'N/A',
                     'capacity' => $class->max_spots,
                     'booked' => $class->bookings()->count(),
                     'status' => $class->active ? 'Active' : 'Inactive',
-                    'description' => 
-                        'Type: ' . $class->classType->name . '\n' .
-                        'Instructor: ' . ($class->instructor ? $class->instructor->name : 'N/A') . '\n' .
-                        'Location: ' . $class->location . '\n' .
-                        'Time: ' . $class->start_time . ' - ' . $class->end_time . '\n' .
-                        'Capacity: ' . $class->bookings()->count() . '/' . $class->max_spots
-                ]
+                    'description' =>
+                        'Type: ' . ($class->classType->name ?? 'N/A') . "\n" .
+                        'Instructor: ' . ($class->instructor ? $class->instructor->name : 'N/A') . "\n" .
+                        'Location: ' . ($class->location ?? 'N/A') . "\n" .
+                        'Time: ' . $class->start_time . ' - ' . $class->end_time . "\n" .
+                        'Capacity: ' . $class->bookings()->count() . '/' . $class->max_spots,
+                ],
             ];
         });
         
