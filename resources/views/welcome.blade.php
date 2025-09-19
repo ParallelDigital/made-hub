@@ -132,7 +132,7 @@
                 justify-content: center;
                 cursor: pointer;
                 transition: all 0.2s ease;
-                margin: -10rem;
+                margin: -1rem;
             }
             
             .nav-arrow:hover {
