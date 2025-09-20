@@ -76,6 +76,12 @@
                                     required 
                                     autocomplete="new-password" 
                                 />
+                                <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200" aria-label="Show password">
+                                    <svg id="eye-icon" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
                             </div>
                             <x-input-error :messages="$errors->get('password')" class="mt-1" />
                         </div>
@@ -97,18 +103,24 @@
                                     required 
                                     autocomplete="new-password" 
                                 />
+                                <button type="button" id="toggle-password-confirmation" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200" aria-label="Show password confirmation">
+                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
                             </div>
                             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1" />
                         </div>
 
                         <!-- Password Requirements -->
-                        <div class="text-xs text-gray-400 mt-2">
+                        <div class="text-xs text-gray-400 mt-2" id="password-requirements">
                             <p class="font-medium mb-1">Password must contain:</p>
                             <ul class="list-disc list-inside space-y-0.5">
-                                <li :class="{ 'text-green-400': $el.querySelector('input').value.length >= 8 }">At least 8 characters</li>
-                                <li :class="{ 'text-green-400': /[A-Z]/.test($el.querySelector('input').value) }">At least one uppercase letter</li>
-                                <li :class="{ 'text-green-400': /[a-z]/.test($el.querySelector('input').value) }">At least one lowercase letter</li>
-                                <li :class="{ 'text-green-400': /[0-9]/.test($el.querySelector('input').value) }">At least one number</li>
+                                <li id="req-length" class="text-gray-400">At least 8 characters</li>
+                                <li id="req-upper" class="text-gray-400">At least one uppercase letter</li>
+                                <li id="req-lower" class="text-gray-400">At least one lowercase letter</li>
+                                <li id="req-number" class="text-gray-400">At least one number</li>
                             </ul>
                         </div>
 
@@ -119,6 +131,48 @@
                             </button>
                         </div>
                     </form>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const pwd = document.getElementById('password');
+                            const pwd2 = document.getElementById('password_confirmation');
+                            const togglePwd = document.getElementById('toggle-password');
+                            const togglePwd2 = document.getElementById('toggle-password-confirmation');
+
+                            function setReq(id, ok) {
+                                const el = document.getElementById(id);
+                                if (!el) return;
+                                el.classList.toggle('text-green-400', ok);
+                                el.classList.toggle('text-gray-400', !ok);
+                            }
+
+                            function updateReq() {
+                                const val = pwd ? (pwd.value || '') : '';
+                                setReq('req-length', val.length >= 8);
+                                setReq('req-upper', /[A-Z]/.test(val));
+                                setReq('req-lower', /[a-z]/.test(val));
+                                setReq('req-number', /[0-9]/.test(val));
+                            }
+
+                            if (pwd) {
+                                pwd.addEventListener('input', updateReq);
+                                updateReq();
+                            }
+
+                            if (togglePwd && pwd) {
+                                togglePwd.addEventListener('click', function() {
+                                    const type = pwd.getAttribute('type') === 'password' ? 'text' : 'password';
+                                    pwd.setAttribute('type', type);
+                                });
+                            }
+
+                            if (togglePwd2 && pwd2) {
+                                togglePwd2.addEventListener('click', function() {
+                                    const type = pwd2.getAttribute('type') === 'password' ? 'text' : 'password';
+                                    pwd2.setAttribute('type', type);
+                                });
+                            }
+                        });
+                    </script>
                 </div>
 
                 <!-- Login Link -->

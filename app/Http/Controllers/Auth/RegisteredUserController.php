@@ -32,7 +32,8 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            // At least 8 characters, one uppercase, one lowercase, one number
+            'password' => ['required', 'confirmed', Rules\Password::min(8)->mixedCase()->numbers()],
         ]);
 
         $user = User::create([
@@ -44,8 +45,21 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Explicitly send verification email (in addition to Registered event)
+        try {
+            if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail) {
+                $user->sendEmailVerificationNotification();
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Failed to send verification email on registration', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Keep user logged in but take them to the verification prompt
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('verification.notice');
     }
 }
