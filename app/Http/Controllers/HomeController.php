@@ -12,6 +12,7 @@ class HomeController extends Controller
     {
         // Get selected date or default to today
         $selectedDate = $request->get('date') ? Carbon::parse($request->get('date')) : Carbon::now();
+        $showPast = $request->boolean('show_past', false);
         
         // Get current week's classes based on selected date (Monday to Sunday)
         $startOfWeek = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
@@ -35,6 +36,23 @@ class HomeController extends Controller
             })
             ->orderBy('start_time')
             ->get();
+
+        // Filter out past classes by default
+        $now = Carbon::now();
+        $selectedDateClasses = $selectedDateClasses->filter(function($class) use ($selectedDate, $now, $showPast) {
+            // For future dates: show all
+            if ($selectedDate->isFuture()) {
+                return true;
+            }
+            // For past dates: show only if explicitly toggled
+            if ($selectedDate->isPast() && !$selectedDate->isToday()) {
+                return $showPast;
+            }
+            // For today: show future classes by default; include past only if toggled
+            $startTime = !empty($class->start_time) ? $class->start_time : '00:00';
+            $selectedStart = Carbon::parse($selectedDate->toDateString() . ' ' . $startTime);
+            return $showPast ? true : $selectedStart->greaterThanOrEqualTo($now);
+        });
         
         // Get week data for navigation (Monday–Sunday)
         $weekDays = [];
@@ -53,7 +71,7 @@ class HomeController extends Controller
         $prevWeek = $startOfWeek->copy()->subWeek()->format('Y-m-d');
         $nextWeek = $startOfWeek->copy()->addWeek()->format('Y-m-d');
         
-        return view('welcome', compact('selectedDateClasses', 'weekDays', 'selectedDate', 'prevWeek', 'nextWeek'));
+        return view('welcome', compact('selectedDateClasses', 'weekDays', 'selectedDate', 'prevWeek', 'nextWeek', 'showPast'));
     }
 
     public function getClasses(Request $request)
@@ -157,7 +175,8 @@ class HomeController extends Controller
             'weekDays' => $weekDays,
             'selectedDate' => $selectedDate->format('l, F j'),
             'prevWeek' => $prevWeek,
-            'nextWeek' => $nextWeek
+            'nextWeek' => $nextWeek,
+            'showPast' => $showPast,
         ]);
     }
 }

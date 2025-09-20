@@ -654,12 +654,21 @@
                 <div class="date-header">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <h2 id="selected-date-header">{{ $selectedDate->format('l, F j, Y') }}</h2>
-                        <button
-                            type="button"
-                            onclick="loadDate('{{ now()->toDateString() }}')"
-                            class="today-btn">
-                            Today
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onclick="loadDate('{{ now()->toDateString() }}')"
+                                class="today-btn">
+                                Today
+                            </button>
+                            <button
+                                type="button"
+                                id="toggle-past-btn"
+                                class="today-btn"
+                                onclick="toggleShowPast()">
+                                {{ ($showPast ?? false) ? 'Hide Past' : 'Show Past' }}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1001,6 +1010,7 @@
             const CLASSES_API = '{{ url('/api/classes') }}';
             const MEMBERSHIP_URL = '{{ route('purchase.package.checkout', ['type' => 'membership']) }}';
             let isLoading = false;
+            window.SHOW_PAST = {{ ($showPast ?? false) ? 'true' : 'false' }};
 
             // Animate week scroller before loading a new week for a smoother transition
             function onArrowNav(date) {
@@ -1028,10 +1038,11 @@
                 // Update URL without page reload
                 const url = new URL(window.location);
                 url.searchParams.set('date', date);
+                if (window.SHOW_PAST) { url.searchParams.set('show_past', '1'); } else { url.searchParams.delete('show_past'); }
                 window.history.pushState({}, '', url);
                 
                 // Fetch new data
-                fetch(`/api/classes?date=${date}`)
+                fetch(`/api/classes?date=${date}&show_past=${window.SHOW_PAST ? 1 : 0}`)
                     .then(response => response.json())
                     .then(data => {
                         updateUI(data);
@@ -1066,6 +1077,11 @@
                 // Hide loading spinner and show content
                 document.getElementById('loading-spinner').classList.add('hidden');
                 document.getElementById('classes-container').classList.remove('hidden');
+
+                // Sync show past state and button label
+                window.SHOW_PAST = !!data.showPast;
+                const toggleBtn = document.getElementById('toggle-past-btn');
+                if (toggleBtn) toggleBtn.textContent = window.SHOW_PAST ? 'Hide Past' : 'Show Past';
             }
 
             function updateWeekNavigation(weekDays, prevWeek, nextWeek) {
@@ -1258,6 +1274,8 @@
             window.addEventListener('popstate', function(event) {
                 const urlParams = new URLSearchParams(window.location.search);
                 const date = urlParams.get('date') || '{{ now()->format("Y-m-d") }}';
+                const sp = urlParams.get('show_past');
+                window.SHOW_PAST = (sp === '1' || sp === 'true');
                 if (date !== currentDate) {
                     loadDate(date);
                 }
@@ -1281,6 +1299,12 @@
                         }
                     }, 100);
                 }
+            }
+
+            // Toggle show/hide past
+            function toggleShowPast() {
+                window.SHOW_PAST = !window.SHOW_PAST;
+                loadDate(currentDate);
             }
 
             // Wait for DOM and all resources to be fully loaded
