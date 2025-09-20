@@ -19,6 +19,7 @@
         .note { background: #0b1220; border: 1px solid #334155; padding: 12px; border-radius: 8px; color: #cbd5e1; font-size: 14px; }
         .footer { color: #64748b; font-size: 12px; margin-top: 20px; text-align: center; }
         .cta { display: inline-block; background: #8b5cf6; color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        .text { color: #ffffff;}
     </style>
 </head>
 <body>
@@ -37,10 +38,6 @@
                 <span class="label">New Balance</span>
                 <span class="value">{{ $newBalance }} {{ ucfirst($creditLabel) }}</span>
             </li>
-            <li>
-                <span class="label">Allocated By</span>
-                <span class="value">{{ $allocatedBy }}</span>
-            </li>
         </ul>
 
         @if(!empty($note))
@@ -52,7 +49,7 @@
         @endif
 
         <hr class="hr" />
-        <p>If you have any questions, just reply to this email and our team will help you out.</p>
+        <p class="text">If you have any questions, just reply to this email and our team will help you out.</p>
         <p style="margin-top: 16px;">
             <a class="cta" href="{{ url('/dashboard') }}">View your dashboard</a>
         </p>
