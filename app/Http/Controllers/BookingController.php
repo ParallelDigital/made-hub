@@ -86,10 +86,53 @@ class BookingController extends Controller
             ]);
         }
 
-        // Standard classes: Check credits (consider legacy credits when no active membership)
+        // If user has an active unlimited pass, allow booking without deducting credits
+        if ($user->hasActiveUnlimitedPass()) {
+            // Check if class is full
+            $currentBookings = Booking::where('fitness_class_id', $classId)->count();
+            if ($currentBookings >= $class->max_spots) {
+                return response()->json(['success' => false, 'message' => 'This class is fully booked.'], 400);
+            }
+
+            // Check if user already booked this class
+            $existingBooking = Booking::where('user_id', $user->id)
+                ->where('fitness_class_id', $classId)
+                ->first();
+            if ($existingBooking) {
+                return response()->json(['success' => false, 'message' => 'You have already booked this class.'], 400);
+            }
+
+            // Create booking WITHOUT deducting any credits
+            $booking = Booking::create([
+                'user_id' => $user->id,
+                'fitness_class_id' => $classId,
+                'status' => 'confirmed',
+                'booked_at' => now(),
+            ]);
+
+            // Send confirmation email (best-effort)
+            try {
+                Mail::to($user->email)->send(new \App\Mail\BookingConfirmed($booking));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send booking confirmation email for unlimited pass user', [
+                    'user_id' => $user->id,
+                    'booking_id' => $booking->id ?? 'unknown',
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Class booked successfully using your unlimited pass! No credits deducted.',
+                'redirect_url' => route('booking.confirmation', ['classId' => $classId]),
+                'booking_id' => $booking->id ?? null,
+            ]);
+        }
+
+        // Standard classes: Check credits (consider non-member credits with expiry)
         $availableCredits = $user->hasActiveMembership()
             ? $user->getAvailableCredits()
-            : ((int) ($user->credits ?? 0));
+            : $user->getNonMemberAvailableCredits();
         if ($availableCredits < 1) {
             $message = $user->hasActiveMembership()
                 ? 'You have used all your monthly credits. Please wait until next month or book with payment.'

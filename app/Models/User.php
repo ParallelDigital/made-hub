@@ -66,6 +66,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'credits_last_refreshed' => 'date',
             'membership_start_date' => 'date',
             'membership_end_date' => 'date',
+            'credits_expires_at' => 'date',
+            'unlimited_pass_expires_at' => 'date',
         ];
     }
 
@@ -154,6 +156,17 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get non-member available credits considering expiry
+     */
+    public function getNonMemberAvailableCredits(): int
+    {
+        if (($this->credits_expires_at && $this->credits_expires_at->isFuture()) || ($this->credits_expires_at && $this->credits_expires_at->isToday())) {
+            return (int) ($this->credits ?? 0);
+        }
+        return 0;
+    }
+
+    /**
      * Refresh monthly credits if needed (on 1st of month)
      */
     public function refreshMonthlyCreditsIfNeeded(): void
@@ -180,7 +193,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         if (!$this->hasActiveMembership()) {
             // Fallback to old credits system
-            if ($this->credits > 0) {
+            // Respect credit expiry window
+            $hasValidWindow = $this->credits_expires_at && ($this->credits_expires_at->isFuture() || $this->credits_expires_at->isToday());
+            if ($hasValidWindow && ($this->credits > 0)) {
                 $this->decrement('credits');
                 return true;
             }
@@ -195,6 +210,38 @@ class User extends Authenticatable implements MustVerifyEmail
         }
         
         return false;
+    }
+
+    /**
+     * Determine if user has an active unlimited pass
+     */
+    public function hasActiveUnlimitedPass(): bool
+    {
+        return (bool) ($this->unlimited_pass_expires_at && ($this->unlimited_pass_expires_at->isFuture() || $this->unlimited_pass_expires_at->isToday()));
+    }
+
+    /**
+     * Allocate N credits to a non-member with a given expiry date (1 month passes, etc.)
+     * If the user has an existing later expiry, keep the later one.
+     */
+    public function allocateCreditsWithExpiry(int $amount, \Carbon\CarbonInterface $expiresAt): void
+    {
+        $this->credits = (int) ($this->credits ?? 0) + max(0, $amount);
+        if ($this->credits_expires_at) {
+            $this->credits_expires_at = $this->credits_expires_at->greaterThan($expiresAt) ? $this->credits_expires_at : $expiresAt->toDateString();
+        } else {
+            $this->credits_expires_at = $expiresAt->toDateString();
+        }
+        $this->save();
+    }
+
+    /**
+     * Activate an unlimited pass until the given expiry date
+     */
+    public function activateUnlimitedPass(\Carbon\CarbonInterface $expiresAt): void
+    {
+        $this->unlimited_pass_expires_at = $expiresAt->toDateString();
+        $this->save();
     }
 
     /**

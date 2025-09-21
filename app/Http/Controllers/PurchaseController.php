@@ -43,7 +43,7 @@ class PurchaseController extends Controller
         $hasMembership = $user ? $user->hasActiveMembership() : false;
         $availableCredits = 0;
         if ($user) {
-            $availableCredits = $hasMembership ? $user->getAvailableCredits() : ($user->credits ?? 0);
+            $availableCredits = $hasMembership ? $user->getAvailableCredits() : $user->getNonMemberAvailableCredits();
         }
 
         $autoOpenCredits = $request->boolean('useCredits');
@@ -113,10 +113,9 @@ class PurchaseController extends Controller
 
     public function packageSuccess(Request $request, string $type)
     {
-        // Generate a unique code and email it
-        $code = strtoupper(bin2hex(random_bytes(4)));
-        // Determine recipient email
+        // Determine purchaser email
         $recipientEmail = $request->user()->email ?? null;
+        $session = null;
         if (!$recipientEmail && $request->has('session_id')) {
             try {
                 $client = new StripeClient(config('services.stripe.secret'));
@@ -127,26 +126,68 @@ class PurchaseController extends Controller
             }
         }
 
-        // Store code record
-        PackageCode::create([
-            'code' => $code,
-            'package_type' => $type,
-            'classes' => in_array($type, ['unlimited','membership']) ? null : ($type === 'package_10' ? 10 : 5),
-            'email' => $recipientEmail,
-            'expires_at' => now()->addMonth(),
-        ]);
-
-        // Send email
-        try {
-            if ($recipientEmail) {
-                Mail::to($recipientEmail)
-                    ->send(new \App\Mail\PackageCodeMail($code, $type));
-            }
-        } catch (\Throwable $e) {
-            \Log::warning('Failed to send package code email: '.$e->getMessage());
+        if (!$recipientEmail) {
+            return redirect()->route('purchase.index')->with('error', 'Unable to identify purchaser email for allocation.');
         }
 
-        return redirect()->route('purchase.index')->with('success', 'Purchase successful! Your code has been emailed to you.');
+        // Find or create the user for this email
+        $user = \App\Models\User::firstOrCreate(
+            ['email' => $recipientEmail],
+            [
+                'name' => ($session && ($session->metadata->name ?? null)) ? $session->metadata->name : 'Guest',
+                'password' => bcrypt('temporary_password_' . time()),
+            ]
+        );
+
+        // Determine allocation by type
+        $expiresAt = now()->addMonth();
+        $allocated = false;
+        $allocatedMessage = '';
+        try {
+            if ($type === 'package_5') {
+                $user->allocateCreditsWithExpiry(5, $expiresAt);
+                $allocated = true;
+                $allocatedMessage = '5 credits added (valid for 1 month).';
+                // Notify user
+                try {
+                    Mail::to($user->email)->send(new \App\Mail\CreditsAllocated($user, 5, 'credits', (int)($user->credits ?? 0), 'Valid for 1 month'));
+                } catch (\Throwable $e) { \Log::warning('Credits email failed: '.$e->getMessage()); }
+            } elseif ($type === 'package_10') {
+                $user->allocateCreditsWithExpiry(10, $expiresAt);
+                $allocated = true;
+                $allocatedMessage = '10 credits added (valid for 1 month).';
+                try {
+                    Mail::to($user->email)->send(new \App\Mail\CreditsAllocated($user, 10, 'credits', (int)($user->credits ?? 0), 'Valid for 1 month'));
+                } catch (\Throwable $e) { \Log::warning('Credits email failed: '.$e->getMessage()); }
+            } elseif ($type === 'unlimited') {
+                $user->activateUnlimitedPass($expiresAt);
+                $allocated = true;
+                $allocatedMessage = 'Unlimited pass activated for 1 month.';
+                // Optional: email notification could be added here
+            } elseif ($type === 'membership') {
+                // For membership subscription, allocation is handled by Stripe webhooks/subscription logic.
+                $allocatedMessage = 'Membership purchase successful.';
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Failed to allocate package to user', ['type' => $type, 'user_id' => $user->id, 'error' => $e->getMessage()]);
+            return redirect()->route('purchase.index')->with('error', 'Purchase completed, but allocation failed. Please contact support.');
+        }
+
+        // Optional: Store a code record for audit (not emailed)
+        try {
+            PackageCode::create([
+                'code' => strtoupper(bin2hex(random_bytes(4))),
+                'package_type' => $type,
+                'classes' => in_array($type, ['unlimited','membership']) ? null : ($type === 'package_10' ? 10 : 5),
+                'email' => $recipientEmail,
+                'expires_at' => $expiresAt,
+                'redeemed_at' => now(),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::warning('Failed to store package code audit record: '.$e->getMessage());
+        }
+
+        return redirect()->route('purchase.index')->with('success', 'Purchase successful! ' . $allocatedMessage . ' You can now book classes.');
     }
 
     private function getPackages(): array

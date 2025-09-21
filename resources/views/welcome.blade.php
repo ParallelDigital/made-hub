@@ -789,8 +789,12 @@
                                 </div>
                                 <div class="text-left">
                                     <div id="useCreditsLabel" class="font-medium text-gray-900">Use Credits</div>
-                                    <div class="text-sm text-gray-500">You have {{ auth()->user()->hasActiveMembership() ? auth()->user()->getAvailableCredits() : (auth()->user()->credits ?? 0) }} {{ auth()->user()->hasActiveMembership() ? 'monthly credits' : 'credits' }}</div>
-                                    <span id="availableCreditsData" data-credits="{{ auth()->user()->hasActiveMembership() ? auth()->user()->getAvailableCredits() : (auth()->user()->credits ?? 0) }}" class="hidden"></span>
+                                    @if(auth()->user()->hasActiveUnlimitedPass())
+                                        <div class="text-sm text-gray-500">Unlimited pass active @if(auth()->user()->unlimited_pass_expires_at) until {{ auth()->user()->unlimited_pass_expires_at->format('j M Y') }} @endif</div>
+                                    @else
+                                        <div class="text-sm text-gray-500">You have {{ auth()->user()->hasActiveMembership() ? auth()->user()->getAvailableCredits() : auth()->user()->getNonMemberAvailableCredits() }} {{ auth()->user()->hasActiveMembership() ? 'monthly credits' : 'credits' }}</div>
+                                    @endif
+                                    <span id="availableCreditsData" data-credits="{{ auth()->user()->hasActiveMembership() ? auth()->user()->getAvailableCredits() : auth()->user()->getNonMemberAvailableCredits() }}" class="hidden"></span>
                                 </div>
                             </div>
                             <div class="text-primary font-semibold" id="useCreditsRight">1 Credit</div>
@@ -999,6 +1003,7 @@
         <script>
             window.IS_AUTH = {{ auth()->check() ? 'true' : 'false' }};
             window.IS_MEMBER = {{ auth()->check() && auth()->user()->hasActiveMembership() ? 'true' : 'false' }};
+            window.IS_UNLIMITED = {{ auth()->check() && method_exists(auth()->user(), 'hasActiveUnlimitedPass') && auth()->user()->hasActiveUnlimitedPass() ? 'true' : 'false' }};
             let currentDate = '{{ $selectedDate->format("Y-m-d") }}';
             const CLASSES_API = '{{ url('/api/classes') }}';
             const MEMBERSHIP_URL = '{{ route('purchase.package.checkout', ['type' => 'membership']) }}';
@@ -1334,6 +1339,10 @@
                     if (useCreditsLabel) useCreditsLabel.textContent = 'Book (Members)';
                     if (useCreditsRight) useCreditsRight.textContent = 'Free';
                     if (payBtn) payBtn.classList.add('hidden');
+                } else if (window.IS_UNLIMITED) {
+                    if (useCreditsLabel) useCreditsLabel.textContent = 'Book (Unlimited)';
+                    if (useCreditsRight) useCreditsRight.textContent = 'Free';
+                    if (payBtn) payBtn.classList.add('hidden');
                 } else {
                     if (useCreditsLabel) useCreditsLabel.textContent = 'Use Credits';
                     if (useCreditsRight) useCreditsRight.textContent = '1 Credit';
@@ -1365,6 +1374,14 @@
                         closeBookingModal();
                         openMembersOnlyModal();
                     } else {
+                        // If user has an unlimited pass, allow booking without checking numeric credits
+                        if (window.IS_UNLIMITED) {
+                            closeBookingModal();
+                            openConfirmModal('Book with your unlimited pass?', function() {
+                                performCreditBooking(cid);
+                            });
+                            return;
+                        }
                         // Determine available credits from hidden data attribute
                         const span = document.getElementById('availableCreditsData');
                         const available = span ? (parseInt(span.getAttribute('data-credits')) || 0) : 0;
