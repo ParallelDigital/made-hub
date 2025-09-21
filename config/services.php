@@ -43,6 +43,9 @@ return [
             ? env('STRIPE_SECRET_LIVE') 
             : (env('STRIPE_MODE') === 'test' ? env('STRIPE_SECRET_TEST') : env('STRIPE_SECRET')),
         'mode' => env('STRIPE_MODE'),
+        'webhook_secret' => env('STRIPE_MODE') === 'live'
+            ? env('STRIPE_WEBHOOK_SECRET_LIVE')
+            : (env('STRIPE_MODE') === 'test' ? env('STRIPE_WEBHOOK_SECRET_TEST') : env('STRIPE_WEBHOOK_SECRET')),
     ],
 
 ];

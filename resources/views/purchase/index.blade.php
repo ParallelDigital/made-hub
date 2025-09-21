@@ -83,7 +83,7 @@
                                         <div class="text-xl font-bold text-black">£{{ number_format($package['price'], 2) }}</div>
                                         <div class="text-sm text-gray-600">*{{ strtoupper($package['billing'] ?? 'PER MONTH') }}*</div>
                                     </div>
-                                    <a href="{{ route('purchase.package.checkout', ['type' => $package['type']]) }}" class="my-2 inline-flex w-full justify-center items-center px-4 py-2 bg-black text-white rounded-md font-semibold hover:bg-gray-800 transition-colors">BUY NOW</a>
+                                    <a href="{{ env('STRIPE_MEMBERSHIP_LINK', 'https://buy.stripe.com/3cscP32lx7Wr6cw3cd') }}" target="_blank" rel="noopener" class="my-2 inline-flex w-full justify-center items-center px-4 py-2 bg-black text-white rounded-md font-semibold hover:bg-gray-800 transition-colors">BUY NOW</a>
                                 </div>
                             </div>
                         @endif

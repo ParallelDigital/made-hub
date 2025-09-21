@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StripeWebhookController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
 
@@ -196,3 +197,8 @@ Route::middleware(['auth', \App\Http\Middleware\IsInstructor::class])->prefix('i
 });
 
 require __DIR__.'/auth.php';
+
+// Stripe Webhook Endpoint (CSRF exempt)
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    ->name('stripe.webhook')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
