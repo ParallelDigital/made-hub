@@ -663,11 +663,6 @@
                             </button>
                             <button
                                 type="button"
-                                id="toggle-past-btn"
-                                class="today-btn"
-                                onclick="toggleShowPast()">
-                                {{ ($showPast ?? false) ? 'Hide Past' : 'Show Past' }}
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -1080,11 +1075,6 @@
 
                 // Sync show past state and button label
                 window.SHOW_PAST = !!data.showPast;
-                const toggleBtn = document.getElementById('toggle-past-btn');
-                if (toggleBtn) toggleBtn.textContent = window.SHOW_PAST ? 'Hide Past' : 'Show Past';
-            }
-
-            function updateWeekNavigation(weekDays, prevWeek, nextWeek) {
                 const weekDaysContainer = document.getElementById('week-days');
                 weekDaysContainer.innerHTML = '';
 
