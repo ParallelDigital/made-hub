@@ -56,6 +56,44 @@
 <div class="bg-gray-800 shadow rounded-lg border border-gray-700">
     <div class="px-4 py-5 sm:p-6">
         @if($classes->count() > 0)
+            @php
+                // Group the current page of classes by week (Mon-Sun)
+                $grouped = [];
+                foreach ($classes as $c) {
+                    $date = $c->class_date instanceof \Carbon\Carbon ? $c->class_date->copy() : \Carbon\Carbon::parse($c->class_date);
+                    $start = $date->copy()->startOfWeek(\Carbon\Carbon::MONDAY);
+                    $end = $date->copy()->endOfWeek(\Carbon\Carbon::SUNDAY);
+                    $key = $start->format('Y-m-d');
+                    if (!isset($grouped[$key])) {
+                        $grouped[$key] = [
+                            'start' => $start,
+                            'end' => $end,
+                            'items' => [],
+                        ];
+                    }
+                    $grouped[$key]['items'][] = $c;
+                }
+                // Sort items inside each week by date + start time (ascending)
+                foreach ($grouped as &$wg) {
+                    usort($wg['items'], function($a, $b) {
+                        $da = $a->class_date instanceof \Carbon\Carbon ? $a->class_date->copy() : \Carbon\Carbon::parse($a->class_date);
+                        $db = $b->class_date instanceof \Carbon\Carbon ? $b->class_date->copy() : \Carbon\Carbon::parse($b->class_date);
+                        $ta = trim(($a->start_time ?? '00:00'));
+                        $tb = trim(($b->start_time ?? '00:00'));
+                        $sa = $da->format('Y-m-d') . ' ' . $ta;
+                        $sb = $db->format('Y-m-d') . ' ' . $tb;
+                        return strcmp($sa, $sb);
+                    });
+                }
+                unset($wg);
+                krsort($grouped); // newest week first
+            @endphp
+
+            <div class="flex justify-end gap-2 mb-3">
+                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded text-sm" onclick="toggleAllWeeks(true)">Expand all</button>
+                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded text-sm" onclick="toggleAllWeeks(false)">Collapse all</button>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-700">
                     <thead class="bg-gray-700">
@@ -69,45 +107,80 @@
                         </tr>
                     </thead>
                     <tbody class="bg-gray-800 divide-y divide-gray-700">
-                        @foreach($classes as $class)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gray-700 rounded-full flex items-center justify-center">
-                                            <span class="text-gray-300">{{ substr($class->classType->name, 0, 2) }}</span>
+                        @foreach($grouped as $weekKey => $week)
+                            @php
+                                $isCurrent = now()->toDateString() >= $week['start']->toDateString() && now()->toDateString() <= $week['end']->toDateString();
+                                $sectionId = 'week-' . str_replace('-', '', $weekKey);
+                                $count = count($week['items']);
+                            @endphp
+                            <tr class="bg-gray-900 hover:bg-gray-800 cursor-pointer" data-section-toggle="{{ $sectionId }}" data-expanded="{{ $isCurrent ? 'true' : 'false' }}" onclick="toggleWeek('{{ $sectionId }}')">
+                                <td colspan="6" class="px-6 py-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-sm font-semibold text-white">
+                                            Week {{ $week['start']->format('D, M j') }} – {{ $week['end']->format('D, M j, Y') }}
+                                            <span class="ml-2 text-gray-400 font-normal">({{ $count }} {{ $count === 1 ? 'class' : 'classes' }})</span>
                                         </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-white">{{ $class->classType->name }}</div>
-                                            <div class="text-sm text-gray-400">{{ $class->classType->duration }} min</div>
-                                        </div>
+                                        <svg class="w-5 h-5 text-gray-300 transition-transform duration-200"
+                                             style="transform: rotate({{ $isCurrent ? '90' : '0' }}deg)"
+                                             data-chevron-for="{{ $sectionId }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-white">{{ $class->instructor->name ?? 'N/A' }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-white">{{ $class->class_date->format('D, M j, Y') }}</div>
-                                    <div class="text-sm text-gray-400">{{ $class->start_time }} - {{ $class->end_time }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                    {{ $class->location }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($class->active)
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Active
-                                        </span>
-                                    @else
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                            Inactive
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="{{ route('admin.classes.edit', $class) }}" class="text-blue-400 hover:text-blue-300 mr-3">Edit</a>
-                                    <button onclick="showDeleteModal('{{ $class->id }}')" class="text-red-400 hover:text-red-300">Delete</button>
-                                </td>
                             </tr>
+                            @foreach($week['items'] as $class)
+                                <tr data-week-row="{{ $sectionId }}" class="{{ $isCurrent ? '' : 'hidden' }}">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 bg-gray-700 rounded-full flex items-center justify-center">
+                                                <span class="text-gray-300">{{ strtoupper(substr(optional($class->classType)->name ?? $class->name, 0, 2)) }}</span>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-white">{{ optional($class->classType)->name ?? $class->name }}</div>
+                                                @php
+                                                    $start = $class->start_time;
+                                                    $end = $class->end_time;
+                                                    // Derive duration if not set on classType
+                                                    $duration = optional($class->classType)->duration;
+                                                    if (!$duration && $start && $end) {
+                                                        try {
+                                                            $cd = $class->class_date instanceof \Carbon\Carbon ? $class->class_date->toDateString() : (string) $class->class_date;
+                                                            $s = \Carbon\Carbon::parse(trim(($cd ?: now()->toDateString()) . ' ' . $start));
+                                                            $e = \Carbon\Carbon::parse(trim(($cd ?: now()->toDateString()) . ' ' . $end));
+                                                            if ($e->lessThan($s)) { $e = $e->copy()->addDay(); }
+                                                            $duration = $s->diffInMinutes($e);
+                                                        } catch (\Throwable $ex) { $duration = null; }
+                                                    }
+                                                @endphp
+                                                @if($duration)
+                                                    <div class="text-sm text-gray-400">{{ $duration }} min</div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-white">{{ optional($class->instructor)->name ?? 'N/A' }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-white">{{ ($class->class_date instanceof \Carbon\Carbon ? $class->class_date : \Carbon\Carbon::parse($class->class_date))->format('D, M j, Y') }}</div>
+                                        <div class="text-sm text-gray-400">{{ $class->start_time }} - {{ $class->end_time }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                        {{ $class->location ?? '—' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($class->active)
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                                        @else
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="{{ route('admin.classes.edit', $class) }}" class="text-blue-400 hover:text-blue-300 mr-3">Edit</a>
+                                        <button onclick="showDeleteModal('{{ $class->id }}')" class="text-red-400 hover:text-red-300">Delete</button>
+                                    </td>
+                                </tr>
+                            @endforeach
                         @endforeach
                     </tbody>
                 </table>
@@ -178,6 +251,29 @@
 
 @push('scripts')
 <script>
+    function toggleWeek(sectionId) {
+        const rows = document.querySelectorAll(`[data-week-row="${sectionId}"]`);
+        const header = document.querySelector(`[data-section-toggle="${sectionId}"]`);
+        const chevron = document.querySelector(`[data-chevron-for="${sectionId}"]`);
+        const expanded = header && header.getAttribute('data-expanded') === 'true';
+        const nextState = !expanded;
+        rows.forEach(r => r.classList.toggle('hidden', !nextState));
+        if (header) header.setAttribute('data-expanded', nextState ? 'true' : 'false');
+        if (chevron) chevron.style.transform = nextState ? 'rotate(90deg)' : 'rotate(0)';
+    }
+
+    function toggleAllWeeks(expand) {
+        const headers = document.querySelectorAll('[data-section-toggle]');
+        headers.forEach(h => {
+            const id = h.getAttribute('data-section-toggle');
+            const rows = document.querySelectorAll(`[data-week-row="${id}"]`);
+            const chevron = document.querySelector(`[data-chevron-for="${id}"]`);
+            rows.forEach(r => r.classList.toggle('hidden', !expand));
+            h.setAttribute('data-expanded', expand ? 'true' : 'false');
+            if (chevron) chevron.style.transform = expand ? 'rotate(90deg)' : 'rotate(0)';
+        });
+    }
+
     function showDeleteModal(classId) {
         const form = document.getElementById('deleteForm');
         form.action = `/admin/classes/${classId}`;
