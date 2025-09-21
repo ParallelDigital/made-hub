@@ -9,9 +9,7 @@
         </p>
     </header>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
+    <!-- Email verification disabled: removed resend verification form -->
 
     <form method="post" action="{{ route('profile.update') }}" class="space-y-6">
         @csrf
@@ -62,25 +60,7 @@
                     </div>
                     <x-input-error class="mt-1" :messages="$errors->get('email')" />
 
-                    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                        <div class="mt-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                            <p class="text-sm text-yellow-400">
-                                {{ __('Your email address is unverified.') }}
-                                <button 
-                                    form="send-verification" 
-                                    class="ml-1 underline text-yellow-300 hover:text-white transition-colors"
-                                >
-                                    {{ __('Click here to re-send the verification email.') }}
-                                </button>
-                            </p>
-
-                            @if (session('status') === 'verification-link-sent')
-                                <p class="mt-2 text-sm text-green-400">
-                                    {{ __('A new verification link has been sent to your email address.') }}
-                                </p>
-                            @endif
-                        </div>
-                    @endif
+                    <!-- Email verification disabled: removed unverified banner and resend button -->
                 </div>
             </div>
         </div>
