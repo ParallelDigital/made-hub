@@ -102,8 +102,23 @@ class HomeController extends Controller
             ->get();
 
 
-        // For homepage calendar: show all classes including past ones
-        // No filtering applied - users can see all scheduled classes
+        // Filter out past classes by default - show current and future classes
+        $now = Carbon::now();
+        $selectedDateClasses = $selectedDateClasses->filter(function($class) use ($selectedDate, $now, $showPast) {
+            // For future dates: show all
+            if ($selectedDate->isFuture()) {
+                return true;
+            }
+            // For past dates: show only if explicitly toggled
+            if ($selectedDate->isPast() && !$selectedDate->isToday()) {
+                return $showPast;
+            }
+            // For today: show future classes by default; include past only if toggled
+            $startTime = !empty($class->start_time) ? $class->start_time : "00:00";
+            $selectedStart = Carbon::parse($selectedDate->toDateString() . " " . $startTime);
+            return $showPast ? true : $selectedStart->greaterThanOrEqualTo($now);
+        });
+
 
         
         // Get week data for navigation (Monday–Sunday)
