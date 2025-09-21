@@ -7,22 +7,12 @@
 
         <title>Made Running - Premium Fitness Experience</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <!-- Preload ProFontWindows to minimise FOUT on homepage -->
+        <link rel="preload" href="{{ Vite::asset('resources/fonts/ProFontWindows.ttf') }}" as="font" type="font/ttf" crossorigin>
 
         <!-- Vite Assets (single source of CSS/JS to keep styles stable) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <!-- Force Inter on homepage only; overrides global ProFontWindows enforcement -->
         <style>
-            /* Override ProFontWindows enforcement for homepage */
-            body.font-inter, body.font-inter *,
-            .font-inter, .font-inter *, .font-inter *::before, .font-inter *::after {
-                font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif !important;
-                font-weight: 400 !important;
-                font-style: normal !important;
-            }
 
             /* Week scroller arrow behavior is implemented in the JS script block below */
             
@@ -498,7 +488,7 @@
             }
         </style>
     </head>
-    <body class="bg-black text-white font-inter">
+    <body class="bg-black text-white">
         <!-- Navigation -->
         <div x-data="{ open: false }" class="relative bg-black border-b border-gray-800">
             <nav class="flex items-center justify-between px-4 sm:px-6 py-4">
