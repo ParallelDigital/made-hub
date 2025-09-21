@@ -89,8 +89,11 @@
             @php 
                 $role = Auth::user()->role; 
                 $hasMembership = Auth::user()->hasActiveMembership();
-                $currentCredits = $hasMembership ? Auth::user()->getAvailableCredits() : (Auth::user()->credits ?? 0);
-                $hasAnyCredits = ($currentCredits ?? 0) > 0;
+                $hasUnlimited = method_exists(Auth::user(), 'hasActiveUnlimitedPass') && Auth::user()->hasActiveUnlimitedPass();
+                $currentCredits = $hasMembership ? Auth::user()->getAvailableCredits() : Auth::user()->getNonMemberAvailableCredits();
+                $hasAnyCredits = ($currentCredits ?? 0) > 0 || $hasUnlimited;
+                $creditsExpiry = (!$hasMembership && !$hasUnlimited) ? Auth::user()->credits_expires_at : null;
+                $unlimitedExpiry = $hasUnlimited ? Auth::user()->unlimited_pass_expires_at : null;
             @endphp
             @if($role === 'admin' || $role === 'administrator' || $role === 'instructor' || $hasAnyCredits)
                 <p class="break-words"><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white text-sm sm:text-base">{{ Auth::user()->pin_code ?? '— — — —' }}</span></p>
@@ -106,12 +109,14 @@
                     None
                 @endif
             </p>
-            @php 
-                $credits = Auth::user()->hasActiveMembership() 
-                    ? Auth::user()->getAvailableCredits() 
-                    : (Auth::user()->credits ?? 0);
-            @endphp
-            <p class="break-words"><span class="text-gray-400">Credits:</span> {{ $credits }}</p>
+            @if($hasUnlimited)
+                <p class="break-words"><span class="text-gray-400">Unlimited Pass:</span> Active @if($unlimitedExpiry) until {{ \Carbon\Carbon::parse($unlimitedExpiry)->format('D, M j, Y') }} @endif</p>
+            @else
+                <p class="break-words"><span class="text-gray-400">Credits:</span> {{ $currentCredits }}</p>
+                @if($creditsExpiry)
+                    <p class="break-words"><span class="text-gray-400">Credits Expire:</span> {{ \Carbon\Carbon::parse($creditsExpiry)->format('D, M j, Y') }}</p>
+                @endif
+            @endif
         </div>
         <div class="profile-actions flex flex-col sm:flex-row gap-3 mt-4">
             <a href="{{ route('profile.edit') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition text-sm sm:text-base min-h-[44px]">Edit Profile</a>
@@ -159,7 +164,8 @@
         const loadingEl = document.getElementById('dash-classes-loading');
         const tmpl = document.getElementById('dash-class-item-template');
         const CLASSES_API = '{{ url('/api/classes') }}';
-        const USER_CREDITS = Number({{ isset($credits) ? (int) $credits : 0 }});
+        const USER_CREDITS = Number({{ Auth::user()->hasActiveMembership() ? (int) Auth::user()->getAvailableCredits() : (int) Auth::user()->getNonMemberAvailableCredits() }});
+        const USER_UNLIMITED = {{ (method_exists(Auth::user(),'hasActiveUnlimitedPass') && Auth::user()->hasActiveUnlimitedPass()) ? 'true' : 'false' }};
         const weekDaysContainer = document.getElementById('dash-week-days');
         const todayBtn = document.getElementById('dash-today-btn');
         const prevWeekBtn = document.getElementById('dash-prev-week');
@@ -212,7 +218,9 @@
                     actions.appendChild(btn(`<button class="px-3 py-2 rounded border border-gray-600 text-gray-400 text-xs cursor-not-allowed w-full sm:w-auto" disabled>Full</button>`));
                 } else {
                     actions.appendChild(btn(`<a href="{{ url('/checkout') }}/${c.id}" class="px-3 py-2 rounded border border-primary text-black bg-primary hover:opacity-90 text-xs w-full sm:w-auto">Reserve</a>`));
-                    actions.appendChild(btn(`<button data-class-id="${c.id}" class="px-3 py-2 rounded border border-gray-300 text-white hover:bg-gray-700 text-xs dash-use-credits w-full sm:w-auto" ${USER_CREDITS>0?'':'disabled title=\"No credits\" class=\"cursor-not-allowed opacity-60\"'}>Use Credits</button>`));
+                    const canUse = USER_UNLIMITED || USER_CREDITS > 0;
+                    const disabledAttrs = canUse ? '' : 'disabled title="No credits" class="cursor-not-allowed opacity-60"';
+                    actions.appendChild(btn(`<button data-class-id="${c.id}" class="px-3 py-2 rounded border border-gray-300 text-white hover:bg-gray-700 text-xs dash-use-credits w-full sm:w-auto" ${disabledAttrs}>Use Credits</button>`));
                 }
                 listEl.appendChild(node);
             });
