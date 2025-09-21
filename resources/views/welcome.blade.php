@@ -726,8 +726,10 @@
                                             @if($isMembersOnly)
                                                 @if(auth()->check() && auth()->user()->hasActiveMembership())
                                                     <button onclick="openBookingModal({{ $class->id }}, 0)" class="reserve-button">Book (Members)</button>
+                                                @elseif(auth()->check())
+                                                    <button onclick="openBookingModal({{ $class->id }}, 0)" class="reserve-button">Become Member</button>
                                                 @else
-                                                    <button onclick="openMembersOnlyModal()" class="reserve-button">Members Only</button>
+                                                    <button onclick="openBookingModal({{ $class->id }}, 0)" class="reserve-button">Members Only</button>
                                                 @endif
                                             @else
                                                 <button onclick="openBookingModal({{ $class->id }}, {{ $class->price }})" class="reserve-button">Reserve</button>
@@ -765,7 +767,7 @@
 
                 <div class="space-y-4">
                     <div class="text-sm text-gray-600 mb-4">
-                        <p>Choose how you'd like to book this class:</p>
+                        <p id="bookingModalMessage">Choose how you'd like to book this class:</p>
                     </div>
                     
                     @auth
@@ -799,11 +801,11 @@
                                     </svg>
                                 </div>
                                 <div class="text-left">
-                                    <div class="font-medium text-gray-900">Use Credits</div>
-                                    <div class="text-sm text-gray-500">Sign in to use credits</div>
+                                    <div class="font-medium text-gray-900">Sign in to continue</div>
+                                    <div class="text-sm text-gray-500">Access member benefits and book classes</div>
                                 </div>
                             </div>
-                            <div class="text-green-600 font-semibold">1 Credit</div>
+                            <div class="text-green-600 font-semibold">Sign In</div>
                         </button>
                     @endauth
                     
@@ -822,6 +824,27 @@
                         </div>
                         <div class="text-gray-800 font-semibold" id="modalClassPrice">£0</div>
                     </button>
+
+                    <!-- Members-only specific options -->
+                    <div id="membersOnlyOptions" class="hidden space-y-3">
+                        <div class="border-t border-gray-200 pt-4">
+                            <p class="text-sm text-gray-600 mb-3">This class is for members only:</p>
+                            <a href="{{ route('purchase.package.checkout', ['type' => 'membership']) }}" class="w-full flex items-center justify-between p-4 border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="font-medium">Become a Member</div>
+                                        <div class="text-sm opacity-75">Get unlimited access to all classes</div>
+                                    </div>
+                                </div>
+                                <div class="font-semibold">Join Now</div>
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-6 pt-4 border-t border-gray-200">
@@ -1210,7 +1233,10 @@
                                                 : (isMembersOnly
                                                     ? (window.IS_MEMBER
                                                         ? `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Book (Members)</button>`
-                                                        : `<button onclick=\"openMembersOnlyModal()\" class=\"reserve-button\">Members Only</button>`
+                                                        : (window.IS_AUTH
+                                                            ? `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Become Member</button>`
+                                                            : `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Members Only</button>`
+                                                          )
                                                       )
                                                     : `<button onclick=\"openBookingModal(${classItem.id}, ${classItem.price})\" class=\"reserve-button\">Reserve</button>`
                                                   )
@@ -1246,7 +1272,14 @@
                         if (isPast) { openFeedbackModal('Unavailable', 'This class has already happened.'); return; }
                         if (isBooked) { openFeedbackModal('Already booked', 'You have already booked this class.'); return; }
                         if (isFull) { openFeedbackModal('Class full', 'This class is fully booked.'); return; }
-                        if (isMembersOnly && !window.IS_MEMBER) { openMembersOnlyModal(); return; }
+                        if (isMembersOnly && !window.IS_MEMBER) { 
+                            if (window.IS_AUTH) {
+                                openBookingModal(classId, 0); 
+                            } else {
+                                openBookingModal(classId, 0); 
+                            }
+                            return; 
+                        }
                         openBookingModal(classId, price);
                     });
                     window.__classCardClickBound = true;
@@ -1319,24 +1352,42 @@
                 // Update the price in the modal
                 document.getElementById('modalClassPrice').textContent = `£${priceNum.toLocaleString()}`;
 
-                // Adjust modal labels for members-only classes
+                // Adjust modal labels and content for members-only classes
                 const card = document.querySelector(`.class-card[data-class-id="${classId}"]`);
                 const isMembersOnly = card && card.dataset && card.dataset.membersOnly === '1';
                 const useCreditsLabel = document.getElementById('useCreditsLabel');
                 const useCreditsRight = document.getElementById('useCreditsRight');
                 const payBtn = document.getElementById('payButton');
-                if (isMembersOnly && window.IS_MEMBER) {
-                    if (useCreditsLabel) useCreditsLabel.textContent = 'Book (Members)';
-                    if (useCreditsRight) useCreditsRight.textContent = 'Free';
-                    if (payBtn) payBtn.classList.add('hidden');
-                } else if (window.IS_UNLIMITED) {
-                    if (useCreditsLabel) useCreditsLabel.textContent = 'Book (Unlimited)';
-                    if (useCreditsRight) useCreditsRight.textContent = 'Free';
-                    if (payBtn) payBtn.classList.add('hidden');
+                const membersOnlyOptions = document.getElementById('membersOnlyOptions');
+                const bookingModalMessage = document.getElementById('bookingModalMessage');
+
+                if (isMembersOnly) {
+                    bookingModalMessage.textContent = 'This class is for members only:';
+                    
+                    if (window.IS_MEMBER) {
+                        // Member: show booking options
+                        if (useCreditsLabel) useCreditsLabel.textContent = 'Book (Members)';
+                        if (useCreditsRight) useCreditsRight.textContent = 'Free';
+                        if (payBtn) payBtn.classList.add('hidden');
+                        if (membersOnlyOptions) membersOnlyOptions.classList.add('hidden');
+                    } else if (window.IS_AUTH) {
+                        // Authenticated non-member: show membership option
+                        if (membersOnlyOptions) membersOnlyOptions.classList.remove('hidden');
+                        if (payBtn) payBtn.classList.add('hidden');
+                        if (useCreditsLabel) useCreditsLabel.textContent = 'Use Credits';
+                        if (useCreditsRight) useCreditsRight.textContent = '1 Credit';
+                    } else {
+                        // Non-authenticated: show login and membership options
+                        if (membersOnlyOptions) membersOnlyOptions.classList.remove('hidden');
+                        if (payBtn) payBtn.classList.add('hidden');
+                    }
                 } else {
+                    // Regular class: show normal options
+                    bookingModalMessage.textContent = 'Choose how you\'d like to book this class:';
                     if (useCreditsLabel) useCreditsLabel.textContent = 'Use Credits';
                     if (useCreditsRight) useCreditsRight.textContent = '1 Credit';
                     if (payBtn) payBtn.classList.remove('hidden');
+                    if (membersOnlyOptions) membersOnlyOptions.classList.add('hidden');
                 }
 
                 document.getElementById('bookingModal').classList.remove('hidden');
