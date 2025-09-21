@@ -837,8 +837,7 @@
                                         </svg>
                                     </div>
                                     <div class="text-left">
-                                        <div class="font-medium">Become a Member</div>
-                                        <div class="text-sm opacity-75">Get unlimited access to all classes</div>
+                                        <div class="text-black font-medium">Become a Member</div>
                                     </div>
                                 </div>
                                 <div class="font-semibold">Join Now</div>
@@ -1360,6 +1359,7 @@
                 const payBtn = document.getElementById('payButton');
                 const membersOnlyOptions = document.getElementById('membersOnlyOptions');
                 const bookingModalMessage = document.getElementById('bookingModalMessage');
+                const useCreditsBtn = document.querySelector('#bookingModal button[onclick*="bookWithCredits"]');
 
                 if (isMembersOnly) {
                     bookingModalMessage.textContent = 'This class is for members only:';
@@ -1370,16 +1370,12 @@
                         if (useCreditsRight) useCreditsRight.textContent = 'Free';
                         if (payBtn) payBtn.classList.add('hidden');
                         if (membersOnlyOptions) membersOnlyOptions.classList.add('hidden');
-                    } else if (window.IS_AUTH) {
-                        // Authenticated non-member: show membership option
-                        if (membersOnlyOptions) membersOnlyOptions.classList.remove('hidden');
-                        if (payBtn) payBtn.classList.add('hidden');
-                        if (useCreditsLabel) useCreditsLabel.textContent = 'Use Credits';
-                        if (useCreditsRight) useCreditsRight.textContent = '1 Credit';
+                        if (useCreditsBtn) useCreditsBtn.classList.remove('hidden');
                     } else {
-                        // Non-authenticated: show login and membership options
-                        if (membersOnlyOptions) membersOnlyOptions.classList.remove('hidden');
+                        // Non-member: hide all booking options, show only membership
                         if (payBtn) payBtn.classList.add('hidden');
+                        if (membersOnlyOptions) membersOnlyOptions.classList.remove('hidden');
+                        if (useCreditsBtn) useCreditsBtn.classList.add('hidden');
                     }
                 } else {
                     // Regular class: show normal options
@@ -1388,6 +1384,7 @@
                     if (useCreditsRight) useCreditsRight.textContent = '1 Credit';
                     if (payBtn) payBtn.classList.remove('hidden');
                     if (membersOnlyOptions) membersOnlyOptions.classList.add('hidden');
+                    if (useCreditsBtn) useCreditsBtn.classList.remove('hidden');
                 }
 
                 document.getElementById('bookingModal').classList.remove('hidden');
