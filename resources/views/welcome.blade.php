@@ -661,8 +661,6 @@
                                 class="today-btn">
                                 Today
                             </button>
-                            <button
-                                type="button"
                         </div>
                     </div>
                 </div>
@@ -1064,7 +1062,7 @@
                 document.getElementById('selected-date-header').textContent = data.selectedDate;
 
                 // Update week navigation
-                updateWeekNavigation(data.weekDays, data.prevWeek, data.nextWeek);
+                const weekDays = Array.isArray(data.weekDays) ? data.weekDays : [];
 
                 // Update classes list
                 updateClassesList(data.classes);
@@ -1102,8 +1100,8 @@
                 });
 
                 // Update arrow buttons
-                document.getElementById('prev-week-btn').setAttribute('onclick', `onArrowNav('${prevWeek}')`);
-                document.getElementById('next-week-btn').setAttribute('onclick', `onArrowNav('${nextWeek}')`);
+                document.getElementById('prev-week-btn').setAttribute('onclick', `onArrowNav('${data.prevWeek}')`);
+                document.getElementById('next-week-btn').setAttribute('onclick', `onArrowNav('${data.nextWeek}')`);
 
                 // Smoothly center the selected day in the scroll container
                 const selectedBtn = weekDaysContainer.querySelector('.week-day-btn.selected') || weekDaysContainer.querySelector('.week-day-btn.today');

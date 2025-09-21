@@ -36,23 +36,9 @@ class HomeController extends Controller
             })
             ->orderBy('start_time')
             ->get();
-
-        // Filter out past classes by default
-        $now = Carbon::now();
-        $selectedDateClasses = $selectedDateClasses->filter(function($class) use ($selectedDate, $now, $showPast) {
-            // For future dates: show all
-            if ($selectedDate->isFuture()) {
-                return true;
-            }
-            // For past dates: show only if explicitly toggled
-            if ($selectedDate->isPast() && !$selectedDate->isToday()) {
-                return $showPast;
-            }
-            // For today: show future classes by default; include past only if toggled
-            $startTime = !empty($class->start_time) ? $class->start_time : '00:00';
-            $selectedStart = Carbon::parse($selectedDate->toDateString() . ' ' . $startTime);
-            return $showPast ? true : $selectedStart->greaterThanOrEqualTo($now);
-        });
+        
+        // Show all classes (past and future) on the homepage for the selected date
+        // No filtering applied here; frontend will label past classes appropriately
         
         // Get week data for navigation (Monday–Sunday)
         $weekDays = [];
