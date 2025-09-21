@@ -168,6 +168,7 @@ Route::middleware('auth')->group(function () {
 // Admin Routes
 Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
+    Route::get('members', [App\Http\Controllers\Admin\UserController::class, 'members'])->name('members.index');
     Route::resource('instructors', App\Http\Controllers\Admin\InstructorController::class);
     Route::get('instructors/{instructor}/classes', [App\Http\Controllers\Admin\InstructorController::class, 'getClasses'])
         ->name('instructors.classes');

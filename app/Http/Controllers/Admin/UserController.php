@@ -224,4 +224,52 @@ class UserController extends Controller
 
         return response()->streamDownload($callback, $filename, $headers);
     }
+
+    /**
+     * Display a listing of members with their current credits and status.
+     */
+    public function members(Request $request)
+    {
+        $status = $request->get('status', 'active'); // active|inactive|all
+
+        $query = User::query()->with('membership');
+
+        // Filter only users with a membership record
+        $query->whereNotNull('membership_id');
+
+        // Status filter
+        $today = now()->toDateString();
+        if ($status === 'active') {
+            $query->whereNotNull('membership_start_date')
+                ->where('membership_start_date', '<=', $today)
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('membership_end_date')
+                      ->orWhere('membership_end_date', '>=', $today);
+                });
+        } elseif ($status === 'inactive') {
+            $query->where(function ($q) use ($today) {
+                $q->whereNull('membership_start_date')
+                  ->orWhere('membership_start_date', '>', $today)
+                  ->orWhere(function ($q2) use ($today) {
+                      $q2->whereNotNull('membership_end_date')
+                         ->where('membership_end_date', '<', $today);
+                  });
+            });
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $term = $request->get('search');
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                  ->orWhere('email', 'like', "%{$term}%")
+                  ->orWhere('first_name', 'like', "%{$term}%")
+                  ->orWhere('last_name', 'like', "%{$term}%");
+            });
+        }
+
+        $members = $query->orderBy('name')->paginate(25)->appends($request->query());
+
+        return view('admin.members.index', compact('members', 'status'));
+    }
 }

@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\MembershipStatusMail;
 use Stripe\Stripe;
 use Stripe\Webhook as StripeWebhook;
 
@@ -115,6 +117,13 @@ class StripeWebhookController extends Controller
         $user->save();
 
         Log::info('Membership activated via checkout.session.completed', ['user_id' => $user->id]);
+
+        // Send activation email
+        try {
+            Mail::to($user->email)->send(new MembershipStatusMail($user, 'activation'));
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send membership activation email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
     }
 
     protected function handleInvoicePaymentSucceeded($invoice): void
@@ -154,6 +163,13 @@ class StripeWebhookController extends Controller
         $user->save();
 
         Log::info('Invoice payment succeeded processed; monthly credits set', ['user_id' => $user->id, 'monthly_credits' => $user->monthly_credits]);
+
+        // Send renewal email
+        try {
+            Mail::to($user->email)->send(new MembershipStatusMail($user, 'renewal'));
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send membership renewal email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
     }
 
     protected function handleSubscriptionCanceled($subscription): void
