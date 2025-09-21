@@ -828,7 +828,7 @@
                     <!-- Members-only specific options -->
                     <div id="membersOnlyOptions" class="hidden space-y-3">
                         <div class="border-t border-gray-200 pt-4">
-                            <p class="text-sm text-gray-600 mb-3">This class is for members only:</p>
+                            <p class="text-sm text-gray-600 mb-3">It looks like you don't have a membership</p>
                             <a href="{{ route('purchase.package.checkout', ['type' => 'membership']) }}" class="w-full flex items-center justify-between p-4 border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
                                 <div class="flex items-center">
                                     <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
