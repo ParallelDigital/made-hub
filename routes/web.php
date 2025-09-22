@@ -227,6 +227,10 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
         \Artisan::call('members:ensure-login-access');
         return back()->with('success', 'Login access check completed. Password reset emails sent to members who need them.');
     })->name('members.ensure-login-access');
+    Route::post('members/ensure-subscription-users', function () {
+        \Artisan::call('members:ensure-subscription-users');
+        return back()->with('success', 'Subscription users check completed. All subscription holders now have proper user accounts.');
+    })->name('members.ensure-subscription-users');
     Route::post('members/verify-accounts', function () {
         \Artisan::call('members:verify-accounts');
         return back()->with('success', 'Membership accounts verification completed. All membership accounts are properly configured.');
