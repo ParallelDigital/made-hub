@@ -143,22 +143,50 @@ class StripeWebhookController extends Controller
         if (!$customerId) return;
 
         $user = User::where('stripe_customer_id', $customerId)->first();
-        if (!$user) return;
+        if (!$user) {
+            // Log this case - we have an invoice for a customer that doesn't exist in our system
+            Log::warning('Invoice payment succeeded for unknown customer', ['customer_id' => $customerId]);
+            return;
+        }
 
-        // Keep membership active if recurring invoice succeeded
-        $membership = Membership::firstOrCreate(
-            ['name' => 'MEMBERSHIP'],
-            [
-                'description' => 'Monthly membership with 5 class credits per month',
-                'price' => 30.00,
-                'duration_days' => 30,
-                'class_credits' => 5,
-                'unlimited' => false,
-                'active' => true,
-            ]
-        );
+        // Ensure the user has a membership if they have an active subscription
+        $membership = null;
+        if ($user->stripe_subscription_id && !$user->membership_id) {
+            $membership = Membership::firstOrCreate(
+                ['name' => 'MEMBERSHIP'],
+                [
+                    'description' => 'Monthly membership with 5 class credits per month',
+                    'price' => 30.00,
+                    'duration_days' => 30,
+                    'class_credits' => 5,
+                    'unlimited' => false,
+                    'active' => true,
+                ]
+            );
+            $user->membership_id = $membership->id;
+            $user->membership_start_date = $user->membership_start_date ?: now()->toDateString();
+            $user->membership_end_date = null;
+        }
+
+        // Get membership for credit calculation
+        if (!$membership) {
+            $membership = Membership::find($user->membership_id);
+        }
 
         if (!$user->hasActiveMembership()) {
+            if (!$membership) {
+                $membership = Membership::firstOrCreate(
+                    ['name' => 'MEMBERSHIP'],
+                    [
+                        'description' => 'Monthly membership with 5 class credits per month',
+                        'price' => 30.00,
+                        'duration_days' => 30,
+                        'class_credits' => 5,
+                        'unlimited' => false,
+                        'active' => true,
+                    ]
+                );
+            }
             $user->membership_id = $membership->id;
             $user->membership_start_date = $user->membership_start_date ?: now()->toDateString();
             $user->membership_end_date = null;

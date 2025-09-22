@@ -1,0 +1,1 @@
+"ID: {$user- Email: {$user- Membership: $hasMembership, Start Date: $hasStartDate, Proper Password: $hasProperPassword" . PHP_EOL

@@ -326,6 +326,15 @@
                         Ensure Member Login Access
                     </button>
                 </form>
+                <form method="POST" action="{{ route('admin.members.ensure-subscription-users') }}" class="inline-block w-full">
+                    @csrf
+                    <button type="submit" class="w-full inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-transparent hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Ensure Subscription Users
+                    </button>
+                </form>
             </div>
         </div>
     </div>
