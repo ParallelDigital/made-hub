@@ -80,6 +80,10 @@ class User extends Authenticatable
             if (empty($user->pin_code)) {
                 $user->pin_code = self::generateUniquePinCode();
             }
+            // Automatically verify email for all new users (email verification disabled)
+            if (empty($user->email_verified_at)) {
+                $user->email_verified_at = now();
+            }
         });
     }
 
