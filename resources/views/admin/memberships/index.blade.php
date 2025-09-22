@@ -46,13 +46,23 @@
     <div class="flex items-center gap-4">
         <form action="{{ route('admin.memberships.index') }}" method="GET" class="flex items-center gap-2">
             <input type="hidden" name="status" value="{{ $statusFilter }}">
-            <label for="per_page" class="text-sm text-gray-400">Per Page:</label>
-            <x-custom-select 
-                name="per_page" 
-                id="per_page"
-                :options="['20' => '20', '50' => '50', '100' => '100']"
-                :selected="$perPage"
-                autoSubmit="true" />
+            <input type="hidden" name="per_page" value="{{ $perPage }}">
+            <label for="search" class="text-sm text-gray-400">Search:</label>
+            <input type="text"
+                   name="search"
+                   id="search"
+                   value="{{ request('search') }}"
+                   placeholder="Search by name or email..."
+                   class="bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-64">
+            <button type="submit" class="bg-primary hover:bg-purple-400 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                Search
+            </button>
+            @if(request('search'))
+                <a href="{{ route('admin.memberships.index', array_merge(request()->except('search'), ['status' => $statusFilter, 'per_page' => $perPage])) }}"
+                   class="text-gray-400 hover:text-white">
+                    Clear
+                </a>
+            @endif
         </form>
         <form action="{{ route('admin.memberships.index') }}" method="GET">
             <input type="hidden" name="per_page" value="{{ $perPage }}">

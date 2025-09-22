@@ -40,6 +40,7 @@ class MembershipController extends Controller
         $monthlyRevenue = 0;
         $stripeMode = config('services.stripe.mode') ?: 'default';
         $statusFilter = $request->input('status', 'all');
+        $searchQuery = $request->input('search', '');
 
         try {
             $secret = config('services.stripe.secret');
@@ -100,6 +101,16 @@ class MembershipController extends Controller
                 if ($statusFilter !== 'all') {
                     $stripeMembers = $stripeMembers->where('status', $statusFilter);
                 }
+
+                // Apply search filter if provided
+                if (!empty($searchQuery)) {
+                    $stripeMembers = $stripeMembers->filter(function ($member) use ($searchQuery) {
+                        $name = strtolower($member['name'] ?? '');
+                        $email = strtolower($member['email'] ?? '');
+                        $search = strtolower($searchQuery);
+                        return str_contains($name, $search) || str_contains($email, $search);
+                    });
+                }
             }
         } catch (\Throwable $e) {
             $stripeError = $e->getMessage();
@@ -128,7 +139,7 @@ class MembershipController extends Controller
 
         return view('admin.memberships.index', compact(
             'users', 'stripeMembers', 'totalMembers', 'monthlyRevenue', 'activeMembersCount',
-            'stripeMode', 'stripeError', 'statusFilter', 'statusOptions', 'perPage'
+            'stripeMode', 'stripeError', 'statusFilter', 'statusOptions', 'perPage', 'searchQuery'
         ));
     }
 
@@ -221,6 +232,7 @@ class MembershipController extends Controller
     public function export(Request $request)
     {
         $statusFilter = $request->input('status', 'all');
+        $searchQuery = $request->input('search', '');
         $filename = 'memberships_export_' . now()->format('Y_m_d_His') . '.csv';
 
         $headers = [
@@ -229,7 +241,7 @@ class MembershipController extends Controller
             'Cache-Control' => 'no-store, no-cache',
         ];
 
-        $callback = function () use ($statusFilter) {
+        $callback = function () use ($statusFilter, $searchQuery) {
             $handle = fopen('php://output', 'w');
             // BOM for Excel UTF-8 compatibility
             fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
@@ -253,6 +265,19 @@ class MembershipController extends Controller
                             }
                             if ($statusFilter !== 'all' && $status !== $statusFilter) {
                                 continue;
+                            }
+
+                            // Apply search filter if provided
+                            if (!empty($searchQuery)) {
+                                $name = is_object($customer) ? ($customer->name ?? '') : '';
+                                $email = is_object($customer) ? ($customer->email ?? '') : '';
+                                $search = strtolower($searchQuery);
+                                $nameLower = strtolower($name);
+                                $emailLower = strtolower($email);
+
+                                if (!str_contains($nameLower, $search) && !str_contains($emailLower, $search)) {
+                                    continue;
+                                }
                             }
 
                             $startTs = $sub->start_date ?? $sub->current_period_start ?? null;
