@@ -25,9 +25,16 @@
             font-size: 24px;
             color: #ffffff;
         }
-        .brand-badge img {
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-container img {
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            background: #ffffff;
+            padding: 2px;
         }
         .content {
             padding: 30px;
@@ -81,7 +88,9 @@
     <div class="email-container">
         <div class="header">
             <div class="brand-badge">
-                <img src="{{ asset('made-running.webp') }}" alt="Made Running" width="80" height="53" style="max-width: 100%; height: auto; border-radius: 4px;">
+                <div class="logo-container">
+                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" style="max-width: 100%; height: auto; border-radius: 3px; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; background: #ffffff; padding: 2px;">
+                </div>
             </div>
             <h1 style="margin-top:10px;">Booking Confirmed</h1>
         </div>
