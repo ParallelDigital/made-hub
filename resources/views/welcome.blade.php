@@ -605,24 +605,7 @@
             </div>
         </div>
 
-        <!-- Membership Section -->
-        <div id="membership" class="bg-white text-black py-8 sm:py-12 lg:py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="membership-grid grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-                    <!-- Image Column -->
-                    <div class="membership-image">
-                        <img src="{{ asset('class-1.jpg') }}" alt="Group fitness class" class="rounded-lg shadow-lg w-full h-full object-cover">
-                    </div>
-                    <!-- Content Column -->
-                    <div class="membership-content text-left">
-                        <h2 class="membership-title text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight">ARE YOU READY <br>TO ELEVATE</h2>
-                        <a href="https://gym.made-reg.co.uk/purchase/package/membership" class="inline-block bg-black text-white px-10 py-4 text-sm font-bold uppercase tracking-widest rounded hover:bg-gray-800 transition-all">
-                            SIGN UP NOW
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- Schedule Section -->
         <div id="schedule" class="bg-white text-black py-6 sm:py-8">
@@ -971,6 +954,25 @@
                 <p id="feedbackMessage" class="text-gray-700"></p>
                 <div class="mt-6 text-right">
                     <button onclick="closeFeedbackModal()" class="px-4 py-2 rounded bg-primary text-black font-semibold hover:bg-opacity-90">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Membership Section -->
+        <div id="membership" class="bg-white text-black py-8 sm:py-12 lg:py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="membership-grid grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+                    <!-- Image Column -->
+                    <div class="membership-image">
+                        <img src="{{ asset('class-1.jpg') }}" alt="Group fitness class" class="rounded-lg shadow-lg w-full h-full object-cover">
+                    </div>
+                    <!-- Content Column -->
+                    <div class="membership-content text-left">
+                        <h2 class="membership-title text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight">ARE YOU READY <br>TO ELEVATE</h2>
+                        <a href="https://gym.made-reg.co.uk/purchase/package/membership" class="inline-block bg-black text-white px-10 py-4 text-sm font-bold uppercase tracking-widest rounded hover:bg-gray-800 transition-all">
+                            SIGN UP NOW
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
