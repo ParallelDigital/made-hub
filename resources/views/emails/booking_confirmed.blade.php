@@ -33,7 +33,6 @@
         .logo-container img {
             border-radius: 3px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-            background: #ffffff;
             padding: 2px;
         }
         .content {
