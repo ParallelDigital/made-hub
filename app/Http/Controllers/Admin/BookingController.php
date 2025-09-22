@@ -13,10 +13,48 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
-        $bookings = Booking::with(['user', 'fitnessClass'])
-            ->orderByDesc('booked_at')
-            ->paginate(20)
-            ->appends($request->query());
+        $search = $request->input('search', '');
+        $sortBy = $request->input('sort_by', 'booked_at');
+        $sortOrder = $request->input('sort_order', 'desc');
+
+        // Build the query with relationships
+        $query = Booking::with(['user', 'fitnessClass']);
+
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->whereHas('user', function($userQuery) use ($search) {
+                    $userQuery->where('name', 'like', '%' . $search . '%')
+                             ->orWhere('email', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('fitnessClass', function($classQuery) use ($search) {
+                    $classQuery->where('name', 'like', '%' . $search . '%');
+                });
+            });
+        }
+
+        // Apply sorting
+        switch ($sortBy) {
+            case 'user_name':
+                $query->join('users', 'bookings.user_id', '=', 'users.id')
+                      ->select('bookings.*')
+                      ->orderBy('users.name', $sortOrder);
+                break;
+            case 'class_name':
+                $query->join('fitness_classes', 'bookings.fitness_class_id', '=', 'fitness_classes.id')
+                      ->select('bookings.*')
+                      ->orderBy('fitness_classes.name', $sortOrder);
+                break;
+            case 'status':
+                $query->orderBy('status', $sortOrder);
+                break;
+            case 'booked_at':
+            default:
+                $query->orderBy('booked_at', $sortOrder === 'asc' ? 'asc' : 'desc');
+                break;
+        }
+
+        $bookings = $query->paginate(20)->appends($request->query());
 
         return view('admin.bookings.index', compact('bookings'));
     }
