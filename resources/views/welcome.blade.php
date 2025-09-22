@@ -300,6 +300,11 @@
                 font-weight: 900 !important;
             }
 
+            h2 {
+                font-family: sans-serif !important;
+                font-weight: 900 !important;
+            }
+
             /* Ribbon for members-only classes */
             .class-card { position: relative; }
             .ribbon-members {
