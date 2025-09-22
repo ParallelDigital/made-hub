@@ -527,7 +527,7 @@
                 </div>
                 <p class="text-gray-700 mb-4">This class is for members only. Become a member to attend this class and others for free.</p>
                 <div class="grid grid-cols-1 gap-3">
-                    <a href="{{ route('purchase.package.checkout', ['type' => 'membership']) }}" class="w-full px-4 py-3 rounded bg-primary text-black font-semibold hover:bg-opacity-90 text-center">Become a Member</a>
+                    <a href="{{ route('purchase.package.checkout', ['type' => 'membership']) }}" class="w-full px-4 py-3 rounded bg-primary text-black font-semibold hover:bg-opacity-90 text-center">Members Only</a>
                     <button onclick="closeMembersOnlyModal()" class="w-full px-4 py-2 rounded text-gray-700 hover:bg-gray-50 border border-gray-300">Close</button>
                 </div>
             </div>
