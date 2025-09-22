@@ -353,6 +353,25 @@
                         Verify Membership Accounts
                     </button>
                 </form>
+                <form method="POST" action="{{ route('admin.members.create-account') }}" class="inline-block w-full space-y-2">
+                    @csrf
+                    <div class="flex space-x-2">
+                        <input type="email" name="email" placeholder="Email address" required 
+                               class="flex-1 px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <input type="text" name="name" placeholder="Full name (optional)" 
+                               class="flex-1 px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="send_reset" checked class="mr-2">
+                            <span class="text-sm text-gray-300">Send password reset</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-transparent hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                        Create Member Account
+                    </button>
+                </form>
             </div>
         </div>
     </div>

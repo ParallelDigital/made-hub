@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\StripeWebhookController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
@@ -225,6 +226,22 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
         \Artisan::call('members:verify-accounts');
         return back()->with('success', 'Membership accounts verification completed. All membership accounts are properly configured.');
     })->name('members.verify-accounts');
+    Route::post('members/create-account', function (Request $request) {
+        $email = $request->input('email');
+        $name = $request->input('name', 'Member');
+        $sendReset = $request->has('send_reset');
+        
+        $command = "members:create-account {$email}";
+        if ($name && $name !== 'Member') {
+            $command .= " --name=\"{$name}\"";
+        }
+        if ($sendReset) {
+            $command .= " --send-reset";
+        }
+        
+        \Artisan::call($command);
+        return back()->with('success', "Member account created for {$email}.");
+    })->name('members.create-account');
 });
 
 // Instructor Routes
