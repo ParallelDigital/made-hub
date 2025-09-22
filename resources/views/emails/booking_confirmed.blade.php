@@ -81,7 +81,7 @@
     <div class="email-container">
         <div class="header">
             <div class="brand-badge">
-                <img src="{{ asset('made-club.jpg') }}" alt="Made Running" width="80" height="53" style="max-width: 100%; height: auto; border-radius: 4px;">
+                <img src="{{ asset('made-running.webp') }}" alt="Made Running" width="80" height="53" style="max-width: 100%; height: auto; border-radius: 4px;">
             </div>
             <h1 style="margin-top:10px;">Booking Confirmed</h1>
         </div>
