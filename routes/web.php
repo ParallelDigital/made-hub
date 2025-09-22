@@ -21,6 +21,19 @@ Route::get('/test-email-send', function () {
         if (!$booking) {
             return 'No bookings found in the database';
         }
+        try {
+            $secret = config('services.stripe.secret');
+            // Temporarily use live key if in test mode but live subscriptions exist
+            if (config('services.stripe.mode') === 'test' && env('STRIPE_SECRET_LIVE')) {
+                $secret = env('STRIPE_SECRET_LIVE');
+                \Log::info('Temporarily using LIVE Stripe key for manual sync');
+            }
+            if (!$secret) {
+                return 'Stripe secret key is not set';
+            }
+        } catch (\Exception $e) {
+            return 'An error occurred while trying to get the Stripe secret key';
+        }
         $user = $booking->user;
         if (!$user) {
             return 'The selected booking has no associated user';
@@ -234,6 +247,95 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
         \Artisan::call($command);
         return back()->with('success', "Member account created for {$email}.");
     })->name('members.create-account');
+    Route::post('members/sync-stripe-members', function () {
+        try {
+            $secret = config('services.stripe.secret');
+            // Temporarily use live key if in test mode but live subscriptions exist
+            if (config('services.stripe.mode') === 'test' && env('STRIPE_SECRET_LIVE')) {
+                $secret = env('STRIPE_SECRET_LIVE');
+                \Log::info('Temporarily using LIVE Stripe key for manual sync');
+            }
+            if (!$secret) {
+                return back()->with('error', 'Stripe secret key not configured');
+            }
+
+            $stripe = new \Stripe\StripeClient($secret);
+            $allSubs = collect();
+            $params = ['limit' => 100, 'expand' => ['data.customer']];
+            do {
+                $resp = $stripe->subscriptions->all($params);
+                $data = collect($resp->data ?? []);
+                $allSubs = $allSubs->merge($data);
+                if (($resp->has_more ?? false) && $data->isNotEmpty()) {
+                    $params['starting_after'] = $data->last()->id;
+                } else {
+                    break;
+                }
+            } while (true);
+
+            $created = 0;
+            $updated = 0;
+
+            foreach ($allSubs as $sub) {
+                $customer = $sub->customer;
+                if (!is_object($customer) || empty($customer->email)) {
+                    continue;
+                }
+
+                $email = $customer->email;
+                $name = is_object($customer) ? ($customer->name ?? 'Member') : 'Member';
+                $status = $sub->status;
+                if ($status === 'past_due') {
+                    $status = 'inactive';
+                }
+
+                $existingUser = \App\Models\User::where('email', $email)->first();
+                
+                if (!$existingUser) {
+                    \App\Models\User::create([
+                        'name' => $name,
+                        'email' => $email,
+                        'password' => bcrypt('temporary_password_' . time() . rand(1000, 9999)),
+                        'role' => 'member',
+                        'stripe_subscription_id' => $sub->id,
+                        'subscription_status' => $status,
+                        'email_verified_at' => now(),
+                    ]);
+                    
+                    try {
+                        \Illuminate\Support\Facades\Password::sendResetLink(['email' => $email]);
+                    } catch (\Exception $e) {
+                        \Log::warning("Failed to send password reset email to {$email}: " . $e->getMessage());
+                    }
+                    
+                    $created++;
+                } else {
+                    $updatedData = false;
+                    if (empty($existingUser->stripe_subscription_id)) {
+                        $existingUser->stripe_subscription_id = $sub->id;
+                        $updatedData = true;
+                    }
+                    if (empty($existingUser->subscription_status) || $existingUser->subscription_status !== $status) {
+                        $existingUser->subscription_status = $status;
+                        $updatedData = true;
+                    }
+                    if (!$existingUser->email_verified_at) {
+                        $existingUser->email_verified_at = now();
+                        $updatedData = true;
+                    }
+                    
+                    if ($updatedData) {
+                        $existingUser->save();
+                        $updated++;
+                    }
+                }
+            }
+
+            return back()->with('success', "Stripe members sync completed! Created: {$created}, Updated: {$updated}");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Sync failed: ' . $e->getMessage());
+        }
+    })->name('members.sync-stripe-members');
 });
 
 // Instructor Routes

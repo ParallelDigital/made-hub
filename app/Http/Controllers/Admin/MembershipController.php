@@ -44,6 +44,11 @@ class MembershipController extends Controller
 
         try {
             $secret = config('services.stripe.secret');
+            // Temporarily use live key if in test mode but live subscriptions exist
+            if (config('services.stripe.mode') === 'test' && env('STRIPE_SECRET_LIVE')) {
+                $secret = env('STRIPE_SECRET_LIVE');
+                \Log::info('Temporarily using LIVE Stripe key for membership sync');
+            }
             if ($secret) {
                 $stripe = new \Stripe\StripeClient($secret);
 
@@ -89,8 +94,10 @@ class MembershipController extends Controller
                 });
 
                 // Ensure all stripeMembers have user accounts so they can log in
+                \Log::info("Checking " . $stripeMembers->count() . " stripeMembers for user accounts");
                 foreach ($stripeMembers as $member) {
                     if (!empty($member['email']) && $member['email'] !== '—') {
+                        \Log::info("Processing stripeMember: {$member['email']}");                        
                         $existingUser = User::where('email', $member['email'])->first();
                         
                         if (!$existingUser) {
@@ -304,6 +311,11 @@ class MembershipController extends Controller
 
             try {
                 $secret = config('services.stripe.secret');
+                // Temporarily use live key if in test mode but live subscriptions exist
+                if (config('services.stripe.mode') === 'test' && env('STRIPE_SECRET_LIVE')) {
+                    $secret = env('STRIPE_SECRET_LIVE');
+                    \Log::info('Temporarily using LIVE Stripe key for export');
+                }
                 if ($secret) {
                     $stripe = new \Stripe\StripeClient($secret);
                     $params = ['limit' => 100, 'expand' => ['data.customer']];
