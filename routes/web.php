@@ -221,6 +221,10 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
         \Artisan::call('members:sync-stripe-subscriptions --create-missing');
         return back()->with('success', 'Stripe subscription sync completed. All Stripe subscribers now have local user accounts.');
     })->name('members.sync-stripe-subscriptions');
+    Route::post('members/verify-accounts', function () {
+        \Artisan::call('members:verify-accounts');
+        return back()->with('success', 'Membership accounts verification completed. All membership accounts are properly configured.');
+    })->name('members.verify-accounts');
 });
 
 // Instructor Routes

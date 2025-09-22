@@ -344,6 +344,15 @@
                         Sync Stripe Subscriptions
                     </button>
                 </form>
+                <form method="POST" action="{{ route('admin.members.verify-accounts') }}" class="inline-block w-full">
+                    @csrf
+                    <button type="submit" class="w-full inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-transparent hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Verify Membership Accounts
+                    </button>
+                </form>
             </div>
         </div>
     </div>

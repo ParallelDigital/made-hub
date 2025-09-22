@@ -22,6 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // Sync Stripe subscriptions with local accounts - run weekly
         $schedule->command('members:sync-stripe-subscriptions --create-missing')->weeklyOn(1, '03:00'); // Monday at 3 AM
+        
+        // Verify all memberships have proper accounts - run daily
+        $schedule->command('members:verify-accounts')->daily('04:00');
     })
     ->withMiddleware(function (Middleware $middleware) {
         // register global/route middleware here if you need
