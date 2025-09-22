@@ -79,8 +79,7 @@
     <div class="email-container">
         <div class="header">
             <div class="brand-badge">
-                <img src="{{ asset('made-running.webp') }}" alt="Made Running" width="36" height="36" style="border-radius: 6px;">
-                <span class="brand-title">MADE RUNNING</span>
+                <img src="{{ asset('made-running.webp') }}" alt="Made Running" width="150" height="100" >
             </div>
             <h1 style="margin-top:10px;">Booking Confirmed</h1>
         </div>
