@@ -80,6 +80,7 @@
                 font-size: 1.5rem;
                 font-weight: 700;
                 color: #374151;
+                text-transform: uppercase;
             }
             
             .week-day-btn.selected .day-name {
