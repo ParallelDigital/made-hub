@@ -95,14 +95,6 @@
                         Memberships
                     </a>
 
-                    <a href="{{ route('admin.members.index') }}"
-                       class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.members.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M15 11a3 3 0 10-6 0 3 3 0 006 0z"></path>
-                        </svg>
-                        Members
-                    </a>
-
                     <a href="{{ route('admin.coupons.index') }}"
                        class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 {{ request()->routeIs('admin.coupons.*') ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
