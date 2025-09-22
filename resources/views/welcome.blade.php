@@ -746,7 +746,7 @@
                                                 @if(auth()->check() && auth()->user()->hasActiveMembership())
                                                     <button onclick="openBookingModal({{ $class->id }}, 0)" class="reserve-button">Book (Members)</button>
                                                 @elseif(auth()->check())
-                                                    <button onclick="openBookingModal({{ $class->id }}, 0)" class="reserve-button">Become Member</button>
+                                                    <button onclick="openBookingModal({{ $class->id }}, 0)" class="reserve-button">Members Only</button>
                                                 @else
                                                     <button onclick="openBookingModal({{ $class->id }}, 0)" class="reserve-button">Members Only</button>
                                                 @endif
