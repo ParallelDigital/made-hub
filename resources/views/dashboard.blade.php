@@ -351,40 +351,52 @@
             .then(r=>r.json())
             .then(data=>{
                 if(data.success){
-                    alert(data.message || 'Booked with credits!');
+                    alert(data.message || 'Booked with credits!', 'success', 'Success');
                     fetchClasses(dateInput.value);
                 } else {
-                    alert(data.message || 'Booking failed.');
+                    alert(data.message || 'Booking failed.', 'error', 'Error');
                 }
             })
-            .catch(()=> alert('Network error. Please try again.'));
+            .catch(() => alert('Network error. Please try again.', 'error', 'Error'));
         });
 
-        // Cancel booking function
+        // Cancel booking function with enhanced modal
         window.cancelBooking = function(bookingId, className) {
-            if (!confirm(`Are you sure you want to cancel your booking for "${className}"? You can only cancel 2 classes per quarter.`)) {
-                return;
-            }
-
-            fetch(`{{ url('/cancel-booking') }}/${bookingId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
+            showConfirmModal(
+                `Are you sure you want to cancel your booking for "${className}"?\n\nYou can only cancel 2 classes per quarter. This action cannot be undone.`,
+                function() {
+                    // User confirmed - proceed with cancellation
+                    fetch(`{{ url('/cancel-booking') }}/${bookingId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message || 'Booking cancelled successfully!', 'success', 'Success');
+                            // Reload the page to refresh the upcoming bookings list
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            alert(data.message || 'Cancellation failed.', 'error', 'Error');
+                        }
+                    })
+                    .catch(() => alert('Network error. Please try again.', 'error', 'Error'));
+                },
+                function() {
+                    // User cancelled - do nothing
+                },
+                {
+                    title: 'Cancel Booking',
+                    yesText: 'Yes, Cancel',
+                    noText: 'Keep Booking',
+                    danger: true,
+                    icon: 'warning'
                 }
-            })
-            .then(r=>r.json())
-            .then(data=>{
-                if(data.success){
-                    alert(data.message || 'Booking cancelled successfully!');
-                    // Reload the page to refresh the upcoming bookings list
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Cancellation failed.');
-                }
-            })
-            .catch(()=> alert('Network error. Please try again.'));
+            );
         };
 
         // Add scroll event listener for indicators
