@@ -295,7 +295,7 @@
             }
 
             /* H1 styling */
-            h1.hero-title {
+            h1.hero-title span {
                 font-family: sans-serif !important;
                 font-weight: 900 !important;
             }
