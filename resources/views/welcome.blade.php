@@ -1041,43 +1041,7 @@
         </div>
 
         <!-- Scrolling Images Section -->
-        <div class="scrolling-images-section bg-white py-8 sm:py-12">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <!-- Mobile: Single image scrolling -->
-                <div class="block md:hidden">
-                    <div class="scrolling-container-mobile overflow-hidden">
-                        <div class="scrolling-track-mobile flex animate-scroll-left">
-                            <img src="{{ asset('class-1.jpg') }}" alt="Fitness class" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
-                            <img src="{{ asset('class-2.jpg') }}" alt="Group workout" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
-                            <img src="{{ asset('class-3.jpg') }}" alt="Training session" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
-                            <img src="{{ asset('class-4.jpg') }}" alt="Fitness group" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
-                            <img src="{{ asset('class-1.jpg') }}" alt="Fitness class" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Desktop: Side-by-side scrolling -->
-                <div class="hidden md:grid md:grid-cols-2 gap-8">
-                    <!-- Left side scrolling -->
-                    <div class="scrolling-container-left overflow-hidden">
-                        <div class="scrolling-track-left flex animate-scroll-left">
-                            <img src="{{ asset('class-1.jpg') }}" alt="Fitness class" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
-                            <img src="{{ asset('class-3.jpg') }}" alt="Training session" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
-                            <img src="{{ asset('class-1.jpg') }}" alt="Fitness class" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
-                        </div>
-                    </div>
-
-                    <!-- Right side scrolling -->
-                    <div class="scrolling-container-right overflow-hidden">
-                        <div class="scrolling-track-right flex animate-scroll-right">
-                            <img src="{{ asset('class-2.jpg') }}" alt="Group workout" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
-                            <img src="{{ asset('class-4.jpg') }}" alt="Fitness group" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
-                            <img src="{{ asset('class-2.jpg') }}" alt="Group workout" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- Membership Section -->
         <div id="membership" class="bg-white text-black py-8 sm:py-12 lg:py-16">
