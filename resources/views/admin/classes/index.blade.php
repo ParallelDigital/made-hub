@@ -65,58 +65,73 @@
 <div class="bg-gray-800 shadow rounded-lg border border-gray-700">
     <div class="px-4 py-5 sm:p-6">
         @if($classes->count() > 0)
+            <div class="mb-3 flex justify-end gap-2">
+                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded text-sm" onclick="toggleAllGroups(true)">Expand all</button>
+                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded text-sm" onclick="toggleAllGroups(false)">Collapse all</button>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-700">
                     <thead class="bg-gray-700">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class Group</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Instructor</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Recurrence</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total Instances</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-gray-800 divide-y divide-gray-700">
-                        @foreach($classes as $class)
-                        <tr class="hover:bg-gray-700 cursor-pointer transition-colors" onclick="window.location='{{ route('admin.classes.show', $class) }}'">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-white">{{ $class->name }}</div>
-                               
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                {{ $class->instructor->name ?? 'No Instructor' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                {{ $class->class_date ? $class->class_date->format('M j, Y') : 'No Date' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                {{ $class->start_time }} - {{ $class->end_time }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                @if($class->recurring_frequency !== 'none')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {{ ucfirst($class->recurring_frequency) }}
-                                    </span>
-                                    @if($class->isChildClass())
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-1">
-                                            Instance
-                                        </span>
-                                    @endif
-                                @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        One-time
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" onclick="event.stopPropagation()">
-                                <div class="flex space-x-2">
-                                    <a href="{{ route('admin.classes.show', $class) }}" class="text-primary hover:text-purple-400">View</a>
-                                    <a href="{{ route('admin.classes.edit', $class) }}" class="text-blue-400 hover:text-blue-300">Edit</a>
-                                    <button onclick="showDeleteOptionsModal({{ $class->id }}, '{{ $class->name }}', {{ $class->isRecurring() && !$class->isChildClass() ? 'true' : 'false' }})" class="text-red-400 hover:text-red-300">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
+                        @foreach($classes as $group)
+                            @php
+                                $groupId = 'group-' . str_replace(' ', '-', strtolower($group['name']));
+                                $isFirst = $loop->first; // Default expand first group
+                            @endphp
+                            <tr class="bg-gray-900 hover:bg-gray-800 cursor-pointer" data-group-toggle="{{ $groupId }}" data-expanded="{{ $isFirst ? 'true' : 'false' }}" onclick="toggleGroup('{{ $groupId }}')">
+                                <td colspan="4" class="px-6 py-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-sm font-semibold text-white">
+                                            {{ $group['name'] }}
+                                            <span class="ml-2 text-gray-400 font-normal">({{ $group['total_instances'] }} {{ $group['total_instances'] === 1 ? 'instance' : 'instances' }})</span>
+                                        </div>
+                                        <svg class="w-5 h-5 text-gray-300 transition-transform duration-200"
+                                             style="transform: rotate({{ $isFirst ? '90' : '0' }}deg)"
+                                             data-chevron-for="{{ $groupId }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </div>
+                                </td>
+                            </tr>
+                            @foreach($group['classes'] as $class)
+                                <tr data-group-row="{{ $groupId }}" class="{{ $isFirst ? '' : 'hidden' }}">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 bg-gray-700 rounded-full flex items-center justify-center">
+                                                <span class="text-gray-300">{{ strtoupper(substr($class->name, 0, 2)) }}</span>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-white">{{ $class->name }}</div>
+                                                @if($class->classType)
+                                                    <div class="text-sm text-gray-400">{{ $class->classType->name }}</div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                        {{ $class->instructor->name ?? 'No Instructor' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                        <div>{{ $class->class_date ? $class->class_date->format('D, M j, Y') : 'No Date' }}</div>
+                                        <div class="text-gray-400">{{ $class->start_time }} - {{ $class->end_time }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <a href="{{ route('admin.classes.show', $class) }}" class="text-primary hover:text-purple-400">View</a>
+                                            <a href="{{ route('admin.classes.edit', $class) }}" class="text-blue-400 hover:text-blue-300">Edit</a>
+                                            <button onclick="showDeleteOptionsModal({{ $class->id }}, '{{ $class->name }}', {{ $class->isRecurring() && !$class->isChildClass() ? 'true' : 'false' }})" class="text-red-400 hover:text-red-300">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
                         @endforeach
                     </tbody>
                 </table>
@@ -190,6 +205,29 @@
 </div>
 
 <script>
+function toggleGroup(groupId) {
+    const rows = document.querySelectorAll(`[data-group-row="${groupId}"]`);
+    const header = document.querySelector(`[data-group-toggle="${groupId}"]`);
+    const chevron = document.querySelector(`[data-chevron-for="${groupId}"]`);
+    const expanded = header && header.getAttribute('data-expanded') === 'true';
+    const nextState = !expanded;
+    rows.forEach(r => r.classList.toggle('hidden', !nextState));
+    if (header) header.setAttribute('data-expanded', nextState ? 'true' : 'false');
+    if (chevron) chevron.style.transform = nextState ? 'rotate(90deg)' : 'rotate(0)';
+}
+
+function toggleAllGroups(expand) {
+    const headers = document.querySelectorAll('[data-group-toggle]');
+    headers.forEach(h => {
+        const id = h.getAttribute('data-group-toggle');
+        const rows = document.querySelectorAll(`[data-group-row="${id}"]`);
+        const chevron = document.querySelector(`[data-chevron-for="${id}"]`);
+        rows.forEach(r => r.classList.toggle('hidden', !expand));
+        h.setAttribute('data-expanded', expand ? 'true' : 'false');
+        if (chevron) chevron.style.transform = expand ? 'rotate(90deg)' : 'rotate(0)';
+    });
+}
+
 function showDeleteOptionsModal(classId, className, isRecurring) {
     document.getElementById('deleteOptionsModalTitle').textContent = `Delete "${className}"`;
     document.getElementById('deleteSingleForm').action = `/admin/classes/${classId}`;

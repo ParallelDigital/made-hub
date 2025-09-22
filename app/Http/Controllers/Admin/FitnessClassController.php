@@ -33,9 +33,41 @@ class FitnessClassController extends Controller
             $classes = $query->orderBy('class_date', 'desc')->paginate(15)->appends($request->query());
             $view = 'admin.classes.list';
         } 
-        // For calendar view (default)
+        // For calendar view (default) - group classes by name
         else {
-            $classes = $query->orderBy('class_date', 'asc')->paginate(15);
+            // Get all classes without pagination first
+            $allClasses = $query->orderBy('name')->orderBy('class_date', 'asc')->get();
+            
+            // Group classes by name
+            $groupedClasses = [];
+            foreach ($allClasses as $class) {
+                $className = $class->name;
+                if (!isset($groupedClasses[$className])) {
+                    $groupedClasses[$className] = [
+                        'name' => $className,
+                        'classes' => [],
+                        'instructor' => $class->instructor->name ?? 'No Instructor',
+                        'total_instances' => 0
+                    ];
+                }
+                $groupedClasses[$className]['classes'][] = $class;
+                $groupedClasses[$className]['total_instances']++;
+            }
+            
+            // Convert to collection for pagination
+            $classes = collect(array_values($groupedClasses));
+            $perPage = 15;
+            $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage('page');
+            $currentPageItems = $classes->slice(($currentPage - 1) * $perPage, $perPage)->all();
+            
+            $classes = new \Illuminate\Pagination\LengthAwarePaginator(
+                $currentPageItems,
+                $classes->count(),
+                $perPage,
+                $currentPage,
+                ['path' => request()->url(), 'pageName' => 'page']
+            );
+            
             $view = 'admin.classes.index';
         }
         
