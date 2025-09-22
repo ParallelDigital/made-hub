@@ -82,9 +82,7 @@
                         <tr class="hover:bg-gray-700 cursor-pointer transition-colors" onclick="window.location='{{ route('admin.classes.show', $class) }}'">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-white">{{ $class->name }}</div>
-                                @if($class->description)
-                                    <div class="text-sm text-gray-400">{{ Str::limit($class->description, 50) }}</div>
-                                @endif
+                               
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                 {{ $class->instructor->name ?? 'No Instructor' }}
