@@ -629,7 +629,7 @@
 
         <!-- Schedule Section -->
         <div id="schedule" class="bg-white text-black py-6 sm:py-8">
-            <div class="schedule-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style="opacity: 0; transition: opacity 0.3s ease-in-out;">
+            <div class="schedule-container max-w-7xl mx-auto" style="opacity: 0; transition: opacity 0.3s ease-in-out;">
                 <!-- Week Navigation -->
                 <div class="week-nav-container">
                     <div class="flex items-center justify-between">
