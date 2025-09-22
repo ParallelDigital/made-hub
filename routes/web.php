@@ -97,6 +97,7 @@ Route::post('/ajax/login', function (\Illuminate\Http\Request $request) {
 Route::post('/book-with-credits/{classId}', [App\Http\Controllers\BookingController::class, 'bookWithCredits'])->name('booking.credits');
 Route::get('/checkout/{class_id}', [App\Http\Controllers\PurchaseController::class, 'showCheckoutForm'])->name('checkout.show');
 Route::post('/checkout/{class_id}', [App\Http\Controllers\PurchaseController::class, 'processCheckout'])->name('booking.process-checkout');
+Route::post('/cancel-booking/{bookingId}', [App\Http\Controllers\BookingController::class, 'cancel'])->name('booking.cancel');
 Route::post('/apply-coupon', [App\Http\Controllers\PurchaseController::class, 'applyCoupon'])->name('booking.apply-coupon');
 Route::get('/booking/success', [App\Http\Controllers\BookingController::class, 'success'])->name('booking.success');
 Route::get('/booking/confirmation/{classId}', [App\Http\Controllers\BookingController::class, 'confirmation'])->name('booking.confirmation');
@@ -134,11 +135,26 @@ Route::get('/dashboard', function () {
         ->whereHas('fitnessClass', function ($query) {
             $query->where('class_date', '>=', now()->toDateString());
         })
+        ->where('status', 'confirmed')
         ->with('fitnessClass.instructor')
         ->get()
         ->sortBy(function($booking) {
             return $booking->fitnessClass->class_date . ' ' . $booking->fitnessClass->start_time;
         });
+
+    // Calculate current quarter cancellation info
+    $now = now();
+    $quarter = ceil($now->month / 3);
+    $year = $now->year;
+    $quarterStart = \Carbon\Carbon::create($year, (($quarter - 1) * 3) + 1, 1);
+    $quarterEnd = \Carbon\Carbon::create($year, $quarter * 3, 1)->endOfMonth();
+
+    $cancellationsThisQuarter = \App\Models\Booking::where('user_id', $user->id)
+        ->where('status', 'cancelled')
+        ->whereBetween('cancelled_at', [$quarterStart, $quarterEnd])
+        ->count();
+
+    $remainingCancellations = max(0, 2 - $cancellationsThisQuarter);
 
     // Signed URL for user's universal check-in (based on their personal QR code)
     $userQrUrl = \Illuminate\Support\Facades\URL::signedRoute('user.checkin', [
@@ -156,6 +172,9 @@ Route::get('/dashboard', function () {
         'upcomingBookings' => $upcomingBookings,
         'userQrUrl' => $userQrUrl,
         'qrSvg' => $qrSvg,
+        'remainingCancellations' => $remainingCancellations,
+        'quarter' => $quarter,
+        'year' => $year,
     ]);
 })->middleware(['auth'])->name('dashboard');
 

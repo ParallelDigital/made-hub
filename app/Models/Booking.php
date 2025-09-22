@@ -16,12 +16,14 @@ class Booking extends Model
         'stripe_session_id',
         'attended',
         'checked_in_at',
-        'checked_in_by'
+        'checked_in_by',
+        'cancelled_at'
     ];
 
     protected $casts = [
         'booked_at' => 'datetime',
         'checked_in_at' => 'datetime',
+        'cancelled_at' => 'datetime',
         'attended' => 'boolean',
     ];
 

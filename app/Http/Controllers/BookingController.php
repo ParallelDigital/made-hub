@@ -387,6 +387,77 @@ class BookingController extends Controller
     }
 
     /**
+     * Cancel a booking with quarterly limits
+     */
+    public function cancel(Request $request, $bookingId)
+    {
+        if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Please log in to cancel bookings.'], 401);
+        }
+
+        $user = Auth::user();
+        $booking = Booking::with('fitnessClass')->findOrFail($bookingId);
+
+        // Check if booking belongs to user
+        if ($booking->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'You can only cancel your own bookings.'], 403);
+        }
+
+        // Check if booking is already cancelled
+        if ($booking->status === 'cancelled') {
+            return response()->json(['success' => false, 'message' => 'This booking is already cancelled.'], 400);
+        }
+
+        // Check if class has already started
+        $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->toDateString() . ' ' . $booking->fitnessClass->start_time);
+        if ($classStart->isPast()) {
+            return response()->json(['success' => false, 'message' => 'You cannot cancel a class that has already started.'], 400);
+        }
+
+        // Check quarterly cancellation limit (2 per quarter)
+        $cancellationsThisQuarter = $this->getCancellationsThisQuarter($user->id);
+        if ($cancellationsThisQuarter >= 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have reached the maximum of 2 cancellations per quarter. You cannot cancel this booking.'
+            ], 400);
+        }
+
+        // Cancel the booking
+        $booking->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now()
+        ]);
+
+        // TODO: Handle refunds if applicable (for paid bookings)
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Booking cancelled successfully. You have ' . (1 - $cancellationsThisQuarter) . ' cancellation(s) remaining this quarter.',
+            'remaining_cancellations' => 1 - $cancellationsThisQuarter
+        ]);
+    }
+
+    /**
+     * Get the number of cancellations for the current quarter
+     */
+    private function getCancellationsThisQuarter($userId)
+    {
+        $now = now();
+        $quarter = ceil($now->month / 3);
+        $year = $now->year;
+
+        // Calculate quarter start and end dates
+        $quarterStart = \Carbon\Carbon::create($year, (($quarter - 1) * 3) + 1, 1)->startOfDay();
+        $quarterEnd = \Carbon\Carbon::create($year, $quarter * 3, 1)->endOfMonth()->endOfDay();
+
+        return Booking::where('user_id', $userId)
+            ->where('status', 'cancelled')
+            ->whereBetween('cancelled_at', [$quarterStart, $quarterEnd])
+            ->count();
+    }
+
+    /**
      * Resolve Stripe secret from config with env fallback.
      */
     private function stripeSecret(): string

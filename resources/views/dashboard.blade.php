@@ -117,6 +117,12 @@
                     <p class="break-words"><span class="text-gray-400">Credits Expire:</span> {{ \Carbon\Carbon::parse($creditsExpiry)->format('D, M j, Y') }}</p>
                 @endif
             @endif
+            <p class="break-words">
+                <span class="text-gray-400">Cancellations Q{{$quarter}} {{$year}}:</span>
+                <span class="{{ $remainingCancellations > 0 ? 'text-green-400' : 'text-red-400' }}">
+                    {{ 2 - $remainingCancellations }}/2 used ({{ $remainingCancellations }} remaining)
+                </span>
+            </p>
         </div>
         <div class="profile-actions flex flex-col sm:flex-row gap-3 mt-4">
             <a href="{{ route('profile.edit') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 transition text-sm sm:text-base min-h-[44px]">Edit Profile</a>
@@ -143,7 +149,18 @@
                             <p class="text-gray-400 text-xs sm:text-sm break-words">Instructor: {{ $booking->fitnessClass->instructor->name ?? 'N/A' }}</p>
                         </div>
                         <div class="upcoming-class-actions shrink-0 w-full sm:w-auto">
-                            <a href="{{ route('booking.confirmation', ['classId' => $booking->fitness_class_id]) }}" class="text-primary hover:underline text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center">Details</a>
+                            <a href="{{ route('booking.confirmation', ['classId' => $booking->fitness_class_id]) }}" class="text-primary hover:underline text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center mr-2">Details</a>
+                            @php
+                                $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->toDateString() . ' ' . $booking->fitnessClass->start_time);
+                                $canCancel = $booking->status === 'confirmed' && !$classStart->isPast();
+                            @endphp
+                            @if($canCancel)
+                                @if($remainingCancellations > 0)
+                                    <button onclick="cancelBooking({{ $booking->id }}, '{{ $booking->fitnessClass->name }}')" class="text-red-500 hover:text-red-700 hover:underline text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center">Cancel</button>
+                                @else
+                                    <span class="text-gray-500 text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center" title="No cancellations remaining this quarter">Cancel Limit Reached</span>
+                                @endif
+                            @endif
                         </div>
                     </li>
                 @endforeach
@@ -342,6 +359,33 @@
             })
             .catch(()=> alert('Network error. Please try again.'));
         });
+
+        // Cancel booking function
+        window.cancelBooking = function(bookingId, className) {
+            if (!confirm(`Are you sure you want to cancel your booking for "${className}"? You can only cancel 2 classes per quarter.`)) {
+                return;
+            }
+
+            fetch(`{{ url('/cancel-booking') }}/${bookingId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(r=>r.json())
+            .then(data=>{
+                if(data.success){
+                    alert(data.message || 'Booking cancelled successfully!');
+                    // Reload the page to refresh the upcoming bookings list
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Cancellation failed.');
+                }
+            })
+            .catch(()=> alert('Network error. Please try again.'));
+        };
 
         // Add scroll event listener for indicators
         if (weekDaysContainer) {
