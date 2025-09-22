@@ -373,6 +373,7 @@
                     font-weight: 500;
                     color: #6b7280;
                     margin-bottom: 0.25rem;
+                    text-transform: uppercase;
                 }
                 
                 .week-day-btn .day-name {
