@@ -294,6 +294,12 @@
                 color: #9ca3af;
             }
 
+            /* H1 styling */
+            h1.hero-title {
+                font-family: sans-serif !important;
+                font-weight: 900 !important;
+            }
+
             /* Ribbon for members-only classes */
             .class-card { position: relative; }
             .ribbon-members {
