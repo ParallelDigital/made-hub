@@ -502,6 +502,88 @@
                 .instructor-section { grid-area: instructor; }
                 .class-info-section { grid-area: info; }
             }
+
+            /* Scrolling Images Animations */
+            .scrolling-container-mobile {
+                width: 100%;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .scrolling-track-mobile {
+                display: flex;
+                width: calc(100% * 5); /* 5 images for smooth looping */
+                animation: scroll-left 30s linear infinite;
+                gap: 1rem;
+            }
+
+            .scrolling-container-left {
+                width: 100%;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .scrolling-track-left {
+                display: flex;
+                width: calc(100% * 3); /* 3 images for smooth looping */
+                animation: scroll-left 25s linear infinite;
+                gap: 2rem;
+            }
+
+            .scrolling-container-right {
+                width: 100%;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .scrolling-track-right {
+                display: flex;
+                width: calc(100% * 3); /* 3 images for smooth looping */
+                animation: scroll-right 25s linear infinite;
+                gap: 2rem;
+            }
+
+            @keyframes scroll-left {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(-50%);
+                }
+            }
+
+            @keyframes scroll-right {
+                0% {
+                    transform: translateX(-50%);
+                }
+                100% {
+                    transform: translateX(0);
+                }
+            }
+
+            /* Pause animation on hover */
+            .scrolling-container-mobile:hover .scrolling-track-mobile,
+            .scrolling-container-left:hover .scrolling-track-left,
+            .scrolling-container-right:hover .scrolling-track-right {
+                animation-play-state: paused;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 640px) {
+                .scrolling-track-mobile {
+                    gap: 0.5rem;
+                }
+
+                .scrolling-track-mobile img {
+                    height: 200px !important;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .scrolling-track-mobile img {
+                    height: 160px !important;
+                }
+            }
         </style>
     </head>
     <body class="bg-black text-white">
@@ -954,6 +1036,45 @@
                 <p id="feedbackMessage" class="text-gray-700"></p>
                 <div class="mt-6 text-right">
                     <button onclick="closeFeedbackModal()" class="px-4 py-2 rounded bg-primary text-black font-semibold hover:bg-opacity-90">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scrolling Images Section -->
+        <div class="scrolling-images-section bg-white py-8 sm:py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Mobile: Single image scrolling -->
+                <div class="block md:hidden">
+                    <div class="scrolling-container-mobile overflow-hidden">
+                        <div class="scrolling-track-mobile flex animate-scroll-left">
+                            <img src="{{ asset('class-1.jpg') }}" alt="Fitness class" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
+                            <img src="{{ asset('class-2.jpg') }}" alt="Group workout" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
+                            <img src="{{ asset('class-3.jpg') }}" alt="Training session" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
+                            <img src="{{ asset('class-4.jpg') }}" alt="Fitness group" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
+                            <img src="{{ asset('class-1.jpg') }}" alt="Fitness class" class="w-full h-64 object-cover rounded-lg shadow-lg flex-shrink-0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop: Side-by-side scrolling -->
+                <div class="hidden md:grid md:grid-cols-2 gap-8">
+                    <!-- Left side scrolling -->
+                    <div class="scrolling-container-left overflow-hidden">
+                        <div class="scrolling-track-left flex animate-scroll-left">
+                            <img src="{{ asset('class-1.jpg') }}" alt="Fitness class" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
+                            <img src="{{ asset('class-3.jpg') }}" alt="Training session" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
+                            <img src="{{ asset('class-1.jpg') }}" alt="Fitness class" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
+                        </div>
+                    </div>
+
+                    <!-- Right side scrolling -->
+                    <div class="scrolling-container-right overflow-hidden">
+                        <div class="scrolling-track-right flex animate-scroll-right">
+                            <img src="{{ asset('class-2.jpg') }}" alt="Group workout" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
+                            <img src="{{ asset('class-4.jpg') }}" alt="Fitness group" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
+                            <img src="{{ asset('class-2.jpg') }}" alt="Group workout" class="w-full h-80 object-cover rounded-lg shadow-lg flex-shrink-0">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
