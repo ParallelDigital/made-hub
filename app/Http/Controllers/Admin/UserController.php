@@ -129,7 +129,7 @@ class UserController extends Controller
         ]));
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User updated successfully.');
+            ->with('success', 'User created successfully.');
     }
 
     /**
