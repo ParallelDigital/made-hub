@@ -611,7 +611,7 @@
                 <div class="membership-grid grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                     <!-- Image Column -->
                     <div class="membership-image">
-                        <img src="{{ asset('made-club.jpg') }}" alt="Group fitness class" class="rounded-lg shadow-lg w-full h-full object-cover">
+                        <img src="{{ asset('class.jpg') }}" alt="Group fitness class" class="rounded-lg shadow-lg w-full h-full object-cover">
                     </div>
                     <!-- Content Column -->
                     <div class="membership-content text-left">
