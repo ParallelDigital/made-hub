@@ -7,9 +7,6 @@
 
         <title>Made Running - Premium Fitness Experience</title>
 
-        <!-- Preload ProFontWindows to minimise FOUT on homepage -->
-        <link rel="preload" href="{{ Vite::asset('resources/fonts/ProFontWindows.ttf') }}" as="font" type="font/ttf" crossorigin>
-
         <!-- Vite Assets (single source of CSS/JS to keep styles stable) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>

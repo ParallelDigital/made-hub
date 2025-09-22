@@ -14,8 +14,6 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        <!-- Preload ProFontWindows to avoid font swap during interactions -->
-        <link rel="preload" href="{{ Vite::asset('resources/fonts/ProFontWindows.ttf') }}" as="font" type="font/ttf" crossorigin>
         
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
