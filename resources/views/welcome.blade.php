@@ -599,7 +599,7 @@
                         BECOME A MEMBER
                     </a>
                     <a href="#schedule" class="w-full sm:w-auto border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded hover:bg-white hover:text-black transition-all text-center">
-                        VIEW SCHEDULE
+                        BOOK A CLASS
                     </a>
                 </div>
             </div>
