@@ -217,6 +217,10 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
         \Artisan::call('members:ensure-subscription-users');
         return back()->with('success', 'Subscription users check completed. All subscription holders now have proper user accounts.');
     })->name('members.ensure-subscription-users');
+    Route::post('members/sync-stripe-subscriptions', function () {
+        \Artisan::call('members:sync-stripe-subscriptions --create-missing');
+        return back()->with('success', 'Stripe subscription sync completed. All Stripe subscribers now have local user accounts.');
+    })->name('members.sync-stripe-subscriptions');
 });
 
 // Instructor Routes
