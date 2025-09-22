@@ -18,13 +18,9 @@
                class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
                 Edit Class
             </a>
-            <form id="delete-class-form" action="{{ route('admin.classes.destroy', $class) }}" method="POST" class="inline" onsubmit="event.preventDefault(); showConfirmModal('Are you sure you want to delete this class?', function(){ document.getElementById('delete-class-form').submit(); })">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
-                    Delete Class
-                </button>
-            </form>
+            <button type="button" onclick="showCancelModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                Cancel Class
+            </button>
         </div>
     </div>
 
@@ -160,6 +156,57 @@
     </div>
 </div>
 
+<!-- Cancel Class Modal -->
+<div id="cancelModal" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;">
+    <div class="absolute inset-0 bg-black bg-opacity-60" onclick="closeCancelModal()"></div>
+    <div class="relative bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-gray-700">
+            <h3 class="text-lg font-semibold text-white">Cancel Class</h3>
+            <button type="button" class="text-gray-400 hover:text-white" onclick="closeCancelModal()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-5">
+            <div class="mb-4">
+                <h4 class="text-white font-medium mb-2">{{ $class->name }}</h4>
+                <p class="text-gray-400 text-sm mb-3">
+                    {{ $class->class_date->format('l, F j, Y') }} at {{ $class->start_time }}
+                </p>
+            </div>
+
+            <div class="mb-4">
+                <div class="text-sm text-gray-300 mb-2">This action will:</div>
+                <ul class="text-sm text-gray-400 space-y-1">
+                    <li>• Deactivate this class</li>
+                    @if($class->isRecurring() && !$class->isChildClass())
+                        <li>• Cancel all future recurring instances</li>
+                    @endif
+                    <li>• Cancel all confirmed bookings for this class</li>
+                    <li>• Notify affected members</li>
+                </ul>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Cancellation Reason (Optional)</label>
+                <textarea id="cancel_reason" class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" rows="3" placeholder="Reason for cancellation..."></textarea>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeCancelModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                    Keep Class
+                </button>
+                <form id="cancel-class-form" action="{{ route('admin.classes.cancel', $class) }}" method="POST" class="inline">
+                    @csrf
+                    <input type="hidden" name="reason" id="cancel_reason_hidden">
+                    <button type="submit" onclick="submitCancel()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                        Cancel Class
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function openBookingsModal() {
     document.getElementById('bookingsModal').style.display = 'flex';
@@ -168,5 +215,27 @@ function openBookingsModal() {
 function closeBookingsModal() {
     document.getElementById('bookingsModal').style.display = 'none';
 }
+
+function showCancelModal() {
+    document.getElementById('cancelModal').style.display = 'flex';
+}
+
+function closeCancelModal() {
+    document.getElementById('cancelModal').style.display = 'none';
+    document.getElementById('cancel_reason').value = '';
+}
+
+function submitCancel() {
+    const reason = document.getElementById('cancel_reason').value;
+    document.getElementById('cancel_reason_hidden').value = reason;
+    document.getElementById('cancel-class-form').submit();
+}
+
+// Close modal when clicking outside
+document.getElementById('cancelModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCancelModal();
+    }
+});
 </script>
 @endsection

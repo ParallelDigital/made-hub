@@ -258,6 +258,84 @@ class FitnessClassController extends Controller
             ->route('admin.classes.index')
             ->with('success', 'Class and all recurring instances deleted successfully.');
     }
+
+    /**
+     * Cancel the specified class (deactivate it and cancel bookings).
+     */
+    public function cancel(Request $request, FitnessClass $class)
+    {
+        $request->validate([
+            'reason' => 'nullable|string|max:500'
+        ]);
+
+        $reason = $request->input('reason', '');
+        $bookingCount = 0;
+        $affectedUsers = collect();
+
+        try {
+            // Cancel any bookings for this class
+            $bookings = $class->bookings()->where('status', 'confirmed')->with('user')->get();
+            foreach ($bookings as $booking) {
+                $booking->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+                $bookingCount++;
+
+                if ($booking->user) {
+                    $affectedUsers->push($booking->user);
+                }
+            }
+
+            // Cancel child instances if this is a parent recurring class
+            if ($class->isRecurring() && !$class->isChildClass()) {
+                $childInstances = FitnessClass::where('parent_class_id', $class->id)
+                    ->where('class_date', '>=', now()->format('Y-m-d'))
+                    ->get();
+
+                foreach ($childInstances as $instance) {
+                    $instanceBookings = $instance->bookings()->where('status', 'confirmed')->with('user')->get();
+                    foreach ($instanceBookings as $booking) {
+                        $booking->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+                        $bookingCount++;
+
+                        if ($booking->user) {
+                            $affectedUsers->push($booking->user);
+                        }
+                    }
+                    $instance->update(['active' => false]);
+                }
+            }
+
+            // Deactivate the class
+            $class->update(['active' => false]);
+
+            // Send cancellation emails to affected users
+            if ($affectedUsers->count() > 0 && !empty($reason)) {
+                $this->sendCancellationEmails($class, $affectedUsers, $reason);
+            }
+
+            $message = "Class cancelled successfully.";
+            if ($bookingCount > 0) {
+                $message .= " {$bookingCount} associated bookings were also cancelled.";
+            }
+            if ($affectedUsers->count() > 0 && !empty($reason)) {
+                $message .= " Cancellation notices sent to {$affectedUsers->count()} affected members.";
+            }
+
+            return redirect()
+                ->route('admin.classes.show', $class)
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to cancel class: ' . $e->getMessage(), [
+                'class_id' => $class->id,
+                'class_name' => $class->name,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()
+                ->route('admin.classes.show', $class)
+                ->with('error', 'Failed to cancel class. Please try again or contact support.');
+        }
+    }
     
     /**
      * Get classes data for the calendar
@@ -351,6 +429,22 @@ class FitnessClassController extends Controller
 
         return redirect()->route('admin.classes.index')
             ->with('success', $message);
+    }
+
+    /**
+     * Send cancellation notification emails to affected users
+     */
+    private function sendCancellationEmails(FitnessClass $class, $affectedUsers, $reason)
+    {
+        $affectedUsers = $affectedUsers->unique('email');
+
+        foreach ($affectedUsers as $user) {
+            try {
+                \Mail::to($user->email)->send(new \App\Mail\ClassCancelled($class, $user, $reason));
+            } catch (\Exception $e) {
+                \Log::warning('Failed to send cancellation email to ' . $user->email . ': ' . $e->getMessage());
+            }
+        }
     }
 
     /**
