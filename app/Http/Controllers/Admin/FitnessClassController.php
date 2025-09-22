@@ -203,6 +203,38 @@ class FitnessClassController extends Controller
 
         $class->update($validated);
 
+        // Handle recurring instances creation/update
+        $oldRecurringFrequency = $class->getOriginal('recurring_frequency');
+        $newRecurringFrequency = $validated['recurring_frequency'];
+        $oldRecurringDays = $class->getOriginal('recurring_days');
+        $newRecurringDays = $validated['recurring_days'] ?? '';
+        $oldClassDate = $class->getOriginal('class_date');
+        $newClassDate = $validated['class_date'];
+
+        // If recurring settings changed, handle child instances
+        if ($oldRecurringFrequency !== $newRecurringFrequency || $oldRecurringDays !== $newRecurringDays || $oldClassDate !== $newClassDate) {
+            // Delete existing child instances if recurring settings were removed or changed
+            if ($oldRecurringFrequency !== 'none') {
+                FitnessClass::where('parent_class_id', $class->id)->delete();
+            }
+
+            // Create new recurring instances if now set to recurring
+            if ($newRecurringFrequency !== 'none' && !empty($validated['recurring_days']) && $validated['recurring_until']) {
+                $this->createRecurringInstances($class, $validated);
+            }
+        } elseif ($newRecurringFrequency !== 'none' && !empty($validated['recurring_days']) && $validated['recurring_until']) {
+            // Check if recurring_until date changed - if so, recreate instances
+            $oldUntilDate = $class->getOriginal('recurring_until');
+            $newUntilDate = $validated['recurring_until'];
+
+            if ($oldUntilDate !== $newUntilDate) {
+                // Delete existing child instances
+                FitnessClass::where('parent_class_id', $class->id)->delete();
+                // Create new ones with updated end date
+                $this->createRecurringInstances($class, $validated);
+            }
+        }
+
         return redirect()->route('admin.classes.index')->with('success', 'Class updated successfully.');
     }
 
@@ -211,11 +243,14 @@ class FitnessClassController extends Controller
      */
     public function destroy(FitnessClass $class)
     {
+        // Delete child instances first
+        FitnessClass::where('parent_class_id', $class->id)->delete();
+
         $class->delete();
         
         return redirect()
             ->route('admin.classes.index')
-            ->with('success', 'Class deleted successfully.');
+            ->with('success', 'Class and all recurring instances deleted successfully.');
     }
     
     /**
@@ -300,50 +335,60 @@ class FitnessClassController extends Controller
         $endDate = \Carbon\Carbon::parse($validated['recurring_until']);
         $frequency = $validated['recurring_frequency'];
         $selectedDays = explode(',', $validated['recurring_days']);
-        
-        // Map day names to Carbon day numbers
+
+        // Map day names to Carbon day numbers (0 = Sunday, 1 = Monday, etc.)
         $dayMap = [
             'monday' => 1, 'tuesday' => 2, 'wednesday' => 3, 'thursday' => 4,
             'friday' => 5, 'saturday' => 6, 'sunday' => 0
         ];
 
-        $currentDate = $startDate->copy();
         $instances = [];
+        $currentDate = $startDate->copy();
 
-        while ($currentDate->lte($endDate)) {
-            $dayName = strtolower($currentDate->format('l'));
-            
-            if (in_array($dayName, $selectedDays) && !$currentDate->eq($startDate)) {
-                $instances[] = [
-                    'name' => $parentClass->name,
-                    'description' => $parentClass->description,
-                    'class_date' => $currentDate->format('Y-m-d'),
-                    'instructor_id' => $parentClass->instructor_id,
-                    'max_spots' => $parentClass->max_spots,
-                    'price' => $parentClass->price,
-                    'members_only' => (bool) $parentClass->members_only,
-                    'start_time' => $parentClass->start_time,
-                    'end_time' => $parentClass->end_time,
-                    'active' => $parentClass->active,
-                    'recurring_frequency' => 'none',
-                    'recurring_days' => null,
-                    'parent_class_id' => $parentClass->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
+        // For each selected day, find all occurrences within the date range
+        foreach ($selectedDays as $dayName) {
+            $dayNumber = $dayMap[$dayName];
+            $dayDate = $startDate->copy()->next($dayNumber); // Find next occurrence of this day
+
+            // If the start date is already on the selected day, include it (but don't create duplicate)
+            if ($startDate->dayOfWeek === $dayNumber) {
+                $dayDate = $startDate->copy();
             }
 
-            // Increment based on frequency
-            switch ($frequency) {
-                case 'weekly':
-                    $currentDate->addWeek();
-                    break;
-                case 'biweekly':
-                    $currentDate->addWeeks(2);
-                    break;
-                case 'monthly':
-                    $currentDate->addMonth();
-                    break;
+            while ($dayDate->lte($endDate)) {
+                // Skip the original class date to avoid duplicates
+                if (!$dayDate->eq($startDate)) {
+                    $instances[] = [
+                        'name' => $parentClass->name,
+                        'description' => $parentClass->description,
+                        'class_date' => $dayDate->format('Y-m-d'),
+                        'instructor_id' => $parentClass->instructor_id,
+                        'max_spots' => $parentClass->max_spots,
+                        'price' => $parentClass->price,
+                        'members_only' => (bool) $parentClass->members_only,
+                        'start_time' => $parentClass->start_time,
+                        'end_time' => $parentClass->end_time,
+                        'active' => $parentClass->active,
+                        'recurring_frequency' => 'none',
+                        'recurring_days' => null,
+                        'parent_class_id' => $parentClass->id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                // Move to next occurrence based on frequency
+                switch ($frequency) {
+                    case 'weekly':
+                        $dayDate->addWeek();
+                        break;
+                    case 'biweekly':
+                        $dayDate->addWeeks(2);
+                        break;
+                    case 'monthly':
+                        $dayDate->addMonth();
+                        break;
+                }
             }
         }
 
