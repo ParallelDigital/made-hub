@@ -611,7 +611,7 @@
                     <!-- Content Column -->
                     <div class="membership-content text-left">
                         <h2 class="membership-title text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight">ARE YOU READY <br>TO ELEVATE</h2>
-                        <a href="#" class="inline-block bg-black text-white px-10 py-4 text-sm font-bold uppercase tracking-widest rounded hover:bg-gray-800 transition-all">
+                        <a href="https://buy.stripe.com/3cscP32lx7Wr6cw3cd" class="inline-block bg-black text-white px-10 py-4 text-sm font-bold uppercase tracking-widest rounded hover:bg-gray-800 transition-all">
                             SIGN UP NOW
                         </a>
                     </div>
