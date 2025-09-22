@@ -13,7 +13,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::query();
+        $query = User::with('membership');
 
         // Filter by search term (name, email, user_login)
         if ($request->filled('search')) {
