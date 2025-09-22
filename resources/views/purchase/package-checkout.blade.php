@@ -33,7 +33,7 @@
     <nav class="bg-black text-white px-6 py-4 shadow-md">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
             <a href="{{ route('purchase.index') }}" class="flex items-center space-x-3 group">
-                <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20 transition-transform group-hover:scale-105">
+                <img src="{{ asset('made-running.png') }}" alt="Made Running" class="h-15 w-20 transition-transform group-hover:scale-105">
             </a>
             <a href="{{ route('welcome') }}" class="text-white hover:text-primary transition-colors duration-200">Back to Home</a>
         </div>

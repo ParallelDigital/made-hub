@@ -34,7 +34,7 @@
             <!-- Logo -->
             <div class="flex items-center justify-center h-16 px-4 bg-gray-900 border-b border-gray-700">
                 <a href="{{ url('/') }}" class="inline-flex items-center">
-                    <img src="{{ asset('made-running.webp') }}" alt="MADE Admin" class="h-8 w-auto" onerror="this.onerror=null;this.src='{{ asset('favicon.ico') }}';" />
+                    <img src="{{ asset('made-running.png') }}" alt="MADE Admin" class="h-8 w-auto" onerror="this.onerror=null;this.src='{{ asset('favicon.ico') }}';" />
                     <span class="sr-only">MADE ADMIN</span>
                 </a>
             </div>
@@ -191,7 +191,7 @@
                         </svg>
                     </button>
                     <a href="{{ url('/') }}" class="inline-flex items-center">
-                        <img src="{{ asset('made-running.webp') }}" alt="MADE Admin" class="h-8 w-auto" onerror="this.onerror=null;this.src='{{ asset('favicon.ico') }}';" />
+                        <img src="{{ asset('made-running.png') }}" alt="MADE Admin" class="h-8 w-auto" onerror="this.onerror=null;this.src='{{ asset('favicon.ico') }}';" />
                         <span class="sr-only">MADE ADMIN</span>
                     </a>
                     <div></div>

@@ -510,7 +510,7 @@
             <nav class="flex items-center justify-between px-4 sm:px-6 py-4">
                 <div class="flex items-center space-x-8">
                     <div class="flex items-center space-x-2">
-                        <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20">
+                        <img src="{{ asset('made-running.png') }}" alt="Made Running" class="h-15 w-20">
                     </div>
 
         <!-- Members Only Modal -->
@@ -981,7 +981,7 @@
                 <div class="footer-grid grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 text-center md:text-left">
                     <div class="footer-section">
                         <div class="flex items-center justify-center md:justify-start space-x-2 mb-4">
-                            <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20">
+                            <img src="{{ asset('made-running.png') }}" alt="Made Running" class="h-15 w-20">
                         </div>
                         <p class="text-gray-400 text-sm">
                             Transform your fitness journey with our high-intensity training programs designed to push your limits.

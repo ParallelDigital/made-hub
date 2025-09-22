@@ -23,7 +23,7 @@
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-8">
                 <a href="{{ route('welcome') }}" class="flex items-center space-x-2">
-                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" class="h-15 w-20">
+                    <img src="{{ asset('made-running.png') }}" alt="Made Running" class="h-15 w-20">
                 </a>
                 <div class="hidden md:flex space-x-6">
                     <a href="{{ route('welcome') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>

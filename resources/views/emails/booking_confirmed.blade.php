@@ -89,7 +89,7 @@
         <div class="header">
             <div class="brand-badge">
                 <div class="logo-container">
-                    <img src="{{ asset('made-running.webp') }}" alt="Made Running" style="max-width: 100%; height: auto; border-radius: 3px; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; background: #ffffff; padding: 2px;">
+                    <img src="{{ asset('made-running.png') }}" alt="Made Running" style="max-width: 100%; height: auto; border-radius: 3px; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; background: #ffffff; padding: 2px;">
                 </div>
             </div>
             <h1 style="margin-top:10px;">Booking Confirmed</h1>
