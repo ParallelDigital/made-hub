@@ -84,7 +84,7 @@ class UserController extends Controller
         ]);
 
         // Generate a unique PIN code
-        $data['pin_code'] = self::generateUniquePinCode();
+        $data['pin_code'] = User::generateUniquePinCode();
 
         // Generate a unique QR code
         $data['qr_code'] = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
