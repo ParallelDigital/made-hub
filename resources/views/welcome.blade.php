@@ -970,7 +970,7 @@
                         </p>
                     </div>
 
-                    <div class="footer-section">
+                    <!-- <div class="footer-section">
                         <h3 class="text-white font-semibold mb-4">COMPANY</h3>
                         <ul class="space-y-2 text-sm text-gray-400">
                             <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
@@ -986,9 +986,9 @@
                             <li><a href="#" class="hover:text-white transition-colors">Terms</a></li>
                             <li><a href="#" class="hover:text-white transition-colors">Privacy</a></li>
                         </ul>
-                    </div>
+                    </div> -->
 
-                    <div class="footer-section">
+                    <!-- <div class="footer-section">
                         <h3 class="text-white font-semibold mb-4">CONNECT</h3>
                         <div class="flex space-x-4 justify-center md:justify-start">
                             <a href="#" class="text-gray-400 hover:text-white transition-colors">
@@ -1007,7 +1007,7 @@
                                 </svg>
                             </a>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
