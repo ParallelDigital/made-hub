@@ -88,6 +88,59 @@ class MembershipController extends Controller
                     ];
                 });
 
+                // Ensure all stripeMembers have user accounts so they can log in
+                foreach ($stripeMembers as $member) {
+                    if (!empty($member['email']) && $member['email'] !== '—') {
+                        $existingUser = User::where('email', $member['email'])->first();
+                        
+                        if (!$existingUser) {
+                            // Create user account for this Stripe member
+                            $name = !empty($member['name']) && $member['name'] !== '—' ? $member['name'] : 'Member';
+                            
+                            $user = User::create([
+                                'name' => $name,
+                                'email' => $member['email'],
+                                'password' => bcrypt('temporary_password_' . time() . rand(1000, 9999)),
+                                'role' => 'member',
+                                'stripe_customer_id' => null, // Will be set by webhook
+                                'stripe_subscription_id' => $member['subscription_id'],
+                                'subscription_status' => $member['status'],
+                                'email_verified_at' => now(), // Auto-verify since they have active Stripe subscription
+                            ]);
+                            
+                            // Send password reset email so they can set their own password
+                            try {
+                                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $member['email']]);
+                                \Log::info("Sent password reset email to new Stripe member: {$member['email']}");
+                            } catch (\Exception $e) {
+                                \Log::warning("Failed to send password reset email to {$member['email']}: " . $e->getMessage());
+                            }
+                            
+                            \Log::info("Created user account for Stripe member: {$member['email']}");
+                        } else {
+                            // Update existing user with Stripe subscription info if missing
+                            $updated = false;
+                            if (empty($existingUser->stripe_subscription_id) && !empty($member['subscription_id'])) {
+                                $existingUser->stripe_subscription_id = $member['subscription_id'];
+                                $updated = true;
+                            }
+                            if (empty($existingUser->subscription_status) || $existingUser->subscription_status !== $member['status']) {
+                                $existingUser->subscription_status = $member['status'];
+                                $updated = true;
+                            }
+                            if (!$existingUser->email_verified_at) {
+                                $existingUser->email_verified_at = now();
+                                $updated = true;
+                            }
+                            
+                            if ($updated) {
+                                $existingUser->save();
+                                \Log::info("Updated user account for Stripe member: {$member['email']}");
+                            }
+                        }
+                    }
+                }
+
                 // Calculate metrics on the complete, unfiltered list of members
                 $stripeMembersBeforeFilter = $stripeMembers;
                 $activeMembers = $stripeMembers->filter(function ($member) {
