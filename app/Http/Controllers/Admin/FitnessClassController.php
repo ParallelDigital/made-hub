@@ -243,11 +243,17 @@ class FitnessClassController extends Controller
      */
     public function destroy(FitnessClass $class)
     {
+        // Cancel any bookings for this class
+        $bookings = $class->bookings()->where('status', 'confirmed')->get();
+        foreach ($bookings as $booking) {
+            $booking->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+        }
+
         // Delete child instances first
         FitnessClass::where('parent_class_id', $class->id)->delete();
 
         $class->delete();
-        
+
         return redirect()
             ->route('admin.classes.index')
             ->with('success', 'Class and all recurring instances deleted successfully.');
@@ -316,14 +322,35 @@ class FitnessClassController extends Controller
         ]);
 
         $deleteAfterDate = $request->delete_after_date;
-        
-        // Delete child instances after the specified date
+
+        // Get child instances that will be deleted (to handle associated bookings)
+        $instancesToDelete = FitnessClass::where('parent_class_id', $class->id)
+            ->where('class_date', '>=', $deleteAfterDate)
+            ->get();
+
+        // Cancel any bookings for these instances
+        $bookingCount = 0;
+        foreach ($instancesToDelete as $instance) {
+            $bookings = $instance->bookings()->where('status', 'confirmed')->get();
+            foreach ($bookings as $booking) {
+                $booking->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+                $bookingCount++;
+            }
+        }
+
+        // Delete child instances on or after the specified date
         $deletedCount = FitnessClass::where('parent_class_id', $class->id)
-            ->where('class_date', '>', $deleteAfterDate)
+            ->where('class_date', '>=', $deleteAfterDate)
             ->delete();
 
+        $message = "Deleted {$deletedCount} class instances";
+        if ($bookingCount > 0) {
+            $message .= " and cancelled {$bookingCount} associated bookings";
+        }
+        $message .= " on or after {$deleteAfterDate}.";
+
         return redirect()->route('admin.classes.index')
-            ->with('success', "Deleted {$deletedCount} class instances after {$deleteAfterDate}.");
+            ->with('success', $message);
     }
 
     /**
