@@ -148,6 +148,7 @@ class HomeController extends Controller
                 return [
                     'id' => $class->id,
                     'name' => $class->name,
+                    'description' => $class->description,
                     'start_time' => $class->start_time,
                     'end_time' => $class->end_time,
                     'duration' => $duration,

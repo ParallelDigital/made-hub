@@ -710,7 +710,7 @@
                                     $isBookedByMe = auth()->check() ? $class->bookings->contains('user_id', auth()->id()) : false;
                                     $isMembersOnly = (bool) ($class->members_only ?? false);
                                 @endphp
-                                <div class="class-card" data-class-id="{{ $class->id }}" data-price="{{ $class->price ?? 0 }}" data-is-past="{{ $isPast ? '1' : '0' }}" data-is-full="{{ $isFull ? '1' : '0' }}" data-is-booked="{{ $isBookedByMe ? '1' : '0' }}" data-members-only="{{ $isMembersOnly ? '1' : '0' }}">
+                                <div class="class-card" data-class-id="{{ $class->id }}" data-price="{{ $class->price ?? 0 }}" data-is-past="{{ $isPast ? '1' : '0' }}" data-is-full="{{ $isFull ? '1' : '0' }}" data-is-booked="{{ $isBookedByMe ? '1' : '0' }}" data-members-only="{{ $isMembersOnly ? '1' : '0' }}" data-description="{{ $class->description }}">
                                     @if($isMembersOnly)
                                         <div class="ribbon-members">Members Class</div>
                                     @endif
@@ -788,6 +788,8 @@
                     <div class="text-sm text-gray-600 mb-4">
                         <p id="bookingModalMessage">Choose how you'd like to book this class:</p>
                     </div>
+                    
+                    <div id="classDescription" class="mb-4 p-3 bg-gray-50 rounded-lg text-sm text-gray-700" style="display: none;"></div>
                     
                     @auth
                         <button onclick="bookWithCredits(window.selectedClassId)" 
@@ -1221,7 +1223,7 @@
                         const isMembersOnly = !!classItem.members_only;
 
                         return `
-                            <div class=\"class-card\" data-class-id=\"${classItem.id}\" data-price=\"${classItem.price || 0}\" data-is-past=\"${classItem.is_past ? 1 : 0}\" data-is-full=\"${(classItem.available_spots <= 0) ? 1 : 0}\" data-is-booked=\"${classItem.is_booked_by_me ? 1 : 0}\" data-members-only=\"${isMembersOnly ? 1 : 0}\">
+                            <div class=\"class-card\" data-class-id=\"${classItem.id}\" data-price=\"${classItem.price || 0}\" data-is-past=\"${classItem.is_past ? 1 : 0}\" data-is-full=\"${(classItem.available_spots <= 0) ? 1 : 0}\" data-is-booked=\"${classItem.is_booked_by_me ? 1 : 0}\" data-members-only=\"${isMembersOnly ? 1 : 0}\" data-description=\"${classItem.description || ''}\">
                                 ${isMembersOnly ? '<div class="ribbon-members">Members Class</div>' : ''}
                                 <div class="class-time-section">
                                     <div class="class-time">${startLabel}</div>
@@ -1287,6 +1289,11 @@
                         const isFull = ds.isFull === '1';
                         const isBooked = ds.isBooked === '1';
                         const isMembersOnly = ds.membersOnly === '1';
+                        const description = ds.description || '';
+                        
+                        // Store description for modal use
+                        window.selectedClassDescription = description;
+                        
                         if (isPast) { openFeedbackModal('Unavailable', 'This class has already happened.'); return; }
                         if (isBooked) { openFeedbackModal('Already booked', 'You have already booked this class.'); return; }
                         if (isFull) { openFeedbackModal('Class full', 'This class is fully booked.'); return; }
@@ -1360,6 +1367,7 @@
         <script>
             window.selectedClassId = null;
             window.selectedClassPrice = 0;
+            window.selectedClassDescription = '';
 
             function openBookingModal(classId, price) {
                 window.selectedClassId = classId;
@@ -1370,8 +1378,29 @@
                 // Update the price in the modal
                 document.getElementById('modalClassPrice').textContent = `£${priceNum.toLocaleString()}`;
 
-                // Adjust modal labels and content for members-only classes
+                // Get class description
+                let classDescription = '';
                 const card = document.querySelector(`.class-card[data-class-id="${classId}"]`);
+                
+                if (card && card.dataset && card.dataset.description) {
+                    classDescription = card.dataset.description;
+                } else if (window.selectedClassDescription) {
+                    // For dynamically loaded classes on mobile
+                    classDescription = window.selectedClassDescription;
+                    // Clear it after use
+                    window.selectedClassDescription = '';
+                }
+                
+                // Show/hide description
+                const descElement = document.getElementById('classDescription');
+                if (classDescription && classDescription.trim()) {
+                    descElement.textContent = classDescription;
+                    descElement.style.display = 'block';
+                } else {
+                    descElement.style.display = 'none';
+                }
+
+                // Adjust modal labels and content for members-only classes
                 const isMembersOnly = card && card.dataset && card.dataset.membersOnly === '1';
                 const useCreditsLabel = document.getElementById('useCreditsLabel');
                 const useCreditsRight = document.getElementById('useCreditsRight');
