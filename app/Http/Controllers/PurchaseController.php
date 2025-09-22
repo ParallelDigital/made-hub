@@ -65,6 +65,7 @@ class PurchaseController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
+            'password' => ['required', 'confirmed', Rules\Password::min(8)->mixedCase()->numbers()],
         ]);
 
         $packages = collect($this->index()->getData()['packages'] ?? []);
@@ -131,11 +132,11 @@ class PurchaseController extends Controller
         }
 
         // Find or create the user for this email
-        $user = \App\Models\User::firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => $recipientEmail],
             [
                 'name' => ($session && ($session->metadata->name ?? null)) ? $session->metadata->name : 'Guest',
-                'password' => bcrypt('temporary_password_' . time()),
+                'password' => Hash::make($request->password),
             ]
         );
 

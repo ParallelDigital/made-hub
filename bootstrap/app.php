@@ -10,6 +10,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withSchedule(function ($schedule) {
+        // Update member credits monthly on the 1st
+        $schedule->command('members:update-credits')->monthlyOn(1, '00:00');
+    })
     ->withMiddleware(function (Middleware $middleware) {
         // register global/route middleware here if you need
         // e.g. $middleware->alias(['role' => \App\Http\Middleware\RoleMiddleware::class]);

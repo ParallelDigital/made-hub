@@ -84,6 +84,15 @@ class StripeWebhookController extends Controller
             ]
         );
 
+        // If user was created with temporary password, send password reset email
+        if ($user->wasRecentlyCreated) {
+            try {
+                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
+            } catch (\Throwable $e) {
+                Log::warning('Failed to send password reset for webhook-created user', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+            }
+        }
+
         // Ensure we have a default membership (5 classes per calendar month)
         $membership = Membership::firstOrCreate(
             ['name' => 'MEMBERSHIP'],

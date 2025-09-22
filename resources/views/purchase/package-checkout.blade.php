@@ -117,6 +117,32 @@
                         <div class="mt-1 text-sm text-gray-500">We'll send your receipt to this email</div>
                     </div>
 
+                    <div class="relative">
+                        <input id="password" name="password" type="password" required
+                               class="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 placeholder-transparent focus:border-primary transition-colors"
+                               placeholder="Password" />
+                        <label for="password"
+                               class="absolute left-2 -top-2.5 text-sm text-gray-600 transition-all
+                                      peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4
+                                      peer-focus:-top-2.5 peer-focus:left-2 peer-focus:text-sm peer-focus:text-primary floating-label">
+                            Password
+                        </label>
+                        <div class="mt-1 text-sm text-gray-500">Create a secure password for your account</div>
+                    </div>
+
+                    <div class="relative">
+                        <input id="password_confirmation" name="password_confirmation" type="password" required
+                               class="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 placeholder-transparent focus:border-primary transition-colors"
+                               placeholder="Confirm Password" />
+                        <label for="password_confirmation"
+                               class="absolute left-2 -top-2.5 text-sm text-gray-600 transition-all
+                                      peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4
+                                      peer-focus:-top-2.5 peer-focus:left-2 peer-focus:text-sm peer-focus:text-primary floating-label">
+                            Confirm Password
+                        </label>
+                        <div class="mt-1 text-sm text-gray-500">Confirm your password</div>
+                    </div>
+
                     <div class="pt-4">
                         <button type="submit" 
                                 class="w-full bg-primary hover:bg-primary-dark text-white rounded-lg px-6 py-4 font-semibold text-lg transition-colors duration-200 flex items-center justify-center space-x-2">
