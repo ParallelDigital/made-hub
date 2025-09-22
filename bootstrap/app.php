@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function ($schedule) {
         // Update member credits monthly on the 1st
         $schedule->command('members:update-credits')->monthlyOn(1, '00:00');
+        
+        // Ensure all members have login access - run weekly
+        $schedule->command('members:ensure-login-access')->weeklyOn(1, '02:00'); // Monday at 2 AM
     })
     ->withMiddleware(function (Middleware $middleware) {
         // register global/route middleware here if you need
