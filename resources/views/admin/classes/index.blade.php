@@ -65,79 +65,192 @@
 <div class="bg-gray-800 shadow rounded-lg border border-gray-700">
     <div class="px-4 py-5 sm:p-6">
         @if($classes->count() > 0)
-            <div class="mb-3 flex justify-end gap-2">
-                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded text-sm" onclick="toggleAllGroups(true)">Expand all</button>
-                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded text-sm" onclick="toggleAllGroups(false)">Collapse all</button>
+            <!-- Quick Actions -->
+            <div class="mb-6 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-400">
+                        <span class="font-medium text-white">{{ $classes->total() }}</span> class {{ $classes->total() === 1 ? 'group' : 'groups' }} found
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium transition-colors text-sm" onclick="toggleAllGroups(true)">
+                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                        Expand All
+                    </button>
+                    <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium transition-colors text-sm" onclick="toggleAllGroups(false)">
+                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                        </svg>
+                        Collapse All
+                    </button>
+                </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Class Group</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Instructor</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total Instances</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-gray-800 divide-y divide-gray-700">
-                        @foreach($classes as $group)
-                            @php
-                                $groupId = 'group-' . str_replace(' ', '-', strtolower($group['name']));
-                                $isFirst = $loop->first; // Default expand first group
-                            @endphp
-                            <tr class="bg-gray-900 hover:bg-gray-800 cursor-pointer" data-group-toggle="{{ $groupId }}" data-expanded="{{ $isFirst ? 'true' : 'false' }}" onclick="toggleGroup('{{ $groupId }}')">
-                                <td colspan="4" class="px-6 py-3">
-                                    <div class="flex items-center justify-between">
-                                        <div class="text-sm font-semibold text-white">
-                                            {{ $group['name'] }}
-                                            <span class="ml-2 text-gray-400 font-normal">({{ $group['total_instances'] }} {{ $group['total_instances'] === 1 ? 'instance' : 'instances' }})</span>
-                                        </div>
-                                        <svg class="w-5 h-5 text-gray-300 transition-transform duration-200"
-                                             style="transform: rotate({{ $isFirst ? '90' : '0' }}deg)"
-                                             data-chevron-for="{{ $groupId }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
+            <div class="space-y-4">
+                @foreach($classes as $group)
+                    @php
+                        $groupId = 'group-' . str_replace(' ', '-', strtolower($group['name']));
+                        $isFirst = $loop->first; // Default expand first group
+                        $nextClass = $group['classes'][0] ?? null;
+                        $hasRecurring = collect($group['classes'])->some(fn($c) => $c->recurring_frequency !== 'none');
+                    @endphp
+
+                    <!-- Class Group Card -->
+                    <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden shadow-sm">
+                        <!-- Group Header -->
+                        <div class="bg-gradient-to-r from-gray-800 to-gray-750 px-6 py-4 cursor-pointer hover:bg-gray-750 transition-colors"
+                             data-group-toggle="{{ $groupId }}"
+                             data-expanded="{{ $isFirst ? 'true' : 'false' }}"
+                             onclick="toggleGroup('{{ $groupId }}')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <!-- Class Icon -->
+                                    <div class="flex-shrink-0 w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                                        <span class="text-white font-bold text-lg">{{ strtoupper(substr($group['name'], 0, 1)) }}</span>
                                     </div>
-                                </td>
-                            </tr>
-                            @foreach($group['classes'] as $class)
-                                <tr data-group-row="{{ $groupId }}" class="{{ $isFirst ? '' : 'hidden' }}">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10 bg-gray-700 rounded-full flex items-center justify-center">
-                                                <span class="text-gray-300">{{ strtoupper(substr($class->name, 0, 2)) }}</span>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-white">{{ $class->name }}</div>
-                                                @if($class->classType)
-                                                    <div class="text-sm text-gray-400">{{ $class->classType->name }}</div>
-                                                @endif
+
+                                    <!-- Class Info -->
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">{{ $group['name'] }}</h3>
+                                        <div class="flex items-center space-x-4 text-sm text-gray-400">
+                                            <span class="flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                </svg>
+                                                {{ $group['instructor'] }}
+                                            </span>
+                                            @if($hasRecurring)
+                                                <span class="flex items-center text-blue-400">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                                    </svg>
+                                                    Recurring
+                                                </span>
+                                            @endif
+                                            <span class="bg-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+                                                {{ $group['total_instances'] }} {{ $group['total_instances'] === 1 ? 'class' : 'classes' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Expand/Collapse Icon -->
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-400">{{ $isFirst ? 'Click to collapse' : 'Click to expand' }}</span>
+                                    <svg class="w-6 h-6 text-primary transition-transform duration-200"
+                                         style="transform: rotate({{ $isFirst ? '90' : '0' }}deg)"
+                                         data-chevron-for="{{ $groupId }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Class Instances -->
+                        <div data-group-row="{{ $groupId }}" class="{{ $isFirst ? '' : 'hidden' }}">
+                            <div class="border-t border-gray-700">
+                                <div class="divide-y divide-gray-700">
+                                    @foreach($group['classes'] as $class)
+                                        <div class="px-6 py-4 hover:bg-gray-750 transition-colors">
+                                            <div class="flex items-center justify-between">
+                                                <!-- Class Details -->
+                                                <div class="flex items-center space-x-4">
+                                                    <!-- Date & Time -->
+                                                    <div class="flex-shrink-0">
+                                                        <div class="text-sm font-medium text-white">
+                                                            {{ $class->class_date ? $class->class_date->format('M j') : 'No Date' }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-400">
+                                                            {{ $class->start_time }} - {{ $class->end_time }}
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Class Type & Location -->
+                                                    <div class="flex-1">
+                                                        @if($class->classType)
+                                                            <div class="text-sm text-gray-300">{{ $class->classType->name }}</div>
+                                                        @endif
+                                                        @if($class->location)
+                                                            <div class="text-xs text-gray-400 flex items-center">
+                                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                </svg>
+                                                                {{ $class->location }}
+                                                            </div>
+                                                        @endif
+                                                    </div>
+
+                                                    <!-- Status Badges -->
+                                                    <div class="flex items-center space-x-2">
+                                                        @if($class->active)
+                                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900 text-green-200">
+                                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                                </svg>
+                                                                Active
+                                                            </span>
+                                                        @else
+                                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-900 text-red-200">
+                                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                                </svg>
+                                                                Inactive
+                                                            </span>
+                                                        @endif
+
+                                                        @if($class->recurring_frequency !== 'none')
+                                                            @if($class->isChildClass())
+                                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
+                                                                    Instance
+                                                                </span>
+                                                            @else
+                                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-900 text-purple-200">
+                                                                    Parent
+                                                                </span>
+                                                            @endif
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                <!-- Actions -->
+                                                <div class="flex items-center space-x-1">
+                                                    <a href="{{ route('admin.classes.show', $class) }}"
+                                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-primary hover:bg-primary hover:text-white transition-colors">
+                                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                        </svg>
+                                                        View
+                                                    </a>
+                                                    <a href="{{ route('admin.classes.edit', $class) }}"
+                                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-400 hover:bg-blue-400 hover:text-white transition-colors">
+                                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                        </svg>
+                                                        Edit
+                                                    </a>
+                                                    <button onclick="showDeleteOptionsModal({{ $class->id }}, '{{ $class->name }}', {{ $class->isRecurring() && !$class->isChildClass() ? 'true' : 'false' }})"
+                                                            class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-red-400 hover:bg-red-400 hover:text-white transition-colors">
+                                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                        </svg>
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                        {{ $class->instructor->name ?? 'No Instructor' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                        <div>{{ $class->class_date ? $class->class_date->format('D, M j, Y') : 'No Date' }}</div>
-                                        <div class="text-gray-400">{{ $class->start_time }} - {{ $class->end_time }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <a href="{{ route('admin.classes.show', $class) }}" class="text-primary hover:text-purple-400">View</a>
-                                            <a href="{{ route('admin.classes.edit', $class) }}" class="text-blue-400 hover:text-blue-300">Edit</a>
-                                            <button onclick="showDeleteOptionsModal({{ $class->id }}, '{{ $class->name }}', {{ $class->isRecurring() && !$class->isChildClass() ? 'true' : 'false' }})" class="text-red-400 hover:text-red-300">Delete</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @endforeach
-                    </tbody>
-                </table>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
-            <div class="mt-6">
+            <div class="mt-8">
                 {{ $classes->links() }}
             </div>
         @else
