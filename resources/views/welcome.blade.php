@@ -207,6 +207,7 @@
                 font-size: 0.875rem;
                 color: #6b7280;
                 margin-top: 0.125rem;
+                text-transform: uppercase;
             }
             
             .class-location {
@@ -243,12 +244,14 @@
                 color: #000;
                 margin: 0 0 0.25rem 0;
                 line-height: 1.3;
+                text-transform: uppercase;
             }
             
             .class-instructor-name {
                 font-size: 0.875rem;
                 color: #6b7280;
                 margin: 0 0 0.25rem 0;
+                text-transform: uppercase;
             }
             
             .class-room {
@@ -439,6 +442,7 @@
                     font-size: 0.875rem;
                     color: #9ca3af;
                     margin-top: 0.25rem;
+                    text-transform: uppercase;
                 }
                 
                 .instructor-section {
@@ -464,12 +468,14 @@
                     color: #000;
                     margin: 0 0 0.5rem 0;
                     text-decoration: underline;
+                    text-transform: uppercase;
                 }
                 
                 .class-instructor-name {
                     font-size: 0.875rem;
                     color: #6b7280;
                     margin: 0 0 0.25rem 0;
+                    text-transform: uppercase;
                 }
                 
                 .class-room {
