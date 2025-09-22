@@ -1252,7 +1252,7 @@
                                                     ? (window.IS_MEMBER
                                                         ? `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Book (Members)</button>`
                                                         : (window.IS_AUTH
-                                                            ? `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Become Member</button>`
+                                                            ? `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Members Only</button>`
                                                             : `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Members Only</button>`
                                                           )
                                                       )
