@@ -54,6 +54,52 @@ class UserController extends Controller
     }
 
     /**
+     * Show the form for creating a new user.
+     */
+    public function create()
+    {
+        // Include both 'administrator' and 'admin' so either can be assigned
+        $roles = ['subscriber', 'administrator', 'admin', 'editor', 'author', 'contributor', 'wpamelia-customer'];
+        return view('admin.users.create', compact('roles'));
+    }
+
+    /**
+     * Store a newly created user in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role' => 'required|string|max:255',
+            'user_login' => 'nullable|string|max:255|unique:users',
+            'nickname' => 'nullable|string|max:255',
+        ]);
+
+        $data = $request->only([
+            'name', 'first_name', 'last_name', 'email', 'role', 'user_login', 'nickname'
+        ]);
+
+        // Generate a unique PIN code
+        $data['pin_code'] = self::generateUniquePinCode();
+
+        // Generate a unique QR code
+        $data['qr_code'] = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
+
+        // Hash the password
+        $data['password'] = bcrypt($request->password);
+
+        // Create the user
+        $user = User::create($data);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User created successfully.');
+    }
+
+    /**
      * Show the form for editing the specified user.
      */
     public function edit(User $user)
