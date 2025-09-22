@@ -113,6 +113,7 @@ class MembershipController extends Controller
                                 'stripe_subscription_id' => $member['subscription_id'],
                                 'subscription_status' => $member['status'],
                                 'email_verified_at' => now(), // Auto-verify since they have active Stripe subscription
+                                'credits' => ($member['status'] === 'active' || $member['status'] === 'trialing') ? 5 : 0, // 5 credits for active members
                             ]);
                             
                             // Send password reset email so they can set their own password
@@ -135,9 +136,11 @@ class MembershipController extends Controller
                                 $existingUser->subscription_status = $member['status'];
                                 $updated = true;
                             }
-                            if (!$existingUser->email_verified_at) {
-                                $existingUser->email_verified_at = now();
+                            // Give 5 credits to active members who don't have them
+                            if (($member['status'] === 'active' || $member['status'] === 'trialing') && $existingUser->credits < 5) {
+                                $existingUser->credits = 5;
                                 $updated = true;
+                                \Log::info("Granted 5 credits to active member: {$member['email']}");
                             }
                             
                             if ($updated) {

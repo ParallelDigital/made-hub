@@ -304,6 +304,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
                         'stripe_subscription_id' => $sub->id,
                         'subscription_status' => $status,
                         'email_verified_at' => now(),
+                        'credits' => ($status === 'active' || $status === 'trialing') ? 5 : 0, // 5 credits for active members
                     ]);
                     
                     try {
@@ -325,6 +326,11 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
                     }
                     if (!$existingUser->email_verified_at) {
                         $existingUser->email_verified_at = now();
+                        $updatedData = true;
+                    }
+                    // Give 5 credits to active members who don't have them
+                    if (($status === 'active' || $status === 'trialing') && $existingUser->credits < 5) {
+                        $existingUser->credits = 5;
                         $updatedData = true;
                     }
                     
