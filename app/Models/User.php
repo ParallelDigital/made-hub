@@ -252,6 +252,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user has an active Stripe subscription
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return in_array($this->subscription_status, ['active', 'trialing'], true);
+    }
+
+    /**
      * Get subscription status from Stripe
      */
     public function getStripeSubscriptionStatus()

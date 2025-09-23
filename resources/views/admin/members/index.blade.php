@@ -54,9 +54,20 @@
             <tbody class="bg-gray-800 divide-y divide-gray-700">
                 @forelse($members as $u)
                     @php
-                        $isActive = $u->membership_start_date && $u->membership_start_date <= now() && (!$u->membership_end_date || $u->membership_end_date >= now());
-                        $statusLabel = $isActive ? 'Active' : 'Inactive';
-                        $statusClass = $isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+                        // Determine active status: either active Stripe subscription OR valid local membership window
+                        $hasActiveStripe = in_array($u->subscription_status, ['active', 'trialing'], true);
+                        $hasActiveMembership = $u->membership_start_date && $u->membership_start_date <= now() && (!$u->membership_end_date || $u->membership_end_date >= now());
+                        $isActive = $hasActiveStripe || $hasActiveMembership;
+
+                        // Status label clarifies the source where helpful
+                        if ($isActive) {
+                            $statusLabel = $hasActiveStripe ? 'Active (Stripe)' : 'Active';
+                            $statusClass = 'bg-green-100 text-green-800';
+                        } else {
+                            $statusLabel = 'Inactive';
+                            $statusClass = 'bg-gray-100 text-gray-800';
+                        }
+
                         $lastRef = $u->credits_last_refreshed ? \Carbon\Carbon::parse($u->credits_last_refreshed)->format('D, M j, Y') : '—';
                         $nextReset = '—';
                         if (!empty($u->stripe_subscription_id)) {

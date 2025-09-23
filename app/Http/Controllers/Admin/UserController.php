@@ -280,26 +280,44 @@ class UserController extends Controller
 
         $query = User::query()->with('membership');
 
-        // Filter only users with a membership record
-        $query->whereNotNull('membership_id');
+        // Filter for members: users with membership_id OR active Stripe subscriptions OR role 'member'
+        $query->where(function ($q) {
+            $q->whereNotNull('membership_id')
+              ->orWhereIn('subscription_status', ['active', 'trialing'])
+              ->orWhere('role', 'member');
+        });
 
         // Status filter
         $today = now()->toDateString();
         if ($status === 'active') {
-            $query->whereNotNull('membership_start_date')
-                ->where('membership_start_date', '<=', $today)
-                ->where(function ($q) use ($today) {
-                    $q->whereNull('membership_end_date')
-                      ->orWhere('membership_end_date', '>=', $today);
-                });
+            $query->where(function ($q) use ($today) {
+                // Active if: has active Stripe subscription OR has valid local membership
+                $q->whereIn('subscription_status', ['active', 'trialing'])
+                  ->orWhere(function ($q2) use ($today) {
+                      $q2->whereNotNull('membership_id')
+                         ->whereNotNull('membership_start_date')
+                         ->where('membership_start_date', '<=', $today)
+                         ->where(function ($q3) use ($today) {
+                             $q3->whereNull('membership_end_date')
+                               ->orWhere('membership_end_date', '>=', $today);
+                         });
+                  });
+            });
         } elseif ($status === 'inactive') {
             $query->where(function ($q) use ($today) {
-                $q->whereNull('membership_start_date')
-                  ->orWhere('membership_start_date', '>', $today)
-                  ->orWhere(function ($q2) use ($today) {
-                      $q2->whereNotNull('membership_end_date')
-                         ->where('membership_end_date', '<', $today);
-                  });
+                // Inactive if: no active Stripe subscription AND no valid local membership
+                $q->where(function ($q2) use ($today) {
+                    $q2->whereNotIn('subscription_status', ['active', 'trialing'])
+                       ->orWhereNull('subscription_status');
+                })->where(function ($q3) use ($today) {
+                    $q3->whereNull('membership_id')
+                       ->orWhereNull('membership_start_date')
+                       ->orWhere('membership_start_date', '>', $today)
+                       ->orWhere(function ($q4) use ($today) {
+                           $q4->whereNotNull('membership_end_date')
+                              ->where('membership_end_date', '<', $today);
+                       });
+                });
             });
         }
 

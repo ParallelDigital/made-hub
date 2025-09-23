@@ -1,1 +1,1 @@
-Subscription:  . $sub- .  -  . $email .  - Status:  . $sub- . PHP_EOL
+   . $customer- .  - Status:  . $sub- . PHP_EOL
