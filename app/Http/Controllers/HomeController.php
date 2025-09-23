@@ -22,20 +22,27 @@ class HomeController extends Controller
         $selectedDateString = $selectedDate->toDateString();
         $dayOfWeek = $selectedDate->dayOfWeek; // 0 = Sunday, 1 = Monday, etc.
         
-        // Get both exact date matches and recurring classes for this day of week
+        // Fetch exact-date classes OR recurring templates, then filter recurring by selected day in PHP (DB-agnostic)
         $selectedDateClasses = FitnessClass::with(['instructor', 'bookings'])
             ->where('active', 1)
-            ->where(function($query) use ($selectedDateString, $dayOfWeek) {
-                // Exact date match
+            ->where(function($query) use ($selectedDateString) {
                 $query->whereDate('class_date', $selectedDateString)
-                      // OR recurring classes that match this day of week
-                      ->orWhere(function($subQuery) use ($dayOfWeek) {
-                          $subQuery->where('recurring', 1)
-                                   ->whereRaw("strftime('%w', class_date) = ?", [(string)$dayOfWeek]); // SQLite strftime %w is 0-based (0=Sunday)
-                      });
+                      ->orWhere('recurring', 1);
             })
             ->orderBy('start_time')
-            ->get();
+            ->get()
+            ->filter(function($class) use ($selectedDate) {
+                $classDate = $class->class_date instanceof \Carbon\Carbon ? $class->class_date->toDateString() : (string) $class->class_date;
+                if ($classDate === $selectedDate->toDateString()) {
+                    return true; // exact date
+                }
+                if ($class->recurring) {
+                    $days = $this->parseRecurringDays($class->recurring_days);
+                    $dayName = strtolower($selectedDate->format('l'));
+                    return in_array($dayName, $days, true);
+                }
+                return false;
+            });
 
         // Deduplicate: prefer a concrete class scheduled on this exact date over a recurring template
         $selectedDateClasses = $this->dedupeClassesForSelectedDate($selectedDateClasses, $selectedDate);
@@ -246,5 +253,35 @@ class HomeController extends Controller
             // Fallback: trim to first 5 chars if format unknown
             return substr($time, 0, 5);
         }
+    }
+
+    /**
+     * Parse recurring days from either JSON or comma-separated string.
+     * Returns an array of lowercase day names.
+     */
+    private function parseRecurringDays($raw): array
+    {
+        if (is_array($raw)) {
+            return array_values(array_filter(array_map(function ($s) {
+                return strtolower(trim((string) $s));
+            }, $raw)));
+        }
+        if (is_string($raw)) {
+            $trim = trim($raw);
+            if ($trim === '') {
+                return [];
+            }
+            $decoded = json_decode($trim, true);
+            if (is_array($decoded)) {
+                return array_values(array_filter(array_map(function ($s) {
+                    return strtolower(trim((string) $s));
+                }, $decoded)));
+            }
+            // Fallback to comma-separated values
+            return array_values(array_filter(array_map(function ($s) {
+                return strtolower(trim((string) $s));
+            }, explode(',', $trim))));
+        }
+        return [];
     }
 }

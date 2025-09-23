@@ -1280,6 +1280,15 @@
                 return `${months[d.getMonth()]} ${d.getDate()}`;
             }
 
+            // Normalize time string ("HH:mm" or "HH:mm:ss") to "HH:mm" for stable keys in de-duplication
+            function normalizeTimeKey(t) {
+                if (!t || typeof t !== 'string') return '';
+                const parts = t.split(':');
+                const h = (parts[0] || '00').padStart(2, '0');
+                const m = (parts[1] || '00').padStart(2, '0');
+                return `${h}:${m}`;
+            }
+
             function updateClassesList(classes) {
                 const container = document.getElementById('classes-container');
 
