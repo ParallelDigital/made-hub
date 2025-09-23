@@ -36,6 +36,9 @@ class HomeController extends Controller
             })
             ->orderBy('start_time')
             ->get();
+
+        // Deduplicate: prefer a concrete class scheduled on this exact date over a recurring template
+        $selectedDateClasses = $this->dedupeClassesForSelectedDate($selectedDateClasses, $selectedDate);
         
         // Show all classes (past and future) on the homepage for the selected date
         // No filtering applied here; frontend will label past classes appropriately
@@ -173,5 +176,58 @@ class HomeController extends Controller
             'nextWeek' => $nextWeek,
             'showPast' => $showPast,
         ]);
+    }
+
+    /**
+     * Deduplicate classes for a selected date to avoid showing both a recurring template
+     * and a concrete dated class at the same time slot. Preference order:
+     * 1) Exact-date match; 2) Child instance (has parent_class_id); 3) First item.
+     */
+    private function dedupeClassesForSelectedDate($classes, Carbon $selectedDate)
+    {
+        if (!$classes) {
+            return collect();
+        }
+
+        $grouped = collect($classes)->groupBy(function($c) {
+            $name = strtolower(trim((string) $c->name));
+            $time = (string) $c->start_time;
+            $instructor = (string) ($c->instructor_id ?? '0');
+            $location = strtolower(trim((string) ($c->location ?? '')));
+            return $name.'|'.$time.'|'.$instructor.'|'.$location;
+        });
+
+        $result = collect();
+        foreach ($grouped as $key => $group) {
+            $choice = $group->first();
+
+            // Prefer exact-date match for the selected day
+            $exact = $group->first(function($c) use ($selectedDate) {
+                $date = $c->class_date;
+                if ($date instanceof \Carbon\Carbon) {
+                    return $date->isSameDay($selectedDate);
+                }
+                try {
+                    return \Carbon\Carbon::parse($date)->isSameDay($selectedDate);
+                } catch (\Throwable $e) {
+                    return false;
+                }
+            });
+            if ($exact) {
+                $choice = $exact;
+            } else {
+                // Otherwise prefer a child instance over a recurring template
+                $child = $group->first(function($c) {
+                    return !is_null($c->parent_class_id);
+                });
+                if ($child) {
+                    $choice = $child;
+                }
+            }
+
+            $result->push($choice);
+        }
+
+        return $result->sortBy('start_time')->values();
     }
 }
