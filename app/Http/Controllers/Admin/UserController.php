@@ -321,9 +321,21 @@ class UserController extends Controller
             });
         }
 
-        // Search
+        // Search - if searching, broaden the member criteria, and do NOT apply status filter
         if ($request->filled('search')) {
             $term = $request->get('search');
+
+            // Expand the member pool during search so matches are not missed
+            $query = User::query()->with('membership');
+            $query->where(function ($q) {
+                $q->whereNotNull('membership_id')
+                  ->orWhereIn('subscription_status', ['active', 'trialing'])
+                  ->orWhere('role', 'member')
+                  ->orWhere('role', 'subscriber') // Include subscribers who might be members
+                  ->orWhereNotNull('stripe_subscription_id'); // Include anyone with a Stripe subscription
+            });
+
+            // Apply search filter (no active/inactive gating when searching)
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', "%{$term}%")
                   ->orWhere('email', 'like', "%{$term}%")
