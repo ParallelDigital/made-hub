@@ -190,11 +190,10 @@ class HomeController extends Controller
         }
 
         $grouped = collect($classes)->groupBy(function($c) {
-            $name = strtolower(trim((string) $c->name));
-            $time = (string) $c->start_time;
-            $instructor = (string) ($c->instructor_id ?? '0');
-            $location = strtolower(trim((string) ($c->location ?? '')));
-            return $name.'|'.$time.'|'.$instructor.'|'.$location;
+            // Visual identity: collapse classes with same name and normalized time
+            $name = strtolower(trim((string) ($c->name ?? '')));
+            $timeKey = $this->normalizeTimeKey((string) ($c->start_time ?? ''));
+            return $name.'|'.$timeKey;
         });
 
         $result = collect();
@@ -229,5 +228,23 @@ class HomeController extends Controller
         }
 
         return $result->sortBy('start_time')->values();
+    }
+
+    /**
+     * Normalize a time string (HH:mm or HH:mm:ss) to HH:mm for stable grouping keys
+     */
+    private function normalizeTimeKey(string $time): string
+    {
+        if ($time === '') {
+            return '';
+        }
+        try {
+            // Try Carbon parse to be safe
+            $t = \Carbon\Carbon::createFromFormat('H:i:s', $time);
+            return $t ? $t->format('H:i') : substr($time, 0, 5);
+        } catch (\Throwable $e) {
+            // Fallback: trim to first 5 chars if format unknown
+            return substr($time, 0, 5);
+        }
     }
 }

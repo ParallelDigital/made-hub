@@ -1283,7 +1283,27 @@
             function updateClassesList(classes) {
                 const container = document.getElementById('classes-container');
 
-                if (classes.length === 0) {
+                // Front-end safety: de-duplicate classes by (name | normalized time | instructor)
+                const uniq = new Map();
+                const classesArr = Array.isArray(classes) ? classes : [];
+                classesArr.forEach(c => {
+                    const name = (c?.name || '').toString().trim().toLowerCase();
+                    const timeKey = normalizeTimeKey(c?.start_time);
+                    const instr = (c?.instructor?.name || '').toString().trim().toLowerCase();
+                    const key = `${name}|${timeKey}|${instr}`;
+                    const existing = uniq.get(key);
+                    if (!existing) {
+                        uniq.set(key, c);
+                    } else {
+                        // Prefer the one booked by me, otherwise keep the first
+                        if ((c?.is_booked_by_me && !existing?.is_booked_by_me)) {
+                            uniq.set(key, c);
+                        }
+                    }
+                });
+                const deduped = Array.from(uniq.values());
+
+                if (deduped.length === 0) {
                     container.innerHTML = `
                         <div class="no-classes">
                             <svg class="no-classes-icon mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1294,7 +1314,7 @@
                         </div>
                     `;
                 } else {
-                    const classesHTML = classes.map(classItem => {
+                    const classesHTML = deduped.map(classItem => {
                         // Ensure price is defined and a number
                         classItem.price = classItem.price || 0;
 
