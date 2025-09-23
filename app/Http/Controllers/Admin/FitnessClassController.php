@@ -78,6 +78,41 @@ class FitnessClassController extends Controller
     }
 
     /**
+     * Deduplicate class instances for admin calendar: prefer child instances (have parent_class_id)
+     * over their parent templates when they share the same slot/date/instructor/location/name.
+     */
+    private function dedupeCalendarClasses($classes)
+    {
+        if (!$classes) {
+            return collect();
+        }
+
+        $grouped = $classes->groupBy(function($c) {
+            $date = $c->class_date instanceof \Carbon\Carbon ? $c->class_date->toDateString() : (string) $c->class_date;
+            $name = strtolower(trim((string) $c->name));
+            $time = (string) $c->start_time;
+            $instructor = (string) ($c->instructor_id ?? '0');
+            $location = strtolower(trim((string) ($c->location ?? '')));
+            return $date.'|'.$time.'|'.$instructor.'|'.$location.'|'.$name;
+        });
+
+        return $grouped->map(function($group) {
+            // Prefer a child instance if present
+            $child = $group->first(function($c) { return !is_null($c->parent_class_id); });
+            if ($child) {
+                return $child;
+            }
+            // Otherwise prefer an active entry
+            $active = $group->first(function($c) { return (bool) $c->active; });
+            if ($active) {
+                return $active;
+            }
+            // Fallback: latest by ID
+            return $group->sortByDesc('id')->first();
+        })->values();
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -361,7 +396,12 @@ class FitnessClassController extends Controller
             ]);
         }
         
-        $classes = $query->get()->map(function($class) {
+        $classes = $query->get();
+
+        // Deduplicate by (date | start_time | instructor | location | name)
+        $classes = $this->dedupeCalendarClasses($classes);
+
+        $classes = $classes->map(function($class) {
             return [
                 'id' => $class->id,
                 'title' => ($class->classType->name ?? $class->name) . ($class->instructor ? ' - ' . $class->instructor->name : ''),

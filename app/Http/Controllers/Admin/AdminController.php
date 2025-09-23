@@ -72,7 +72,7 @@ class AdminController extends Controller
         foreach ($classes as $class) {
             if ($class->recurring) {
                 // Handle recurring classes
-                $recurringDays = json_decode($class->recurring_days, true) ?? [];
+                $recurringDays = $this->parseRecurringDays($class->recurring_days);
                 $dayMapping = [
                     'sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3,
                     'thursday' => 4, 'friday' => 5, 'saturday' => 6
@@ -124,7 +124,7 @@ class AdminController extends Controller
         foreach ($classes as $class) {
             if ($class->recurring) {
                 // Handle recurring classes - add once per recurring day in the month
-                $recurringDays = json_decode($class->recurring_days, true) ?? [];
+                $recurringDays = $this->parseRecurringDays($class->recurring_days);
                 $dayMapping = [
                     'sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3,
                     'thursday' => 4, 'friday' => 5, 'saturday' => 6
@@ -158,6 +158,36 @@ class AdminController extends Controller
         }
 
         return $calendarData;
+    }
+
+    /**
+     * Parse recurring days from either JSON or comma-separated string.
+     * Returns an array of lowercase day names.
+     */
+    private function parseRecurringDays($raw): array
+    {
+        if (is_array($raw)) {
+            return array_values(array_filter(array_map(function ($s) {
+                return strtolower(trim((string) $s));
+            }, $raw)));
+        }
+        if (is_string($raw)) {
+            $trim = trim($raw);
+            if ($trim === '') {
+                return [];
+            }
+            $decoded = json_decode($trim, true);
+            if (is_array($decoded)) {
+                return array_values(array_filter(array_map(function ($s) {
+                    return strtolower(trim((string) $s));
+                }, $decoded)));
+            }
+            // Fallback to comma-separated values
+            return array_values(array_filter(array_map(function ($s) {
+                return strtolower(trim((string) $s));
+            }, explode(',', $trim))));
+        }
+        return [];
     }
 
     public function users()
