@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Coupon;
 use App\Models\FitnessClass;
 use App\Models\PackageCode;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Mail;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
@@ -62,13 +67,41 @@ class PurchaseController extends Controller
 
     public function processPackageCheckout(Request $request, string $type)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'password' => ['required', 'confirmed', Rules\Password::min(8)->mixedCase()->numbers()],
-        ]);
+        // Validate input; require password for guests:
+        // - If email already exists, require password (login) without confirmation.
+        // - If new email, require strong password with confirmation (account creation).
+        $existingUser = User::where('email', $request->input('email'))->first();
 
-        $packages = collect($this->index()->getData()['packages'] ?? []);
+        if ($request->user()) {
+            // Logged-in users: no password needed
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+            ]);
+        } elseif ($existingUser) {
+            // Guest using an existing account: must provide password to login
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'password' => ['required','string'],
+            ]);
+
+            // Attempt login
+            if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+                return back()->withInput()->with('error', 'This email is already registered. Please enter the correct password to continue, or use a different email.');
+            }
+
+            $request->session()->regenerate();
+        } else {
+            // Guest creating a new account: no password required at checkout.
+            // We'll create the account after successful payment and email a password setup link.
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+            ]);
+        }
+
+        $packages = collect($this->getPackages());
         $package = $packages->firstWhere('type', $type);
         abort_unless($package, 404);
 
@@ -136,9 +169,26 @@ class PurchaseController extends Controller
             ['email' => $recipientEmail],
             [
                 'name' => ($session && ($session->metadata->name ?? null)) ? $session->metadata->name : 'Guest',
-                'password' => Hash::make($request->password),
+                // Create a secure random password for new users; they can set their own later
+                'password' => Hash::make(bin2hex(random_bytes(16))),
             ]
         );
+
+        // Ensure the purchaser is logged in for immediate access to credits/passes
+        try {
+            Auth::login($user);
+        } catch (\Throwable $e) {
+            \Log::warning('Auto login after package purchase failed: '.$e->getMessage());
+        }
+
+        // If the account was just created, email them a password setup link
+        if ($user->wasRecentlyCreated) {
+            try {
+                Password::sendResetLink(['email' => $user->email]);
+            } catch (\Throwable $e) {
+                \Log::warning('Failed to send password setup link: '.$e->getMessage());
+            }
+        }
 
         // Determine allocation by type
         $expiresAt = now()->addMonth();

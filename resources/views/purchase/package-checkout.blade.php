@@ -88,11 +88,29 @@
                         </div>
                     </div>
                 @endif
+                @if ($errors->any())
+                    <div class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-red-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <div class="text-red-800 font-semibold mb-1">Please fix the following:</div>
+                                <ul class="list-disc list-inside text-red-700 text-sm">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <form action="{{ route('purchase.package.process', ['type' => $package->type]) }}" method="POST" class="space-y-6">
                     @csrf
                     <div class="relative">
                         <input id="name" name="name" type="text" required
+                               value="{{ old('name', auth()->user()->name ?? '') }}" @auth readonly @endauth
                                class="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 placeholder-transparent focus:border-primary transition-colors"
                                placeholder="Full Name" />
                         <label for="name" 
@@ -102,10 +120,14 @@
                             Full Name
                         </label>
                         <div class="mt-1 text-sm text-gray-500">Enter your name as it appears on your card</div>
+                        @error('name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="relative">
                         <input id="email" name="email" type="email" required
+                               value="{{ old('email', auth()->user()->email ?? '') }}" @auth readonly @endauth
                                class="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 placeholder-transparent focus:border-primary transition-colors"
                                placeholder="Email Address" />
                         <label for="email"
@@ -115,33 +137,28 @@
                             Email Address
                         </label>
                         <div class="mt-1 text-sm text-gray-500">We'll send your receipt to this email</div>
+                        @error('email')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
-                    <div class="relative">
-                        <input id="password" name="password" type="password" required
-                               class="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 placeholder-transparent focus:border-primary transition-colors"
-                               placeholder="Password" />
-                        <label for="password"
-                               class="absolute left-2 -top-2.5 text-sm text-gray-600 transition-all
-                                      peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4
-                                      peer-focus:-top-2.5 peer-focus:left-2 peer-focus:text-sm peer-focus:text-primary floating-label">
-                            Password
-                        </label>
-                        <div class="mt-1 text-sm text-gray-500">Create a secure password for your account</div>
-                    </div>
-
-                    <div class="relative">
-                        <input id="password_confirmation" name="password_confirmation" type="password" required
-                               class="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 placeholder-transparent focus:border-primary transition-colors"
-                               placeholder="Confirm Password" />
-                        <label for="password_confirmation"
-                               class="absolute left-2 -top-2.5 text-sm text-gray-600 transition-all
-                                      peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4
-                                      peer-focus:-top-2.5 peer-focus:left-2 peer-focus:text-sm peer-focus:text-primary floating-label">
-                            Confirm Password
-                        </label>
-                        <div class="mt-1 text-sm text-gray-500">Confirm your password</div>
-                    </div>
+                    @guest
+                        <div class="relative">
+                            <input id="password" name="password" type="password"
+                                   class="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 placeholder-transparent focus:border-primary transition-colors"
+                                   placeholder="Password" />
+                            <label for="password"
+                                   class="absolute left-2 -top-2.5 text-sm text-gray-600 transition-all
+                                          peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4
+                                          peer-focus:-top-2.5 peer-focus:left-2 peer-focus:text-sm peer-focus:text-primary floating-label">
+                                Password
+                            </label>
+                            <div class="mt-1 text-sm text-gray-500">If you already have an account, enter your existing password to continue. New customers can leave this blank and you'll be emailed a link to set your password after payment.</div>
+                            @error('password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endguest
 
                     <div class="pt-4">
                         <button type="submit" 
