@@ -8,7 +8,9 @@
         body { background: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
         .container { max-width: 640px; margin: 0 auto; padding: 24px; }
         .card { background: #111827; border: 1px solid #334155; border-radius: 12px; padding: 24px; }
-        .brand { color: #c084fc; font-weight: 700; letter-spacing: 0.4px; }
+        .logo { text-align: center; margin-bottom: 12px; }
+        .logo img { max-width: 180px; height: auto; display: inline-block; background: #ffffff; border-radius: 8px; padding: 4px; }
+        .brand { color: #c084fc; font-weight: 700; letter-spacing: 0.4px; text-align: center; }
         .title { font-size: 22px; margin: 0 0 8px; color: #fff; }
         .subtitle { margin: 0 0 20px; color: #94a3b8; font-size: 14px; }
         .hr { border: 0; border-top: 1px solid #334155; margin: 20px 0; }
@@ -20,6 +22,9 @@
 <body>
 <div class="container">
     <div class="card">
+        <div class="logo">
+            <img src="{{ asset('made-running.png') }}" alt="Made Running">
+        </div>
         <div class="brand">Made Running</div>
         @if($event === 'activation')
             <h1 class="title">Your Membership is Active</h1>

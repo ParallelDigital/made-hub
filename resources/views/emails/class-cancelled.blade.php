@@ -5,82 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class Cancelled</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .email-container {
-            max-width: 600px;
-            margin: 40px auto;
-            background-color: #ffffff;
-            border: 1px solid #dddddd;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .header { background-color: #000000; color: #ffffff; padding: 20px; text-align: center; }
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            color: #ffffff;
-        }
-        .brand-badge { display: inline-flex; align-items: center; gap: 10px; justify-content: center; }
-        .brand-title { color: #c8b7ed; font-weight: 800; letter-spacing: 0.5px; }
-        .content {
-            padding: 30px;
-            color: #333333;
-            line-height: 1.6;
-        }
-        .content h2 {
-            font-size: 20px;
-            color: #111111;
-        }
-        .class-details {
-            margin: 20px 0;
-            padding: 20px;
-            background-color: #f9f9ff;
-            border-left: 4px solid #dc2626; /* red border */
-        }
-        .class-details p {
-            margin: 5px 0;
-        }
-        .reason-box {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #fef3f2;
-            border: 1px solid #fecaca;
-            border-radius: 6px;
-        }
-        .button {
-            display: inline-block;
-            background-color: #c8b7ed;
-            color: #000000 !important;
-            padding: 12px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 700;
-        }
-        .footer {
-            background-color: #000000;
-            color: #aaaaaa;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-        }
-        .footer a {
-            color: #c8b7ed;
-            text-decoration: none;
-        }
+        body { background: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        .email-container { max-width: 640px; margin: 24px auto; background: #111827; border: 1px solid #334155; border-radius: 12px; overflow: hidden; }
+        .header { background: transparent; color: #e2e8f0; padding: 20px; text-align: center; }
+        .header h1 { margin: 8px 0 0; font-size: 22px; color: #ffffff; }
+        .brand { color: #c084fc; font-weight: 700; letter-spacing: 0.4px; margin-top: 8px; }
+        .logo-container img { max-width: 180px; height: auto; display: inline-block; background: #ffffff; border-radius: 8px; padding: 4px; }
+        .content { padding: 24px; color: #e2e8f0; line-height: 1.6; }
+        .content h2 { font-size: 18px; color: #ffffff; }
+        .class-details { margin: 20px 0; padding: 16px; background: #0b1220; border: 1px solid #334155; border-left: 4px solid #dc2626; border-radius: 8px; }
+        .class-details p { margin: 6px 0; }
+        .reason-box { margin: 20px 0; padding: 15px; background: #1b1220; border: 1px solid #fecaca33; border-radius: 8px; color: #fecaca; }
+        .cta { display: inline-block; background: #8b5cf6; color: #fff !important; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 700; }
+        .footer { background: transparent; color: #64748b; padding: 16px 20px; text-align: center; font-size: 12px; }
+        .footer a { color: #c084fc; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="email-container">
         <div class="header">
             <div class="brand-badge">
-                <img src="{{ asset('made-club.jpg') }}" alt="Made Running" width="80" height="53" style="max-width: 100%; height: auto; border-radius: 4px;">
+                <div class="logo-container">
+                    <img src="{{ asset('made-running.png') }}" alt="Made Running">
+                </div>
             </div>
-            <h1 style="margin-top:10px;">Class Cancelled</h1>
+            <div class="brand">Made Running</div>
+            <h1>Class Cancelled</h1>
         </div>
         <div class="content">
             <h2>Hi {{ $user->name ?? 'there' }},</h2>
@@ -108,7 +58,7 @@
 
             <p>You can browse and book other available classes on our website:</p>
             <p style="margin-top: 20px;">
-                <a href="{{ url('/dashboard') }}" class="button">Browse Available Classes</a>
+                <a href="{{ url('/dashboard') }}" class="cta">Browse Available Classes</a>
             </p>
 
             <p>If you have any questions or need assistance finding another class, please don't hesitate to contact us.</p>

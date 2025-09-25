@@ -5,82 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Confirmed</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .email-container {
-            max-width: 600px;
-            margin: 40px auto;
-            background-color: #ffffff;
-            border: 1px solid #dddddd;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .header { background-color: #000000; color: #ffffff; padding: 20px; text-align: center; }
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            color: #ffffff;
-        }
-        .brand-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .logo-container img {
-            border-radius: 3px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-            padding: 2px;
-        }
-        .content {
-            padding: 30px;
-            color: #333333;
-            line-height: 1.6;
-        }
-        .content h2 {
-            font-size: 20px;
-            color: #111111;
-        }
-        .booking-details {
-            margin: 20px 0;
-            padding: 20px;
-            background-color: #f9f9ff;
-            border-left: 4px solid #c8b7ed; /* brand primary */
-        }
-        .booking-details p {
-            margin: 5px 0;
-        }
-        .qr-code {
-            text-align: center;
-            margin-top: 30px;
-        }
-        .qr-code img {
-            max-width: 200px;
-            height: auto;
-        }
-        .button {
-            display: inline-block;
-            background-color: #c8b7ed;
-            color: #000000 !important;
-            padding: 12px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 700;
-        }
-        .footer {
-            background-color: #000000;
-            color: #aaaaaa;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-        }
-        .footer a {
-            color: #c8b7ed;
-            text-decoration: none;
-        }
+        body { background: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        .email-container { max-width: 640px; margin: 24px auto; background: #111827; border: 1px solid #334155; border-radius: 12px; overflow: hidden; }
+        .header { background: transparent; color: #e2e8f0; padding: 20px; text-align: center; }
+        .header h1 { margin: 8px 0 0; font-size: 22px; color: #ffffff; }
+        .brand { color: #c084fc; font-weight: 700; letter-spacing: 0.4px; margin-top: 8px; }
+        .logo-container img { max-width: 180px; height: auto; display: inline-block; background: #ffffff; border-radius: 8px; padding: 4px; }
+        .content { padding: 24px; color: #e2e8f0; line-height: 1.6; }
+        .content h2 { font-size: 18px; color: #ffffff; }
+        .booking-details { margin: 20px 0; padding: 16px; background: #0b1220; border: 1px solid #334155; border-left: 4px solid #c084fc; border-radius: 8px; }
+        .booking-details p { margin: 6px 0; }
+        .qr-code { text-align: center; margin-top: 24px; }
+        .qr-code img { max-width: 200px; height: auto; }
+        .cta { display: inline-block; background: #8b5cf6; color: #fff !important; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 700; }
+        .footer { background: transparent; color: #64748b; padding: 16px 20px; text-align: center; font-size: 12px; }
+        .footer a { color: #c084fc; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -88,10 +27,11 @@
         <div class="header">
             <div class="brand-badge">
                 <div class="logo-container">
-                    <img src="{{ asset('made-running.png') }}" alt="Made Running" style="max-width: 100%; height: auto; border-radius: 3px; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; background: #ffffff; padding: 2px;">
+                    <img src="{{ asset('made-running.png') }}" alt="Made Running">
                 </div>
             </div>
-            <h1 style="margin-top:10px;">Booking Confirmed</h1>
+            <div class="brand">Made Running</div>
+            <h1>Booking Confirmed</h1>
         </div>
         <div class="content">
             <h2>Hi {{ $booking->user->name ?? 'there' }},</h2>
@@ -110,9 +50,9 @@
                 @if($qrCode)
                     <img src="data:{{ $qrMime ?? 'image/jpeg' }};base64,{{ $qrCode }}" alt="Your Booking QR Code" style="max-width: 200px; height: auto; display: block; margin: 0 auto;">
                 @endif
-                <p style="margin-top:12px; font-size: 13px; color:#555;">The QR code is also attached to this email as an image for your convenience.</p>
-                <p style="margin-top:16px;"><a href="{{ $qrUrl }}" class="button">Open Check-in Link</a></p>
-                <p style="margin-top:8px; font-size: 12px; color:#666; word-break: break-all;">Or copy this link: {{ $qrUrl }}</p>
+                <p style="margin-top:12px; font-size: 13px; color:#94a3b8;">The QR code is also attached to this email as an image for your convenience.</p>
+                <p style="margin-top:16px;"><a href="{{ $qrUrl }}" class="cta">Open Check-in Link</a></p>
+                <p style="margin-top:8px; font-size: 12px; color:#94a3b8; word-break: break-all;">Or copy this link: {{ $qrUrl }}</p>
             </div>
 
             <p>If you have any questions or need to make changes, please don't hesitate to contact us.</p>
