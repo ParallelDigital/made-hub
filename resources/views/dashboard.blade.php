@@ -95,11 +95,8 @@
                 $creditsExpiry = (!$hasMembership && !$hasUnlimited) ? Auth::user()->credits_expires_at : null;
                 $unlimitedExpiry = $hasUnlimited ? Auth::user()->unlimited_pass_expires_at : null;
             @endphp
-            @if($role === 'admin' || $role === 'administrator' || $role === 'instructor' || $hasAnyCredits)
+            @if($role === 'admin' || $role === 'administrator' || $role === 'instructor')
                 <p class="break-words"><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white text-sm sm:text-base">{{ Auth::user()->pin_code ?? '— — — —' }}</span></p>
-            @else
-                <p class="break-words"><span class="text-gray-400">Booking Code (PIN):</span> <span class="font-mono tracking-widest text-white text-sm sm:text-base">{{ Auth::user()->pin_code ? '••••' : '— — — —' }}</span></p>
-                <p class="text-xs text-gray-400">Your PIN will be shown when you book with credits.</p>
             @endif
             <p>
                 <span class="text-gray-400">Membership:</span>
@@ -181,11 +178,6 @@
                     <div id="uc-class-name" class="font-medium">Class Name</div>
                     <div id="uc-class-datetime" class="text-sm text-gray-300">Date and time</div>
                 </div>
-                <div class="space-y-1">
-                    <label for="uc-pin" class="text-sm text-gray-300">Booking PIN (optional)</label>
-                    <input id="uc-pin" type="password" inputmode="numeric" pattern="\\d*" maxlength="4" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Enter 4-digit PIN (if set)" />
-                    <p class="text-xs text-gray-400">If you have a booking PIN set, enter it to confirm.</p>
-                </div>
                 <div id="uc-error" class="hidden text-sm text-red-400"></div>
             </div>
             <div class="p-4 border-t border-gray-700 flex items-center justify-end gap-3">
@@ -220,7 +212,6 @@
         const ucModal = document.getElementById('use-credits-modal');
         const ucName = document.getElementById('uc-class-name');
         const ucDT = document.getElementById('uc-class-datetime');
-        const ucPin = document.getElementById('uc-pin');
         const ucError = document.getElementById('uc-error');
         const ucConfirm = document.getElementById('uc-confirm');
         const ucCancel = document.getElementById('uc-cancel');
@@ -374,7 +365,6 @@
             ucClassId = info.id;
             ucName.textContent = info.name || 'Class';
             ucDT.textContent = `${info.date} • ${formatTime12(info.time)}`;
-            ucPin.value = '';
             ucError.classList.add('hidden');
             ucError.textContent = '';
             ucModal.classList.remove('hidden');
@@ -409,7 +399,7 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ pin_code: ucPin.value || null })
+                body: JSON.stringify({})
             })
             .then(async r => {
                 const data = await r.json().catch(()=>({success:false,message:'Unexpected server response'}));

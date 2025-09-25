@@ -965,29 +965,7 @@
             </div>
         </div>
 
-        <!-- PIN Modal (for confirming credit booking) -->
-        <div id="pinModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg max-w-md w-full p-6">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Confirm with Credits</h3>
-                    <button onclick="closePinModal()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <p class="text-gray-700 mb-3">Enter your 4-digit booking code (PIN) to confirm booking with credits.</p>
-                <div class="relative mb-2">
-                    <input id="pinModalInput" type="password" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="0000" class="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
-                    <button type="button" onclick="togglePinVisibility('pinModalInput', this)" aria-label="Show PIN" class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700">
-                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3C5 3 1.73 7.11 1 10c.73 2.89 4 7 9 7s8.27-4.11 9-7c-.73-2.89-4-7-9-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="10" cy="10" r="3" fill="currentColor"/></svg>
-                    </button>
-                </div>
-                <p id="pinModalError" class="text-sm text-red-600 hidden">Please enter your 4-digit PIN.</p>
-                <div class="mt-4 flex justify-end gap-3">
-                    <button onclick="closePinModal()" class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button onclick="confirmPinAndBook()" class="px-4 py-2 rounded bg-primary text-black font-semibold hover:bg-opacity-90">Confirm</button>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- No Credits Modal (prompt to purchase) -->
         <div id="noCreditsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
@@ -1684,16 +1662,7 @@
                 }
             })();
 
-            // Toggle PIN visibility
-            (function(){
-                const toggleBtn = document.getElementById('togglePinVisibility');
-                const input = document.getElementById('pinCodeInput');
-                if (toggleBtn && input) {
-                    toggleBtn.addEventListener('click', function(){
-                        input.type = input.type === 'password' ? 'text' : 'password';
-                    });
-                }
-            })();
+            // (PIN no longer required for booking with credits)
 
             // Login modal helpers
             function openLoginModal() {
@@ -1743,11 +1712,10 @@
                 document.body.style.overflow = 'auto';
             }
 
-            // Perform booking with credits (AJAX) after confirmation
-            function performCreditBooking(classId, pin) {
+            // Perform booking with credits (AJAX) after confirmation (no PIN required)
+            function performCreditBooking(classId) {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 const payload = {};
-                if (pin && /^\d{4}$/.test(pin)) payload.pin_code = pin;
                 fetch(`/book-with-credits/${classId}`, {
                     method: 'POST',
                     headers: {
@@ -1771,32 +1739,6 @@
                 });
             }
 
-            // Optional PIN helpers (modal exists; PIN is optional)
-            function togglePinVisibility(inputId, btn) {
-                const input = document.getElementById(inputId);
-                if (!input) return;
-                input.type = input.type === 'password' ? 'text' : 'password';
-                if (btn && btn.setAttribute) {
-                    const shown = input.type === 'text';
-                    btn.setAttribute('aria-label', shown ? 'Hide PIN' : 'Show PIN');
-                }
-            }
-
-            function closePinModal() {
-                const modal = document.getElementById('pinModal');
-                if (modal) {
-                    modal.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
-                }
-            }
-
-            function confirmPinAndBook() {
-                const input = document.getElementById('pinModalInput');
-                const pin = (input?.value || '').trim();
-                const cid = window.selectedClassId;
-                closePinModal();
-                performCreditBooking(cid, pin);
-            }
 
             // No-credits modal helpers
             function openNoCreditsModal() {

@@ -130,24 +130,10 @@
                         <div class="text-3xl font-extrabold text-black">{{ $availableCredits ?? 0 }}</div>
                     </div>
 
-                    <div id="creditsPinWrap" class="space-y-2 {{ ($autoOpenCredits ?? false) ? '' : 'hidden' }}">
-                        <label for="creditsPinInput" class="block text-sm font-medium text-gray-800">Enter your 4-digit booking code (PIN)</label>
-                        <div class="relative">
-                            <input id="creditsPinInput" name="pin_code" inputmode="numeric" pattern="\\d{4}" maxlength="4" type="password"
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                   placeholder="0000">
-                            <button type="button" id="toggleCreditsPin" aria-label="Show PIN"
-                                    class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700">
-                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3C5 3 1.73 7.11 1 10c.73 2.89 4 7 9 7s8.27-4.11 9-7c-.73-2.89-4-7-9-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="10" cy="10" r="3" fill="currentColor"/></svg>
-                            </button>
-                        </div>
-                        <p id="creditsPinError" class="text-sm text-red-600 hidden">Please enter your 4-digit PIN.</p>
-                    </div>
-
                     <button id="useCreditsCheckoutBtn"
                             class="w-full mt-3 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md bg-purple-50 hover:bg-purple-100 text-black font-semibold transition-colors {{ ($availableCredits ?? 0) > 0 ? '' : 'opacity-50 cursor-not-allowed' }}"
                             {{ ($availableCredits ?? 0) > 0 ? '' : 'disabled' }}>
-                        <span id="useCreditsCheckoutLabel">{{ ($autoOpenCredits ?? false) ? 'Confirm with Credits' : 'Use 1 Credit' }}</span>
+                        <span id="useCreditsCheckoutLabel">Use 1 Credit</span>
                     </button>
                 @else
                     <p class="text-gray-700 mb-3">Sign in to use your credits.</p>
@@ -189,56 +175,23 @@
             btnCard.addEventListener('click', () => activate('card'));
             btnCredits.addEventListener('click', () => activate('credits'));
         })();
-        // Auto-open credits block
+        // Auto-open credits tab if requested (no PIN)
         document.addEventListener('DOMContentLoaded', function() {
             const shouldOpen = {{ ($autoOpenCredits ?? false) ? 'true' : 'false' }};
             if (shouldOpen) {
-                const wrap = document.getElementById('creditsPinWrap');
-                if (wrap) {
-                    wrap.classList.remove('hidden');
-                    const input = document.getElementById('creditsPinInput');
-                    if (input) input.focus();
-                }
+                const btnCredits = document.getElementById('tab-btn-credits');
+                if (btnCredits) btnCredits.click();
             }
         });
-
-        // Toggle PIN visibility
-        (function() {
-            const toggleBtn = document.getElementById('toggleCreditsPin');
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function() {
-                    const input = document.getElementById('creditsPinInput');
-                    if (!input) return;
-                    input.type = input.type === 'password' ? 'text' : 'password';
-                    this.setAttribute('aria-label', input.type === 'password' ? 'Show PIN' : 'Hide PIN');
-                });
-            }
-        })();
 
         // Use credits booking
         (function() {
             const btn = document.getElementById('useCreditsCheckoutBtn');
             if (!btn) return;
             btn.addEventListener('click', function() {
-                const wrap = document.getElementById('creditsPinWrap');
                 const label = document.getElementById('useCreditsCheckoutLabel');
-                if (wrap && wrap.classList.contains('hidden')) {
-                    wrap.classList.remove('hidden');
-                    if (label) label.textContent = 'Confirm with Credits';
-                    const input = document.getElementById('creditsPinInput');
-                    if (input) input.focus();
-                    return;
-                }
-
-                const input = document.getElementById('creditsPinInput');
-                const pinError = document.getElementById('creditsPinError');
-                const pin = input ? input.value.trim() : '';
-                if (!/^\d{4}$/.test(pin)) {
-                    if (pinError) pinError.classList.remove('hidden');
-                    if (input) input.focus();
-                    return;
-                }
-                if (pinError) pinError.classList.add('hidden');
+                // Simple confirmation
+                if (!confirm('Use 1 credit to book this class?')) return;
 
                 // Disable button during request
                 btn.disabled = true;
@@ -252,31 +205,27 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
-                    body: JSON.stringify({ pin_code: pin })
+                    body: JSON.stringify({})
                 })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = `/booking/confirmation/{{ $class->id }}`;
-                    } else {
-                        if (pinError) {
-                            pinError.textContent = data.message || 'Booking failed. Please try again.';
-                            pinError.classList.remove('hidden');
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
                         } else {
-                            showAlertModal(data.message || 'Booking failed. Please try again.', 'error');
+                            window.location.href = `/booking/confirmation/{{ $class->id }}`;
                         }
+                    } else {
+                        showAlertModal(data.message || 'Booking failed. Please try again.', 'error');
                     }
                 })
                 .catch(() => {
-                    if (pinError) {
-                        pinError.textContent = 'An error occurred. Please try again.';
-                        pinError.classList.remove('hidden');
-                    }
+                    showAlertModal('An error occurred. Please try again.', 'error');
                 })
                 .finally(() => {
                     btn.disabled = false;
                     btn.classList.remove('opacity-70', 'cursor-not-allowed');
-                    if (label) label.textContent = 'Confirm with Credits';
+                    if (label) label.textContent = 'Use 1 Credit';
                 });
             });
         })();

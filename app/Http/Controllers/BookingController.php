@@ -22,11 +22,6 @@ class BookingController extends Controller
 
         $user = Auth::user();
         
-        // Optional: validate 4-digit booking PIN if provided, but do not require it
-        $pin = $request->input('pin_code');
-        if ($pin !== null && (string) $pin !== (string) ($user->pin_code ?? '')) {
-            return response()->json(['success' => false, 'message' => 'Invalid booking code (PIN).'], 422);
-        }
         $class = FitnessClass::findOrFail($classId);
 
         // Check if the class has already started
