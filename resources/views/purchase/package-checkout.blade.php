@@ -108,6 +108,32 @@
 
                 <form action="{{ route('purchase.package.process', ['type' => $package->type]) }}" method="POST" class="space-y-6">
                     @csrf
+                    @auth
+                        <input type="hidden" name="checkout_mode" value="account" />
+                    @endauth
+                    @guest
+                        <fieldset class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <legend class="text-sm font-semibold text-gray-700">Checkout options</legend>
+                            <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <label class="flex items-start space-x-3 cursor-pointer border rounded-lg p-3 hover:border-primary">
+                                    <input type="radio" name="checkout_mode" value="guest" class="mt-1"
+                                           {{ old('checkout_mode', 'guest') === 'guest' ? 'checked' : '' }}>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Guest checkout</div>
+                                        <div class="text-sm text-gray-600">Buy credits without signing in. We'll allocate them to the email below and email a link to set a password if needed.</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-start space-x-3 cursor-pointer border rounded-lg p-3 hover:border-primary">
+                                    <input type="radio" name="checkout_mode" value="account" class="mt-1"
+                                           {{ old('checkout_mode') === 'account' ? 'checked' : '' }}>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Sign in to account</div>
+                                        <div class="text-sm text-gray-600">Use your existing password to sign in and buy credits.</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </fieldset>
+                    @endguest
                     <div class="relative">
                         <input id="name" name="name" type="text" required
                                value="{{ old('name', auth()->user()->name ?? '') }}" @auth readonly @endauth
@@ -143,7 +169,7 @@
                     </div>
 
                     @guest
-                        <div class="relative">
+                        <div id="account-password-block" class="relative" style="display: none;">
                             <input id="password" name="password" type="password"
                                    class="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 placeholder-transparent focus:border-primary transition-colors"
                                    placeholder="Password" />
@@ -153,7 +179,7 @@
                                           peer-focus:-top-2.5 peer-focus:left-2 peer-focus:text-sm peer-focus:text-primary floating-label">
                                 Password
                             </label>
-                            <div class="mt-1 text-sm text-gray-500">If you already have an account, enter your existing password to continue. New customers can leave this blank and you'll be emailed a link to set your password after payment.</div>
+                            <div class="mt-1 text-sm text-gray-500">Enter your existing password to sign in. If you prefer, choose Guest checkout to buy credits without signing in.</div>
                             @error('password')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -176,6 +202,22 @@
                         </div>
                     </div>
                 </form>
+                @guest
+                    <script>
+                        (function(){
+                            const modeInputs = document.querySelectorAll('input[name="checkout_mode"]');
+                            const pwBlock = document.getElementById('account-password-block');
+                            const update = () => {
+                                const selected = document.querySelector('input[name="checkout_mode"]:checked');
+                                if (!selected) return;
+                                pwBlock.style.display = selected.value === 'account' ? '' : 'none';
+                            };
+                            modeInputs.forEach(i => i.addEventListener('change', update));
+                            // Initialize on load based on old() value
+                            update();
+                        })();
+                    </script>
+                @endguest
             </div>
         </div>
     </div>

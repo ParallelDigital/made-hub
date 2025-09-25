@@ -67,9 +67,8 @@ class PurchaseController extends Controller
 
     public function processPackageCheckout(Request $request, string $type)
     {
-        // Validate input; require password for guests:
-        // - If email already exists, require password (login) without confirmation.
-        // - If new email, require strong password with confirmation (account creation).
+        // Validate input according to checkout mode (guest vs account)
+        $mode = $request->input('checkout_mode', $request->user() ? 'account' : 'guest');
         $existingUser = User::where('email', $request->input('email'))->first();
 
         if ($request->user()) {
@@ -78,23 +77,25 @@ class PurchaseController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
             ]);
-        } elseif ($existingUser) {
-            // Guest using an existing account: must provide password to login
+        } elseif ($mode === 'account') {
+            // Sign in and checkout
+            if (!$existingUser) {
+                return back()->withInput()->with('error', 'No account found for this email. Choose Guest checkout to buy credits for this email, or use a different email.');
+            }
+
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
                 'password' => ['required','string'],
             ]);
 
-            // Attempt login
             if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-                return back()->withInput()->with('error', 'This email is already registered. Please enter the correct password to continue, or use a different email.');
+                return back()->withInput()->with('error', 'Invalid password for this email. You can choose Guest checkout to buy credits for this account without signing in.');
             }
 
             $request->session()->regenerate();
         } else {
-            // Guest creating a new account: no password required at checkout.
-            // We'll create the account after successful payment and email a password setup link.
+            // Guest checkout (no sign-in) — credits will be allocated to the account for this email
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
@@ -136,6 +137,7 @@ class PurchaseController extends Controller
                     'package_type' => $type,
                     'name' => $request->name,
                     'email' => $request->email,
+                    'checkout_mode' => $mode,
                 ],
             ]);
 
@@ -160,6 +162,14 @@ class PurchaseController extends Controller
             }
         }
 
+        // Determine checkout mode (guest vs account) from session metadata or auth context
+        $checkoutMode = 'guest';
+        if ($request->user()) {
+            $checkoutMode = 'account';
+        } elseif ($session && isset($session->metadata) && ($session->metadata->checkout_mode ?? null)) {
+            $checkoutMode = $session->metadata->checkout_mode;
+        }
+
         if (!$recipientEmail) {
             return redirect()->route('purchase.index')->with('error', 'Unable to identify purchaser email for allocation.');
         }
@@ -174,11 +184,13 @@ class PurchaseController extends Controller
             ]
         );
 
-        // Ensure the purchaser is logged in for immediate access to credits/passes
-        try {
-            Auth::login($user);
-        } catch (\Throwable $e) {
-            \Log::warning('Auto login after package purchase failed: '.$e->getMessage());
+        // Login only if they checked out as account (signed in); keep guest otherwise (security)
+        if ($checkoutMode === 'account' || $request->user()) {
+            try {
+                Auth::login($user);
+            } catch (\Throwable $e) {
+                \Log::warning('Auto login after package purchase failed: '.$e->getMessage());
+            }
         }
 
         // If the account was just created, email them a password setup link
