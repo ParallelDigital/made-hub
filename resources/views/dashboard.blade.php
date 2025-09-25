@@ -168,7 +168,32 @@
         @endif
     </div>
     
-   
+    <!-- Use Credits Confirmation Modal -->
+    <div id="use-credits-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="relative max-w-md mx-auto mt-24 bg-gray-900 border border-gray-700 rounded-lg shadow-xl text-gray-100">
+            <div class="p-5 border-b border-gray-700">
+                <h3 class="text-lg font-semibold">Confirm Use of Credits</h3>
+            </div>
+            <div class="p-5 space-y-3">
+                <p>Use 1 credit to book:</p>
+                <div class="bg-gray-800 rounded p-3">
+                    <div id="uc-class-name" class="font-medium">Class Name</div>
+                    <div id="uc-class-datetime" class="text-sm text-gray-300">Date and time</div>
+                </div>
+                <div class="space-y-1">
+                    <label for="uc-pin" class="text-sm text-gray-300">Booking PIN (optional)</label>
+                    <input id="uc-pin" type="password" inputmode="numeric" pattern="\\d*" maxlength="4" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Enter 4-digit PIN (if set)" />
+                    <p class="text-xs text-gray-400">If you have a booking PIN set, enter it to confirm.</p>
+                </div>
+                <div id="uc-error" class="hidden text-sm text-red-400"></div>
+            </div>
+            <div class="p-4 border-t border-gray-700 flex items-center justify-end gap-3">
+                <button id="uc-cancel" class="px-4 py-2 rounded border border-gray-600 hover:bg-gray-800">Cancel</button>
+                <button id="uc-confirm" class="px-4 py-2 rounded bg-primary text-black hover:opacity-90">Confirm</button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -190,6 +215,16 @@
         const selectedDateHeader = document.getElementById('dash-selected-date');
         let dashCurrentDate = '{{ now()->format('Y-m-d') }}';
         let dashIsLoading = false;
+
+        // Use Credits Modal elements
+        const ucModal = document.getElementById('use-credits-modal');
+        const ucName = document.getElementById('uc-class-name');
+        const ucDT = document.getElementById('uc-class-datetime');
+        const ucPin = document.getElementById('uc-pin');
+        const ucError = document.getElementById('uc-error');
+        const ucConfirm = document.getElementById('uc-confirm');
+        const ucCancel = document.getElementById('uc-cancel');
+        let ucClassId = null;
 
         function parseTimeToMinutes(t){
             if(!t) return null;
@@ -237,7 +272,9 @@
                     actions.appendChild(btn(`<a href="{{ url('/checkout') }}/${c.id}" class="px-3 py-2 rounded border border-primary text-black bg-primary hover:opacity-90 text-xs w-full sm:w-auto">Reserve</a>`));
                     const canUse = USER_UNLIMITED || USER_CREDITS > 0;
                     const disabledAttrs = canUse ? '' : 'disabled title="No credits" class="cursor-not-allowed opacity-60"';
-                    actions.appendChild(btn(`<button data-class-id="${c.id}" class="px-3 py-2 rounded border border-gray-300 text-white hover:bg-gray-700 text-xs dash-use-credits w-full sm:w-auto" ${disabledAttrs}>Use Credits</button>`));
+                    const safeName = (c.name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                    const classDate = c.class_date || dashCurrentDate;
+                    actions.appendChild(btn(`<button data-class-id="${c.id}" data-class-name="${safeName}" data-class-date="${classDate}" data-class-time="${c.start_time}" class="px-3 py-2 rounded border border-gray-300 text-white hover:bg-gray-700 text-xs dash-use-credits w-full sm:w-auto" ${disabledAttrs}>Use Credits</button>`));
                 }
                 listEl.appendChild(node);
             });
@@ -333,31 +370,67 @@
             fetchClasses(date).finally(()=>{ dashIsLoading = false; });
         }
 
+        function openUseCreditsModal(info){
+            ucClassId = info.id;
+            ucName.textContent = info.name || 'Class';
+            ucDT.textContent = `${info.date} • ${formatTime12(info.time)}`;
+            ucPin.value = '';
+            ucError.classList.add('hidden');
+            ucError.textContent = '';
+            ucModal.classList.remove('hidden');
+        }
+
+        function closeUseCreditsModal(){
+            ucModal.classList.add('hidden');
+            ucClassId = null;
+        }
+
         document.addEventListener('click', (e)=>{
             const btnEl = e.target.closest('.dash-use-credits');
             if(!btnEl) return;
-            const classId = btnEl.getAttribute('data-class-id');
-            const pin = prompt('Enter your 4-digit PIN to use credits:');
-            if(!pin) return;
-            fetch(`{{ url('/book-with-credits') }}/${classId}`, {
+            if (btnEl.hasAttribute('disabled')) return;
+            const info = {
+                id: btnEl.getAttribute('data-class-id'),
+                name: btnEl.getAttribute('data-class-name'),
+                date: btnEl.getAttribute('data-class-date') || dashCurrentDate,
+                time: btnEl.getAttribute('data-class-time')
+            };
+            openUseCreditsModal(info);
+        });
+
+        if (ucCancel) ucCancel.addEventListener('click', closeUseCreditsModal);
+        if (ucConfirm) ucConfirm.addEventListener('click', function(){
+            if(!ucClassId) return;
+            ucConfirm.disabled = true;
+            fetch(`{{ url('/book-with-credits') }}/${ucClassId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ pin_code: pin })
+                body: JSON.stringify({ pin_code: ucPin.value || null })
             })
-            .then(r=>r.json())
-            .then(data=>{
-                if(data.success){
+            .then(async r => {
+                const data = await r.json().catch(()=>({success:false,message:'Unexpected server response'}));
+                if (data.success) {
                     alert(data.message || 'Booked with credits!', 'success', 'Success');
-                    fetchClasses(dateInput.value);
+                    closeUseCreditsModal();
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        fetchClasses(dateInput.value);
+                    }
                 } else {
-                    alert(data.message || 'Booking failed.', 'error', 'Error');
+                    ucError.textContent = data.message || 'Booking failed.';
+                    ucError.classList.remove('hidden');
                 }
             })
-            .catch(() => alert('Network error. Please try again.', 'error', 'Error'));
+            .catch(() => {
+                ucError.textContent = 'Network error. Please try again.';
+                ucError.classList.remove('hidden');
+            })
+            .finally(()=>{ ucConfirm.disabled = false; });
         });
 
         // Cancel booking function with enhanced modal
