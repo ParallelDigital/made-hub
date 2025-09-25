@@ -10,6 +10,11 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class InstructorController extends Controller
 {
@@ -236,17 +241,21 @@ class InstructorController extends Controller
      */
     public function update(Request $request, Instructor $instructor)
     {
-        // Find the user by the instructor's current email to correctly handle email changes.
-        $user = \App\Models\User::where('email', $instructor->email)->first();
+        // Find the current linked user by instructor's existing email, and any target user by the new email.
+        $oldUser = User::where('email', $instructor->email)->first();
+        $targetUser = User::where('email', $request->input('email'))->first();
 
-        $emailValidationRule = 'required|email|unique:users,email';
-        if ($user) {
-            $emailValidationRule .= ',' . $user->id;
-        }
+        // Build robust uniqueness validation: allow the target user's email, and ensure instructors.email stays unique.
+        $ignoreUserId = $targetUser?->id ?? $oldUser?->id;
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => $emailValidationRule,
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->ignore($ignoreUserId),
+                Rule::unique('instructors', 'email')->ignore($instructor->id),
+            ],
             'phone' => 'nullable|string|max:20',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'password' => 'nullable|string|min:8|confirmed',
@@ -254,19 +263,30 @@ class InstructorController extends Controller
         ]);
 
         try {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $instructor, $validated, $user) {
-                $userData = [
-                    'name' => $validated['name'],
-                    'email' => $validated['email'],
-                    'role' => 'instructor',
-                ];
+            DB::transaction(function () use ($request, $instructor, $validated, $oldUser, $targetUser) {
+                // Choose which user record to update: prefer an existing user with the new email.
+                $userToUpdate = $targetUser ?: $oldUser;
 
-                if (!empty($validated['password'])) {
-                    $userData['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+                if (!$userToUpdate) {
+                    // No user exists with either email; create one
+                    $userToUpdate = User::create([
+                        'name' => $validated['name'],
+                        'email' => $validated['email'],
+                        'password' => !empty($validated['password']) ? Hash::make($validated['password']) : Hash::make(\Str::random(16)),
+                        'role' => 'instructor',
+                    ]);
+                } else {
+                    // Update details on the chosen user; ensure it has the new email
+                    $userData = [
+                        'name' => $validated['name'],
+                        'email' => $validated['email'],
+                        'role' => 'instructor',
+                    ];
+                    if (!empty($validated['password'])) {
+                        $userData['password'] = Hash::make($validated['password']);
+                    }
+                    $userToUpdate->update($userData);
                 }
-
-                // Update or create the user record.
-                \App\Models\User::updateOrCreate(['email' => $instructor->email], $userData);
 
                 // Handle photo upload within the transaction.
                 $photoPath = $instructor->photo;
