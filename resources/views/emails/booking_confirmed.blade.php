@@ -47,11 +47,13 @@
             <div class="qr-code">
                 <h3>Your QR Code for Check-in</h3>
                 <p>Present this code at the front desk to check in quickly.</p>
-                @if($qrCode)
+                @if(isset($qrCid))
+                    <img src="{{ $qrCid }}" alt="Your Booking QR Code" style="max-width: 200px; height: auto; display: block; margin: 0 auto;">
+                @elseif($qrCode)
                     <img src="data:{{ $qrMime ?? 'image/jpeg' }};base64,{{ $qrCode }}" alt="Your Booking QR Code" style="max-width: 200px; height: auto; display: block; margin: 0 auto;">
                 @endif
                 <p style="margin-top:12px; font-size: 13px; color:#94a3b8;">The QR code is also attached to this email as an image for your convenience.</p>
-                <p style="margin-top:16px;"><a href="{{ $qrUrl }}" class="cta">Open Check-in Link</a></p>
+                <p style="margin-top:16px;"><a href="{{ $qrCid ?? $qrUrl }}" class="cta" @if(isset($qrCid)) download="{{ $qrAttachmentName ?? 'checkin-qr.jpg' }}" @endif>Open QR Code Image</a></p>
                 <p style="margin-top:8px; font-size: 12px; color:#94a3b8; word-break: break-all;">Or copy this link: {{ $qrUrl }}</p>
             </div>
 

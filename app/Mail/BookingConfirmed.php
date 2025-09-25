@@ -11,6 +11,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Support\Facades\URL;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Symfony\Component\Mime\Email as SymfonyEmail;
+use Symfony\Component\Mime\Part\DataPart;
 
 class BookingConfirmed extends Mailable
 {
@@ -22,6 +24,8 @@ class BookingConfirmed extends Mailable
     private $qrAttachmentName = null;
     /** @var string|null */
     private $qrMime = null;
+    /** @var string|null */
+    private $qrCid = null;
 
     /**
      * Create a new message instance.
@@ -62,6 +66,22 @@ class BookingConfirmed extends Mailable
         // Ensure QR image bytes are prepared (JPEG preferred, PNG fallback)
         $qrCodeBase64 = $this->prepareQrImage($qrUrl);
 
+        // Also embed the QR as an inline MIME part with a fixed Content-ID so the view
+        // can reference it via cid:qr-code. We keep the file attachment (in attachments()).
+        $this->withSymfonyMessage(function (SymfonyEmail $email) {
+            if (!empty($this->qrCodeRaw) && !empty($this->qrMime)) {
+                $part = new DataPart($this->qrCodeRaw, $this->qrAttachmentName ?? 'checkin-qr.jpg', $this->qrMime);
+                // Ensure it's inline and uses a predictable Content-ID
+                $part = $part->asInline();
+                // Symfony generates a Content-ID automatically; to ensure consistency, set it explicitly
+                $headers = $part->getHeaders();
+                $headers->remove('Content-ID');
+                $headers->addIdHeader('Content-ID', 'qr-code');
+                $email->addPart($part);
+                $this->qrCid = 'cid:qr-code';
+            }
+        });
+
         return new Content(
             view: 'emails.booking_confirmed',
             with: [
@@ -69,6 +89,8 @@ class BookingConfirmed extends Mailable
                 'qrCode' => $qrCodeBase64,
                 'qrUrl' => $qrUrl,
                 'qrMime' => $this->qrMime ?? 'image/jpeg',
+                'qrAttachmentName' => $this->qrAttachmentName ?? 'checkin-qr.jpg',
+                'qrCid' => $this->qrCid,
             ],
         );
     }
