@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\BookingConfirmed;
+use App\Mail\InstructorClassRoster;
 use App\Models\Booking;
 use App\Models\FitnessClass;
 use App\Models\User;
@@ -73,6 +74,20 @@ class BookingController extends Controller
                 ]);
             }
 
+            // Notify instructor with updated roster (best-effort)
+            try {
+                $class->loadMissing('instructor');
+                if ($class->instructor && $class->instructor->email) {
+                    Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update'));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send instructor roster email', [
+                    'class_id' => $class->id,
+                    'booking_id' => $booking->id ?? 'unknown',
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Class booked successfully. This class is free for members.',
@@ -111,6 +126,20 @@ class BookingController extends Controller
             } catch (\Exception $e) {
                 \Log::error('Failed to send booking confirmation email for unlimited pass user', [
                     'user_id' => $user->id,
+                    'booking_id' => $booking->id ?? 'unknown',
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            // Notify instructor with updated roster (best-effort)
+            try {
+                $class->loadMissing('instructor');
+                if ($class->instructor && $class->instructor->email) {
+                    Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update'));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send instructor roster email (unlimited pass)', [
+                    'class_id' => $class->id,
                     'booking_id' => $booking->id ?? 'unknown',
                     'error' => $e->getMessage(),
                 ]);
@@ -172,6 +201,20 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             \Log::error('Failed to send booking confirmation email', [
                 'user_id' => $user->id,
+                'booking_id' => $booking->id ?? 'unknown',
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Notify instructor with updated roster (best-effort)
+        try {
+            $class->loadMissing('instructor');
+            if ($class->instructor && $class->instructor->email) {
+                Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update'));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send instructor roster email (credits booking)', [
+                'class_id' => $class->id,
                 'booking_id' => $booking->id ?? 'unknown',
                 'error' => $e->getMessage(),
             ]);
@@ -332,6 +375,20 @@ class BookingController extends Controller
             } catch (\Exception $e) {
                 // Log the error but don't fail the booking
                 \Log::error('Failed to send booking confirmation email for new booking: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            }
+
+            // Notify instructor with updated roster (best-effort)
+            try {
+                $class->loadMissing('instructor');
+                if ($class->instructor && $class->instructor->email) {
+                    Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update'));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send instructor roster email (paid booking)', [
+                    'class_id' => $class->id,
+                    'booking_id' => $booking->id ?? 'unknown',
+                    'error' => $e->getMessage(),
+                ]);
             }
 
             \Log::info('Booking created', ['booking_id' => $booking->id, 'user_id' => $user->id, 'class_id' => $classId]);
