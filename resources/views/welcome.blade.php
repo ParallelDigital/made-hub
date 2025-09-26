@@ -1056,7 +1056,7 @@
                         <div class="flex items-start gap-4">
                             <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary text-purple-300 flex items-center justify-center">
                                 <!-- dumbbell icon -->
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.5 6.5l11 11M7 10H4a1 1 0 00-1 1v2a1 1 0 001 1h3m10-4h3a1 1 0 011 1v2a1 1 0 01-1 1h-3M9 7V4a1 1 0 011-1h2a1 1 0 011 1v3m0 10v3a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3"/></svg>
+                                <svg class="svg-inline--fa fa-dumbbell" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="dumbbell" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M96 64c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32V224v64V448c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V384H64c-17.7 0-32-14.3-32-32V288c-17.7 0-32-14.3-32-32s14.3-32 32-32V160c0-17.7 14.3-32 32-32H96V64zm448 0v64h32c17.7 0 32 14.3 32 32v64c17.7 0 32 14.3 32 32s-14.3 32-32 32v64c0 17.7-14.3 32-32 32H544v64c0 17.7-14.3 32-32 32H480c-17.7 0-32-14.3-32-32V288 224 64c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32zM416 224v64H224V224H416z"></path></svg>
                             </div>
                             <div>
                                 <div class="font-semibold leading-tight">5 Classes Per Week</div>
