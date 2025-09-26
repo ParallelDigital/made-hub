@@ -1046,7 +1046,7 @@
             <div class="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
                 <!-- Header -->
                 <div class="text-center mb-12 sm:mb-14">
-                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">Premium Membership</h2>
+                    <h3 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">Made Membership</h3>
                     <p class="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-gray-300">Unlock unlimited access to our world-class facilities</p>
                 </div>
 
