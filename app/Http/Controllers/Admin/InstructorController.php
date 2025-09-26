@@ -163,20 +163,19 @@ class InstructorController extends Controller
             'role' => 'instructor',
         ]);
 
-        if ($request->hasFile('photo')) {
-            $validated['photo'] = $request->file('photo')->store('instructors', 'public');
-        }
-
-        $validated['active'] = $request->has('active');
-
-        // Create the Instructor record
-        Instructor::create([
+        $instructorData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
-            'photo' => $validated['photo'] ?? null,
-            'active' => $validated['active'],
-        ]);
+            'active' => $request->has('active'),
+        ];
+
+        if ($request->hasFile('photo')) {
+            $instructorData['photo'] = $request->file('photo')->store('instructors', 'public');
+        }
+
+        // Create the Instructor record
+        Instructor::create($instructorData);
 
         return redirect()->route('admin.instructors.index')->with('success', 'Instructor created successfully.');
     }
