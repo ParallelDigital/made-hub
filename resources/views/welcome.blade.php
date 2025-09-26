@@ -734,64 +734,165 @@
             </div>
         </div>
 
-        <!-- Memberships Section -->
-        <div id="memberships" class="bg-black text-white py-14 sm:py-16 lg:py-20">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight uppercase">Memberships</h2>
+        <!-- Membership Section -->
+        <div id="membership" class="bg-black text-white py-14 sm:py-16 lg:py-20 uppercase">
+            <div class="max-w-7xl mx-auto p-5 sm:px-6 lg:px-8">
+                <!-- Header -->
+                <div class="text-center mb-12 sm:mb-14">
+                    <h3 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">MADE MEMBERSHIP</h3>
+                    <p class="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-gray-300">Unlock unlimited access to our world-class facilities</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-xl mx-auto">
-                    <div class="pricing-card bg-[#1A1A1A] rounded-xl p-8 flex flex-col text-center items-center col-span-1 md:col-span-2 lg:col-span-3">
-                        <h3 class="text-2xl font-bold text-white uppercase">Membership</h3>
-                        <p class="text-5xl font-extrabold text-purple-300 my-4">£30.00</p>
-                        <p class="text-gray-400 mb-6 uppercase">*PER MONTH*</p>
-                        <a href="#" class="mt-auto w-full max-w-xs text-center bg-purple-300 text-black font-bold py-3 rounded-lg hover:bg-purple-200 transition-colors uppercase">BUY NOW</a>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
+                    <!-- Features -->
+                    <div class="space-y-6 sm:space-y-7 max-w-xl mx-auto lg:mx-0">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                                <!-- dumbbell icon -->
+                                <svg class="svg-inline--fa fa-dumbbell w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="dumbbell" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M96 64c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32V224v64V448c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V384H64c-17.7 0-32-14.3-32-32V288c-17.7 0-32-14.3-32-32s14.3-32 32-32V160c0-17.7 14.3-32 32-32H96V64zm448 0v64h32c17.7 0 32 14.3 32 32v64c17.7 0 32 14.3 32 32s-14.3 32-32 32v64c0 17.7-14.3 32-32 32H544v64c0 17.7-14.3 32-32 32H480c-17.7 0-32-14.3-32-32V288 224 64c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32zM416 224v64H224V224H416z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold leading-tight">5 Classes Per Week</div>
+                                <div class="text-gray-400 text-sm leading-relaxed">Access to all group fitness classes</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-12 h-12  rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                                <!-- crown icon -->
+                                <svg class="svg-inline--fa fa-crown w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="crown" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M309 106c11.4-7 19-19.7 19-34c0-22.1-17.9-40-40-40s-40 17.9-40 40c0 14.4 7.6 27 19 34L209.7 220.6c-9.1 18.2-32.7 23.4-48.6 10.7L72 160c5-6.7 8-15 8-24c0-22.1-17.9-40-40-40S0 113.9 0 136s17.9 40 40 40c.2 0 .5 0 .7 0L86.4 427.4c5.5 30.4 32 52.6 63 52.6H426.6c30.9 0 57.4-22.1 63-52.6L535.3 176c.2 0 .5 0 .7 0c22.1 0 40-17.9 40-40s-17.9-40-40-40s-40 17.9-40 40c0 9 3 17.3 8 24l-89.1 71.3c-15.9 12.7-39.5 7.5-48.6-10.7L309 106z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold leading-tight">Members Only Classes</div>
+                                <div class="text-gray-400 text-sm leading-relaxed">Exclusive premium training sessions</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                                <!-- ticket icon -->
+                                <svg class="svg-inline--fa fa-calendar-check w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="calendar-check" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zM329 305c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-95 95-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L329 305z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold leading-tight">First Access on Events</div>
+                                <div class="text-gray-400 text-sm leading-relaxed">Priority booking for special events</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                                <!-- clock icon -->
+                                <svg class="svg-inline--fa fa-clock w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="clock" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold leading-tight">Early Booking Access</div>
+                                <div class="text-gray-400 text-sm leading-relaxed">Book classes 48 hours in advance</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                                <!-- building icon -->
+                                <svg class="svg-inline--fa fa-users w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="users" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M144 0a80 80 0 1 1 0 160A80 80 0 1 1 144 0zM512 0a80 80 0 1 1 0 160A80 80 0 1 1 512 0zM0 298.7C0 239.8 47.8 192 106.7 192h42.7c15.9 0 31 3.5 44.6 9.7c-1.3 7.2-1.9 14.7-1.9 22.3c0 38.2 16.8 72.5 43.3 96c-.2 0-.4 0-.7 0H21.3C9.6 320 0 310.4 0 298.7zM405.3 320c-.2 0-.4 0-.7 0c26.6-23.5 43.3-57.8 43.3-96c0-7.6-.7-15-1.9-22.3c13.6-6.3 28.7-9.7 44.6-9.7h42.7C592.2 192 640 239.8 640 298.7c0 11.8-9.6 21.3-21.3 21.3H405.3zM224 224a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zM128 485.3C128 411.7 187.7 352 261.3 352H378.7C452.3 352 512 411.7 512 485.3c0 14.7-11.9 26.7-26.7 26.7H154.7c-14.7 0-26.7-11.9-26.7-26.7z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold leading-tight">Hubspace Access</div>
+                                <div class="text-gray-400 text-sm leading-relaxed">Collaborative workspace and lounge</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                                <!-- meeting room icon -->
+                                <svg class="svg-inline--fa fa-door-open w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="door-open" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M320 32c0-9.9-4.5-19.2-12.3-25.2S289.8-1.4 280.2 1l-179.9 45C79 51.3 64 70.5 64 92.5V448H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H96 288h32V480 32zM256 256c0 17.7-10.7 32-24 32s-24-14.3-24-32s10.7-32 24-32s24 14.3 24 32zm96-128h96V480c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H512V128c0-35.3-28.7-64-64-64H352v64z"></path></svg>    
+                            </div>
+                            <div>
+                                <div class="font-semibold leading-tight">Free Meeting Room</div>
+                                <div class="text-gray-400 text-sm leading-relaxed">Private space for consultations</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                                <!-- gift icon -->
+                                <svg class="svg-inline--fa fa-gift w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="gift" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M190.5 68.8L225.3 128H224 152c-22.1 0-40-17.9-40-40s17.9-40 40-40h2.2c14.9 0 28.8 7.9 36.3 20.8zM64 88c0 14.4 3.5 28 9.6 40H32c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32H480c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32H438.4c6.1-12 9.6-25.6 9.6-40c0-48.6-39.4-88-88-88h-2.2c-31.9 0-61.5 16.9-77.7 44.4L256 85.5l-24.1-41C215.7 16.9 186.1 0 154.2 0H152C103.4 0 64 39.4 64 88zm336 0c0 22.1-17.9 40-40 40H288h-1.3l34.8-59.2C329.1 55.9 342.9 48 357.8 48H360c22.1 0 40 17.9 40 40zM32 288V464c0 26.5 21.5 48 48 48H224V288H32zM288 512H432c26.5 0 48-21.5 48-48V288H288V512z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold leading-tight">Monthly Giveaways</div>
+                                <div class="text-gray-400 text-sm leading-relaxed">Exclusive prizes and rewards</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Card -->
+                    <div class="max-w-md w-full mx-auto lg:mx-0">
+                        <div class="relative rounded-3xl border border-white/5 ring-1 ring-white/5 bg-gradient-to-br from-[#1a1527] via-[#141021] to-[#0e0a18] p-6 sm:p-8 shadow-2xl mt-5">
+                            <div class="text-center">
+                                <div class="text-base sm:text-lg font-semibold text-gray-100">Made Membership</div>
+                                <div class="mt-3 text-5xl sm:text-6xl font-black tracking-tight">£30</div>
+                                <div class="mt-1 mb-4 text-gray-400 text-sm">per month</div>
+
+                                <a href="https://buy.stripe.com/3cscP32lx7Wr6cw3cd" class="relative block top-5 w-full sm:w-auto bg-primary text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">Get Signed Up</a>
+
+                                <div class="mt-4 text-xs text-gray-500">Instant Access • No setup fees</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Class Packages Section -->
-        <div id="class-packages" class="bg-black text-white py-14 sm:py-16 lg:py-20">
+        <!-- Flexible Class Passes Section -->
+        <div id="class-packages" class="bg-[#2A2A3A] text-white py-14 sm:py-16 lg:py-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight uppercase">Class Packages</h2>
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Flexible Class Passes</h2>
+                    <p class="text-gray-400 text-lg">Choose the perfect plan for your lifestyle</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                    <!-- 5 Classes -->
-                    <div class="pricing-card bg-[#1A1A1A] rounded-xl p-8 flex flex-col text-center items-center">
-                        <h3 class="text-2xl font-bold text-white uppercase">MANCHESTER CLASS PACKAGE</h3>
-                        <p class="text-lg text-gray-400 mt-2">5 CLASSES</p>
-                        <p class="text-5xl font-extrabold text-purple-300 my-4">£32.50</p>
-                        <p class="text-4xl font-bold text-white mb-4">5</p>
-                        <p class="text-gray-400 mb-6 uppercase">classes</p>
-                        <a href="#" class="mt-auto w-full max-w-xs text-center bg-[#2D2D2D] text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors uppercase">BUY NOW</a>
-                        <p class="text-gray-400 mt-4 text-xs uppercase">*VALID FOR 1 MONTH*</p>
+                    <!-- Single Class -->
+                    <div class="pricing-card bg-black rounded-xl p-8 flex flex-col">
+                        <h3 class="text-2xl font-bold text-white mb-4">Single Class</h3>
+                        <p class="text-5xl font-extrabold text-white mb-2">$25</p>
+                        <p class="text-gray-400 mb-6">per class</p>
+                        <ul class="space-y-4 text-white mb-8 flex-grow">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Access to any class</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Valid for 30 days</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Equipment included</li>
+                        </ul>
+                        <button class="w-full bg-gray-700 text-white font-bold py-3 rounded-lg hover:bg-gray-600 transition-colors">Purchase</button>
                     </div>
 
-                    <!-- 10 Classes - Most Popular -->
-                    <div class="relative pricing-card bg-[#1A1A1A] rounded-xl p-8 flex flex-col text-center items-center border-2 border-purple-300">
-                        <div class="absolute top-0 -translate-y-1/2 w-full flex justify-center">
-                            <span class="bg-purple-300 text-black text-xs font-bold px-4 py-1 rounded-full uppercase">Most Popular</span>
+                    <!-- 10 Class Pack - Most Popular -->
+                    <div class="relative pricing-card bg-black rounded-xl p-8 flex flex-col border-2 border-purple-400">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-purple-400 text-black text-sm font-bold px-4 py-1 rounded-full">Most Popular</span>
                         </div>
-                        <h3 class="text-2xl font-bold text-white uppercase">MANCHESTER CLASS PACKAGE</h3>
-                        <p class="text-lg text-gray-400 mt-2">10 CLASSES</p>
-                        <p class="text-5xl font-extrabold text-purple-300 my-4">£50.00</p>
-                        <p class="text-4xl font-bold text-white mb-4">10</p>
-                        <p class="text-gray-400 mb-6 uppercase">classes</p>
-                        <a href="#" class="mt-auto w-full max-w-xs text-center bg-purple-300 text-black font-bold py-3 rounded-lg hover:bg-purple-200 transition-colors uppercase">BUY NOW</a>
-                        <p class="text-gray-400 mt-4 text-xs uppercase">*VALID FOR 1 MONTH*</p>
+                        <h3 class="text-2xl font-bold text-white mb-4 mt-4">10 Class Pack</h3>
+                        <p class="text-5xl font-extrabold text-white mb-2">$200</p>
+                        <p class="text-gray-400 mb-6">$20 per class</p>
+                        <ul class="space-y-4 text-white mb-8 flex-grow">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>10 classes included</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Valid for 3 months</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Share with friends</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Priority booking</li>
+                        </ul>
+                        <button class="w-full bg-purple-400 text-black font-bold py-3 rounded-lg hover:bg-purple-300 transition-colors">Purchase</button>
                     </div>
 
-                    <!-- Unlimited -->
-                    <div class="pricing-card bg-[#1A1A1A] rounded-xl p-8 flex flex-col text-center items-center">
-                        <h3 class="text-2xl font-bold text-white uppercase">MANCHESTER CLASS PACKAGE</h3>
-                        <p class="text-lg text-gray-400 mt-2">UNLIMITED</p>
-                        <p class="text-5xl font-extrabold text-purple-300 my-4">£90.00</p>
-                        <p class="text-4xl font-bold text-white mb-4">Unlimited</p>
-                        <a href="#" class="mt-auto w-full max-w-xs text-center bg-[#2D2D2D] text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors uppercase">BUY NOW</a>
-                        <p class="text-gray-400 mt-4 text-xs uppercase">*VALID FOR 1 MONTH*</p>
+                    <!-- Monthly Unlimited -->
+                    <div class="pricing-card bg-black rounded-xl p-8 flex flex-col">
+                        <h3 class="text-2xl font-bold text-white mb-4">Monthly Unlimited</h3>
+                        <p class="text-5xl font-extrabold text-white mb-2">$150</p>
+                        <p class="text-gray-400 mb-6">unlimited classes</p>
+                        <ul class="space-y-4 text-white mb-8 flex-grow">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Unlimited classes</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>30 days access</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Guest passes included</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Locker included</li>
+                        </ul>
+                        <button class="w-full bg-gray-700 text-white font-bold py-3 rounded-lg hover:bg-gray-600 transition-colors">Purchase</button>
                     </div>
                 </div>
             </div>
