@@ -1054,7 +1054,7 @@
                     <!-- Features -->
                     <div class="space-y-6 sm:space-y-7 max-w-xl mx-auto lg:mx-0">
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primart-500/15 text-purple-300 flex items-center justify-center">
                                 <!-- dumbbell icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.5 6.5l11 11M7 10H4a1 1 0 00-1 1v2a1 1 0 001 1h3m10-4h3a1 1 0 011 1v2a1 1 0 01-1 1h-3M9 7V4a1 1 0 011-1h2a1 1 0 011 1v3m0 10v3a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3"/></svg>
                             </div>
@@ -1065,7 +1065,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primart-500/15 text-purple-300 flex items-center justify-center">
                                 <!-- crown icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l4 4 5-5 5 5 4-4v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
                             </div>
@@ -1076,7 +1076,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primart-500/15 text-purple-300 flex items-center justify-center">
                                 <!-- ticket icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5H9a2 2 0 00-2 2v2a2 2 0 110 4v2a2 2 0 002 2h6a2 2 0 002-2v-2a2 2 0 110-4V7a2 2 0 00-2-2z"/></svg>
                             </div>
@@ -1087,7 +1087,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primart-500/15 text-purple-300 flex items-center justify-center">
                                 <!-- clock icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
@@ -1098,7 +1098,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primart-500/15 text-purple-300 flex items-center justify-center">
                                 <!-- building icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18M9 8h6m-8 5h10M9 3h6a2 2 0 012 2v16H7V5a2 2 0 012-2z"/></svg>
                             </div>
@@ -1109,7 +1109,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primart-500/15 text-purple-300 flex items-center justify-center">
                                 <!-- meeting room icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10m-6 4h6"/></svg>
                             </div>
@@ -1120,7 +1120,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primart-500/15 text-purple-300 flex items-center justify-center">
                                 <!-- gift icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8m16 0H4m16 0h-6m-4 0H4m6-8a3 3 0 100 6h4a3 3 0 100-6M9 4a2 2 0 104 0"/></svg>
                             </div>
