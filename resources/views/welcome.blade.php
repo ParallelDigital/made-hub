@@ -799,7 +799,7 @@
 
                     <!-- Pricing Card -->
                     <div class="max-w-md w-full mx-auto lg:mx-0">
-                        <div class="relative rounded-3xl border border-white/5 ring-1 ring-white/5 bg-gradient-to-br from-[#1a1527] via-[#141021] to-[#0e0a18] p-6 sm:p-8 shadow-2xl">
+                        <div class="relative rounded-3xl border border-white/5 ring-1 ring-white/5 bg-gradient-to-br from-[#1a1527] via-[#141021] to-[#0e0a18] p-6 sm:p-8 shadow-2xl mt-5">
                             <div class="text-center">
                                 <div class="text-base sm:text-lg font-semibold text-gray-100">Made Membership</div>
                                 <div class="mt-3 text-5xl sm:text-6xl font-black tracking-tight">£30</div>
