@@ -995,7 +995,7 @@
                 <p class="text-gray-700 mb-4">Would you like to buy credits or buy a class pass?</p>
                 <div class="grid grid-cols-1 gap-3">
                     <a href="{{ route('purchase.package.checkout', ['type' => 'package_5']) }}" class="w-full px-4 py-3 rounded border border-gray-300 text-black font-semibold hover:bg-gray-50 text-center">Buy Credits</a>
-                    <a href="{{ route('purchase.package.checkout', ['type' => 'package_10']) }}" class="w-full px-4 py-3 rounded bg-primary text-black font-semibold hover:bg-opacity-90 text-center">Buy Class Pass</a>
+                    <a href="https://gym.made-reg.co.uk/purchase#class-packages" class="w-full px-4 py-3 rounded bg-primary text-black font-semibold hover:bg-opacity-90 text-center">Buy Class Pass</a>
                     <button onclick="closeNoCreditsModal()" class="w-full px-4 py-2 rounded text-gray-700 hover:bg-gray-50">Cancel</button>
                 </div>
             </div>
