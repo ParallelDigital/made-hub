@@ -160,8 +160,8 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
-                                        @if($instructor->photo)
-                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ asset('storage/' . $instructor->photo) }}" alt="{{ $instructor->name }}">
+                                        @if($instructor->photo_url)
+                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ $instructor->photo_url }}" alt="{{ $instructor->name }}">
                                         @else
                                             <div class="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
                                                 <span class="text-sm font-medium text-white">{{ substr($instructor->name, 0, 2) }}</span>

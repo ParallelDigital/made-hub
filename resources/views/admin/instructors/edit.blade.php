@@ -73,9 +73,9 @@
                 <input type="file" name="photo" id="photo"
                        class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-gray-300 hover:file:bg-gray-600"/>
                 <p class="mt-2 text-sm text-gray-400">Leave blank to keep the current photo.</p>
-                @if ($instructor->photo)
+                @if ($instructor->photo_url)
                     <div class="mt-4">
-                        <img src="{{ asset('storage/' . $instructor->photo) }}" alt="{{ $instructor->name }}" class="h-20 w-20 rounded-full object-cover">
+                        <img src="{{ $instructor->photo_url }}" alt="{{ $instructor->name }}" class="h-20 w-20 rounded-full object-cover">
                     </div>
                 @endif
                 @error('photo')

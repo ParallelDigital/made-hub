@@ -34,8 +34,8 @@
             <div class="bg-gray-800 shadow rounded-lg border border-gray-700 p-6">
                 <div class="flex items-start space-x-6 mb-6">
                     <div class="flex-shrink-0">
-                        @if($instructor->photo)
-                            <img class="h-20 w-20 rounded-full object-cover" src="{{ asset('storage/' . $instructor->photo) }}" alt="{{ $instructor->name }}">
+                        @if($instructor->photo_url)
+                            <img class="h-20 w-20 rounded-full object-cover" src="{{ $instructor->photo_url }}" alt="{{ $instructor->name }}">
                         @else
                             <div class="h-20 w-20 rounded-full bg-primary flex items-center justify-center">
                                 <span class="text-2xl font-medium text-white">{{ substr($instructor->name, 0, 2) }}</span>

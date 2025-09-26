@@ -912,7 +912,7 @@
                                     </div>
                                     
                                     <div class="instructor-section">
-                                        <img src="{{ $class->instructor && $class->instructor->photo ? asset('storage/' . $class->instructor->photo) : 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
+                                        <img src="{{ $class->instructor->photo_url ?? 'https://www.gravatar.com/avatar/?d=mp&s=100' }}" 
                                              alt="{{ $class->instructor->name ?? 'Instructor' }}" 
                                              class="instructor-avatar">
                                     </div>
