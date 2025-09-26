@@ -18,6 +18,30 @@
                 text-transform: uppercase;
             }
 
+            /* Pricing Card Styles */
+            .pricing-card {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .pricing-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Responsive adjustments for pricing cards */
+            @media (max-width: 1024px) {
+                #class-pass .grid {
+                    grid-template-columns: 1fr;
+                    max-width: 450px; /* Center cards on tablet */
+                }
+            }
+
+            @media (max-width: 768px) {
+                #class-pass .grid {
+                    max-width: 100%; /* Full width on mobile */
+                }
+            }
+
             /* Week scroller arrow behavior is implemented in the JS script block below */
             
             /* Clean minimalist calendar design matching brand */
@@ -813,6 +837,62 @@
                                 <div class="mt-4 text-xs text-gray-500">Instant Access • No setup fees</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class Pass Section -->
+        <div id="class-pass" class="bg-black text-white py-14 sm:py-16 lg:py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight uppercase">Class Pass Options</h2>
+                    <p class="mt-3 max-w-2xl mx-auto text-sm sm:text-base text-gray-400 uppercase">Choose the pass that works for you.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <!-- Single Class -->
+                    <div class="pricing-card bg-[#1A1A1A] rounded-xl p-8 flex flex-col">
+                        <h3 class="text-2xl font-bold text-white">Single Class</h3>
+                        <p class="text-5xl font-extrabold text-purple-300 my-4">$25</p>
+                        <p class="text-gray-400 mb-6">per class</p>
+                        <ul class="space-y-4 text-white mb-8 flex-grow">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Access to any class</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Valid for 30 days</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Equipment included</li>
+                        </ul>
+                        <a href="#" class="mt-auto w-full text-center bg-[#2D2D2D] text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors">Purchase</a>
+                    </div>
+
+                    <!-- 10 Class Pack - Most Popular -->
+                    <div class="relative pricing-card bg-[#1A1A1A] rounded-xl p-8 flex flex-col border-2 border-purple-300">
+                        <div class="absolute top-0 -translate-y-1/2 w-full flex justify-center">
+                            <span class="bg-purple-300 text-black text-xs font-bold px-4 py-1 rounded-full uppercase">Most Popular</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">10 Class Pack</h3>
+                        <p class="text-5xl font-extrabold text-purple-300 my-4">$200</p>
+                        <p class="text-gray-400 mb-6">$20 per class</p>
+                        <ul class="space-y-4 text-white mb-8 flex-grow">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>10 classes included</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Valid for 3 months</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Share with friends</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Priority booking</li>
+                        </ul>
+                        <a href="#" class="mt-auto w-full text-center bg-purple-300 text-black font-bold py-3 rounded-lg hover:bg-purple-200 transition-colors">Purchase</a>
+                    </div>
+
+                    <!-- Monthly Unlimited -->
+                    <div class="pricing-card bg-[#1A1A1A] rounded-xl p-8 flex flex-col">
+                        <h3 class="text-2xl font-bold text-white">Monthly Unlimited</h3>
+                        <p class="text-5xl font-extrabold text-purple-300 my-4">$150</p>
+                        <p class="text-gray-400 mb-6">unlimited classes</p>
+                        <ul class="space-y-4 text-white mb-8 flex-grow">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Unlimited classes</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>30 days access</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Guest passes included</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-purple-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Locker included</li>
+                        </ul>
+                        <a href="#" class="mt-auto w-full text-center bg-[#2D2D2D] text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors">Purchase</a>
                     </div>
                 </div>
             </div>
