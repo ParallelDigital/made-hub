@@ -14,6 +14,9 @@
         <!-- Vite Assets (single source of CSS/JS to keep styles stable) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>
+            .uppercase {
+                text-transform: uppercase;
+            }
 
             /* Week scroller arrow behavior is implemented in the JS script block below */
             
@@ -708,7 +711,7 @@
         </div>
 
         <!-- Membership Section -->
-        <div id="membership" class="bg-black text-white py-14 sm:py-16 lg:py-20">
+        <div id="membership" class="bg-black text-white py-14 sm:py-16 lg:py-20 uppercase">
             <div class="max-w-7xl mx-auto p-5 sm:px-6 lg:px-8">
                 <!-- Header -->
                 <div class="text-center mb-12 sm:mb-14">
