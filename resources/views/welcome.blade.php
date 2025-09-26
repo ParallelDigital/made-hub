@@ -1054,7 +1054,7 @@
                     <!-- Features -->
                     <div class="space-y-6 sm:space-y-7 max-w-xl mx-auto lg:mx-0">
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 sm:w-12 sm:h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
                                 <!-- dumbbell icon -->
                                 <svg class="svg-inline--fa fa-dumbbell w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="dumbbell" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M96 64c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32V224v64V448c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V384H64c-17.7 0-32-14.3-32-32V288c-17.7 0-32-14.3-32-32s14.3-32 32-32V160c0-17.7 14.3-32 32-32H96V64zm448 0v64h32c17.7 0 32 14.3 32 32v64c17.7 0 32 14.3 32 32s-14.3 32-32 32v64c0 17.7-14.3 32-32 32H544v64c0 17.7-14.3 32-32 32H480c-17.7 0-32-14.3-32-32V288 224 64c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32zM416 224v64H224V224H416z"></path></svg>
                             </div>
@@ -1065,7 +1065,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 sm:w-10 sm:h-10 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-12 h-12  rounded-full bg-primary text-purple-300 flex items-center justify-center">
                                 <!-- crown icon -->
                                 <svg class="svg-inline--fa fa-crown w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="crown" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M309 106c11.4-7 19-19.7 19-34c0-22.1-17.9-40-40-40s-40 17.9-40 40c0 14.4 7.6 27 19 34L209.7 220.6c-9.1 18.2-32.7 23.4-48.6 10.7L72 160c5-6.7 8-15 8-24c0-22.1-17.9-40-40-40S0 113.9 0 136s17.9 40 40 40c.2 0 .5 0 .7 0L86.4 427.4c5.5 30.4 32 52.6 63 52.6H426.6c30.9 0 57.4-22.1 63-52.6L535.3 176c.2 0 .5 0 .7 0c22.1 0 40-17.9 40-40s-17.9-40-40-40s-40 17.9-40 40c0 9 3 17.3 8 24l-89.1 71.3c-15.9 12.7-39.5 7.5-48.6-10.7L309 106z"></path></svg>
                             </div>
@@ -1076,7 +1076,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 sm:w-10 sm:h-10 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
                                 <!-- ticket icon -->
                                 <svg class="svg-inline--fa fa-calendar-check w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="calendar-check" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zM329 305c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-95 95-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L329 305z"></path></svg>
                             </div>
@@ -1087,7 +1087,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 sm:w-10 sm:h-10 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
                                 <!-- clock icon -->
                                 <svg class="svg-inline--fa fa-clock w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="clock" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"></path></svg>
                             </div>
@@ -1098,7 +1098,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 sm:w-10 sm:h-10 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
                                 <!-- building icon -->
                                 <svg class="svg-inline--fa fa-users w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="users" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M144 0a80 80 0 1 1 0 160A80 80 0 1 1 144 0zM512 0a80 80 0 1 1 0 160A80 80 0 1 1 512 0zM0 298.7C0 239.8 47.8 192 106.7 192h42.7c15.9 0 31 3.5 44.6 9.7c-1.3 7.2-1.9 14.7-1.9 22.3c0 38.2 16.8 72.5 43.3 96c-.2 0-.4 0-.7 0H21.3C9.6 320 0 310.4 0 298.7zM405.3 320c-.2 0-.4 0-.7 0c26.6-23.5 43.3-57.8 43.3-96c0-7.6-.7-15-1.9-22.3c13.6-6.3 28.7-9.7 44.6-9.7h42.7C592.2 192 640 239.8 640 298.7c0 11.8-9.6 21.3-21.3 21.3H405.3zM224 224a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zM128 485.3C128 411.7 187.7 352 261.3 352H378.7C452.3 352 512 411.7 512 485.3c0 14.7-11.9 26.7-26.7 26.7H154.7c-14.7 0-26.7-11.9-26.7-26.7z"></path></svg>
                             </div>
@@ -1109,7 +1109,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 sm:w-10 sm:h-10 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
                                 <!-- meeting room icon -->
                                 <svg class="svg-inline--fa fa-door-open w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="door-open" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M320 32c0-9.9-4.5-19.2-12.3-25.2S289.8-1.4 280.2 1l-179.9 45C79 51.3 64 70.5 64 92.5V448H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H96 288h32V480 32zM256 256c0 17.7-10.7 32-24 32s-24-14.3-24-32s10.7-32 24-32s24 14.3 24 32zm96-128h96V480c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H512V128c0-35.3-28.7-64-64-64H352v64z"></path></svg>    
                             </div>
@@ -1120,7 +1120,7 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0 w-9 h-12 sm:w-12 sm:h-10 rounded-full bg-primary text-purple-300 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-9 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
                                 <!-- gift icon -->
                                 <svg class="svg-inline--fa fa-gift w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="gift" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M190.5 68.8L225.3 128H224 152c-22.1 0-40-17.9-40-40s17.9-40 40-40h2.2c14.9 0 28.8 7.9 36.3 20.8zM64 88c0 14.4 3.5 28 9.6 40H32c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32H480c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32H438.4c6.1-12 9.6-25.6 9.6-40c0-48.6-39.4-88-88-88h-2.2c-31.9 0-61.5 16.9-77.7 44.4L256 85.5l-24.1-41C215.7 16.9 186.1 0 154.2 0H152C103.4 0 64 39.4 64 88zm336 0c0 22.1-17.9 40-40 40H288h-1.3l34.8-59.2C329.1 55.9 342.9 48 357.8 48H360c22.1 0 40 17.9 40 40zM32 288V464c0 26.5 21.5 48 48 48H224V288H32zM288 512H432c26.5 0 48-21.5 48-48V288H288V512z"></path></svg>
                             </div>
