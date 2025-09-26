@@ -1042,19 +1042,108 @@
         
 
         <!-- Membership Section -->
-        <div id="membership" class="bg-white text-black py-8 sm:py-12 lg:py-16">
+        <div id="membership" class="bg-black text-white py-12 sm:py-16 lg:py-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="membership-grid grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-                    <!-- Image Column -->
-                    <div class="membership-image">
-                        <img src="{{ asset('class-1.jpg') }}" alt="Group fitness class" class="rounded-lg shadow-lg w-full h-full object-cover">
+                <!-- Header -->
+                <div class="text-center mb-10 sm:mb-12">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">Premium Membership</h2>
+                    <p class="mt-3 text-sm sm:text-base text-gray-300">Unlock unlimited access to our world-class facilities</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+                    <!-- Features -->
+                    <div class="space-y-5">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                                <!-- dumbbell icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.5 6.5l11 11M7 10H4a1 1 0 00-1 1v2a1 1 0 001 1h3m10-4h3a1 1 0 011 1v2a1 1 0 01-1 1h-3M9 7V4a1 1 0 011-1h2a1 1 0 011 1v3m0 10v3a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold">5 Classes Per Week</div>
+                                <div class="text-gray-400 text-sm">Access to all group fitness classes</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                                <!-- crown icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l4 4 5-5 5 5 4-4v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Members Only Classes</div>
+                                <div class="text-gray-400 text-sm">Exclusive premium training sessions</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                                <!-- ticket icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5H9a2 2 0 00-2 2v2a2 2 0 110 4v2a2 2 0 002 2h6a2 2 0 002-2v-2a2 2 0 110-4V7a2 2 0 00-2-2z"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold">First Access on Events</div>
+                                <div class="text-gray-400 text-sm">Priority booking for special events</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                                <!-- clock icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Early Booking Access</div>
+                                <div class="text-gray-400 text-sm">Book classes 48 hours in advance</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                                <!-- building icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18M9 8h6m-8 5h10M9 3h6a2 2 0 012 2v16H7V5a2 2 0 012-2z"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Hubspace Access</div>
+                                <div class="text-gray-400 text-sm">Collaborative workspace and lounge</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                                <!-- meeting room icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10m-6 4h6"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Free Meeting Room</div>
+                                <div class="text-gray-400 text-sm">Private space for consultations</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center">
+                                <!-- gift icon -->
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8m16 0H4m16 0h-6m-4 0H4m6-8a3 3 0 100 6h4a3 3 0 100-6M9 4a2 2 0 104 0"/></svg>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Monthly Giveaways</div>
+                                <div class="text-gray-400 text-sm">Exclusive prizes and rewards</div>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Content Column -->
-                    <div class="membership-content text-left">
-                        <h2 class="membership-title text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight">ARE YOU READY <br>TO ELEVATE</h2>
-                        <a href="https://gym.made-reg.co.uk/purchase/package/membership" class="inline-block bg-black text-white px-10 py-4 text-sm font-bold uppercase tracking-widest rounded hover:bg-gray-800 transition-all">
-                            SIGN UP NOW
-                        </a>
+
+                    <!-- Pricing Card -->
+                    <div>
+                        <div class="relative rounded-2xl border border-gray-800 bg-gradient-to-br from-gray-900 via-gray-900/70 to-gray-900 p-6 sm:p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-gray-100">Premium Membership</div>
+                                <div class="mt-3 text-5xl sm:text-6xl font-black tracking-tight">£30</div>
+                                <div class="mt-1 text-gray-400 text-sm">per month</div>
+
+                                <a href="https://gym.made-reg.co.uk/purchase#memberships" class="block mt-6 w-full rounded-xl bg-[#c8b7ed] text-black font-semibold py-3 text-center hover:bg-[#b094e8] transition-colors">Start Your Journey</a>
+
+                                <div class="mt-4 text-xs text-gray-500">Cancel anytime • No setup fees</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
