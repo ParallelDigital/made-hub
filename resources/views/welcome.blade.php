@@ -30,7 +30,7 @@
 
             /* Responsive adjustments for pricing cards */
             @media (max-width: 1024px) {
-                #class-pass .grid {
+                #class-packages .grid, #class-pass .grid {
                     grid-template-columns: 1fr;
                     max-width: 500px; /* Center cards on tablet */
                     margin: 0 auto;
@@ -38,34 +38,34 @@
             }
 
             @media (max-width: 768px) {
-                #class-pass .grid {
+                #class-packages .grid, #class-pass .grid {
                     max-width: 100%; /* Full width on mobile */
                     gap: 1.5rem; /* Reduce gap on mobile */
                 }
                 
-                #class-pass .pricing-card {
+                #class-packages .pricing-card, #class-pass .pricing-card {
                     padding: 1.5rem; /* Reduce padding on mobile */
                 }
                 
-                #class-pass h2 {
+                #class-packages h2, #class-pass h2 {
                     font-size: 2rem; /* Smaller title on mobile */
                 }
             }
 
             @media (max-width: 640px) {
-                #class-pass {
+                #class-packages, #class-pass {
                     padding: 3rem 0; /* Reduce section padding on small mobile */
                 }
                 
-                #class-pass .pricing-card {
+                #class-packages .pricing-card, #class-pass .pricing-card {
                     padding: 1.25rem; /* Further reduce padding on small mobile */
                 }
                 
-                #class-pass .pricing-card h3 {
+                #class-packages .pricing-card h3, #class-pass .pricing-card h3 {
                     font-size: 1.125rem; /* Smaller card titles */
                 }
                 
-                #class-pass .pricing-card .text-4xl {
+                #class-packages .pricing-card .text-4xl, #class-pass .pricing-card .text-4xl {
                     font-size: 2.5rem; /* Smaller price text */
                 }
             }
@@ -871,7 +871,7 @@
         </div>
 
         <!-- Flexible Class Passes Section -->
-        <div id="class-pass" class="bg-[#1a1a2e] text-white py-14 sm:py-16 lg:py-20">
+        <div id="class-packages" class="bg-[#1a1a2e] text-white py-14 sm:py-16 lg:py-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
                     <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Flexible Class Passes</h2>
@@ -879,35 +879,13 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                    <!-- Single Class -->
+                   <!-- Single Class -->
                     <div class="pricing-card bg-[#0f0f23] rounded-2xl p-8 flex flex-col border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
-                        <h3 class="text-xl font-bold text-white mb-6">Single Class</h3>
+                        <h3 class="text-xl font-bold text-white mb-6">5 CLASSES</h3>
                         <div class="mb-6">
-                            <p class="text-4xl font-bold text-white mb-1">$25</p>
-                            <p class="text-gray-400 text-sm">per class</p>
+                            <p class="text-4xl font-bold text-white mb-1">£32.50</p>
+                            <p class="text-gray-400 text-sm">£6.50per class</p>
                         </div>
-                        
-                        <div class="space-y-3 mb-8 flex-grow">
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Access to any class
-                            </div>
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Valid for 30 days
-                            </div>
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Equipment included
-                            </div>
-                        </div>
-                        
                         <button class="w-full bg-[#3a3a54] text-white font-semibold py-3 rounded-lg hover:bg-[#4a4a64] transition-colors">Purchase</button>
                     </div>
 
@@ -918,37 +896,9 @@
                         </div>
                         <h3 class="text-xl font-bold text-white mb-6 mt-2">10 Class Pack</h3>
                         <div class="mb-6">
-                            <p class="text-4xl font-bold text-white mb-1">$200</p>
-                            <p class="text-gray-400 text-sm">$20 per class</p>
+                            <p class="text-4xl font-bold text-white mb-1">£50.00</p>
+                            <p class="text-gray-400 text-sm">£5 per class</p>
                         </div>
-                        
-                        <div class="space-y-3 mb-8 flex-grow">
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                10 classes included
-                            </div>
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Valid for 3 months
-                            </div>
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Share with friends
-                            </div>
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Priority booking
-                            </div>
-                        </div>
-                        
                         <button class="w-full bg-[#c4a7ff] text-black font-semibold py-3 rounded-lg hover:bg-[#d4b7ff] transition-colors">Purchase</button>
                     </div>
 
@@ -956,37 +906,9 @@
                     <div class="pricing-card bg-[#0f0f23] rounded-2xl p-8 flex flex-col border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
                         <h3 class="text-xl font-bold text-white mb-6">Monthly Unlimited</h3>
                         <div class="mb-6">
-                            <p class="text-4xl font-bold text-white mb-1">$150</p>
+                            <p class="text-4xl font-bold text-white mb-1">£90.00</p>
                             <p class="text-gray-400 text-sm">unlimited classes</p>
                         </div>
-                        
-                        <div class="space-y-3 mb-8 flex-grow">
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Unlimited classes
-                            </div>
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                30 days access
-                            </div>
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Guest passes included
-                            </div>
-                            <div class="flex items-center text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                Locker included
-                            </div>
-                        </div>
-                        
                         <button class="w-full bg-[#3a3a54] text-white font-semibold py-3 rounded-lg hover:bg-[#4a4a64] transition-colors">Purchase</button>
                     </div>
                 </div>
