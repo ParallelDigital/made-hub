@@ -291,9 +291,11 @@ class InstructorController extends Controller
                 // Handle photo upload within the transaction.
                 $photoPath = $instructor->photo;
                 if ($request->hasFile('photo')) {
-                    if ($instructor->photo) {
-                        \Illuminate\Support\Facades\Storage::disk('public')->delete($instructor->photo);
+                    // Delete old photo if it exists
+                    if ($instructor->photo && Storage::disk('public')->exists($instructor->photo)) {
+                        Storage::disk('public')->delete($instructor->photo);
                     }
+                    // Store new photo
                     $photoPath = $request->file('photo')->store('instructors', 'public');
                 }
 
