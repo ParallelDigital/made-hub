@@ -1139,7 +1139,7 @@
                                 <div class="mt-3 text-5xl sm:text-6xl font-black tracking-tight">£30</div>
                                 <div class="mt-1 text-gray-400 text-sm">per month</div>
 
-                                <a href="https://gym.made-reg.co.uk/purchase#memberships" class="block mt-6 w-full rounded-full bg-[#c8b7ed] text-black font-semibold py-3.5 text-center hover:bg-[#b094e8] transition-colors">Start Your Journey</a>
+                                <a href="https://gym.made-reg.co.uk/purchase#memberships" class="w-full sm:w-auto bg-primary text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">Start Your Journey</a>
 
                                 <div class="mt-4 text-xs text-gray-500">Cancel anytime • No setup fees</div>
                             </div>
