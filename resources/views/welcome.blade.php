@@ -1135,13 +1135,13 @@
                     <div class="max-w-md w-full mx-auto lg:mx-0">
                         <div class="relative rounded-3xl border border-white/5 ring-1 ring-white/5 bg-gradient-to-br from-[#1a1527] via-[#141021] to-[#0e0a18] p-6 sm:p-8 shadow-2xl">
                             <div class="text-center">
-                                <div class="text-base sm:text-lg font-semibold text-gray-100">Premium Membership</div>
+                                <div class="text-base sm:text-lg font-semibold text-gray-100">Made Membership</div>
                                 <div class="mt-3 text-5xl sm:text-6xl font-black tracking-tight">£30</div>
                                 <div class="mt-1 mb-4 text-gray-400 text-sm">per month</div>
 
-                                <a href="https://gym.made-reg.co.uk/purchase#memberships" class="relative block top-5 w-full sm:w-auto bg-primary text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">Get Signed Up</a>
+                                <a href="https://buy.stripe.com/3cscP32lx7Wr6cw3cd" class="relative block top-5 w-full sm:w-auto bg-primary text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">Get Signed Up</a>
 
-                                <div class="mt-4 text-xs text-gray-500">Cancel anytime • No setup fees</div>
+                                <div class="mt-4 text-xs text-gray-500">Instant Access • No setup fees</div>
                             </div>
                         </div>
                     </div>
