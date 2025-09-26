@@ -32,13 +32,41 @@
             @media (max-width: 1024px) {
                 #class-pass .grid {
                     grid-template-columns: 1fr;
-                    max-width: 450px; /* Center cards on tablet */
+                    max-width: 500px; /* Center cards on tablet */
+                    margin: 0 auto;
                 }
             }
 
             @media (max-width: 768px) {
                 #class-pass .grid {
                     max-width: 100%; /* Full width on mobile */
+                    gap: 1.5rem; /* Reduce gap on mobile */
+                }
+                
+                #class-pass .pricing-card {
+                    padding: 1.5rem; /* Reduce padding on mobile */
+                }
+                
+                #class-pass h2 {
+                    font-size: 2rem; /* Smaller title on mobile */
+                }
+            }
+
+            @media (max-width: 640px) {
+                #class-pass {
+                    padding: 3rem 0; /* Reduce section padding on small mobile */
+                }
+                
+                #class-pass .pricing-card {
+                    padding: 1.25rem; /* Further reduce padding on small mobile */
+                }
+                
+                #class-pass .pricing-card h3 {
+                    font-size: 1.125rem; /* Smaller card titles */
+                }
+                
+                #class-pass .pricing-card .text-4xl {
+                    font-size: 2.5rem; /* Smaller price text */
                 }
             }
 
@@ -843,40 +871,123 @@
         </div>
 
         <!-- Flexible Class Passes Section -->
-        <div id="class-packages" class="bg-[#2A2A3A] text-white py-14 sm:py-16 lg:py-20">
+        <div id="class-pass" class="bg-[#1a1a2e] text-white py-14 sm:py-16 lg:py-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
                     <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Flexible Class Passes</h2>
                     <p class="text-gray-400 text-lg">Choose the perfect plan for your lifestyle</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
                     <!-- Single Class -->
-                    <div class="pricing-card bg-black rounded-xl p-8 flex flex-col">
-                        <h3 class="text-2xl font-bold text-white mb-4">5 CLASSES</h3>
-                        <p class="text-5xl font-extrabold text-white mb-2">£32.50</p>
-                        <p class="text-gray-400 mb-6">£6.50per class</p>
-                       
-                        <button class="w-full bg-gray-700 text-white font-bold py-3 rounded-lg hover:bg-gray-600 transition-colors">Purchase</button>
+                    <div class="pricing-card bg-[#0f0f23] rounded-2xl p-8 flex flex-col border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
+                        <h3 class="text-xl font-bold text-white mb-6">Single Class</h3>
+                        <div class="mb-6">
+                            <p class="text-4xl font-bold text-white mb-1">$25</p>
+                            <p class="text-gray-400 text-sm">per class</p>
+                        </div>
+                        
+                        <div class="space-y-3 mb-8 flex-grow">
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Access to any class
+                            </div>
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Valid for 30 days
+                            </div>
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Equipment included
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-[#3a3a54] text-white font-semibold py-3 rounded-lg hover:bg-[#4a4a64] transition-colors">Purchase</button>
                     </div>
 
                     <!-- 10 Class Pack - Most Popular -->
-                    <div class="relative pricing-card bg-black rounded-xl p-8 flex flex-col border-2 border-purple-400">
+                    <div class="relative pricing-card bg-[#0f0f23] rounded-2xl p-8 flex flex-col border-2 border-[#c4a7ff] hover:border-[#d4b7ff] transition-all duration-300">
                         <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                            <span class="bg-purple-400 text-black text-sm font-bold px-4 py-1 rounded-full">Most Popular</span>
+                            <span class="bg-[#c4a7ff] text-black text-xs font-bold px-4 py-1 rounded-full">Most Popular</span>
                         </div>
-                        <h3 class="text-2xl font-bold text-white mb-4 mt-4">10 Class Pack</h3>
-                        <p class="text-5xl font-extrabold text-white mb-2">£50.00</p>
-                        <p class="text-gray-400 mb-6">£5 per class</p>
-                        <button class="w-full bg-purple-400 text-black font-bold py-3 rounded-lg hover:bg-purple-300 transition-colors">Purchase</button>
+                        <h3 class="text-xl font-bold text-white mb-6 mt-2">10 Class Pack</h3>
+                        <div class="mb-6">
+                            <p class="text-4xl font-bold text-white mb-1">$200</p>
+                            <p class="text-gray-400 text-sm">$20 per class</p>
+                        </div>
+                        
+                        <div class="space-y-3 mb-8 flex-grow">
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                10 classes included
+                            </div>
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Valid for 3 months
+                            </div>
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Share with friends
+                            </div>
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Priority booking
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-[#c4a7ff] text-black font-semibold py-3 rounded-lg hover:bg-[#d4b7ff] transition-colors">Purchase</button>
                     </div>
 
                     <!-- Monthly Unlimited -->
-                    <div class="pricing-card bg-black rounded-xl p-8 flex flex-col">
-                        <h3 class="text-2xl font-bold text-white mb-4">Monthly Unlimited</h3>
-                        <p class="text-5xl font-extrabold text-white mb-2">£90.00</p>
-                        <p class="text-gray-400 mb-6">unlimited classes</p>
-                        <button class="w-full bg-gray-700 text-white font-bold py-3 rounded-lg hover:bg-gray-600 transition-colors">Purchase</button>
+                    <div class="pricing-card bg-[#0f0f23] rounded-2xl p-8 flex flex-col border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
+                        <h3 class="text-xl font-bold text-white mb-6">Monthly Unlimited</h3>
+                        <div class="mb-6">
+                            <p class="text-4xl font-bold text-white mb-1">$150</p>
+                            <p class="text-gray-400 text-sm">unlimited classes</p>
+                        </div>
+                        
+                        <div class="space-y-3 mb-8 flex-grow">
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Unlimited classes
+                            </div>
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                30 days access
+                            </div>
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Guest passes included
+                            </div>
+                            <div class="flex items-center text-sm text-gray-300">
+                                <svg class="w-4 h-4 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Locker included
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-[#3a3a54] text-white font-semibold py-3 rounded-lg hover:bg-[#4a4a64] transition-colors">Purchase</button>
                     </div>
                 </div>
             </div>
