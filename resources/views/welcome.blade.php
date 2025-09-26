@@ -662,6 +662,22 @@
             </div>
         </div>
 
+        <!-- Flash Messages -->
+        @if (session('error'))
+        <div class="bg-red-600 text-white">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 text-sm font-medium">
+                {{ session('error') }}
+            </div>
+        </div>
+        @endif
+        @if (session('success'))
+        <div class="bg-green-600 text-white">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 text-sm font-medium">
+                {{ session('success') }}
+            </div>
+        </div>
+        @endif
+
         <!-- Hero Section -->
         <div class="hero-section relative h-[550px] md:h-[550px] flex items-center overflow-hidden">
             <!-- Background Image -->
