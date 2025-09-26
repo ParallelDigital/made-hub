@@ -175,9 +175,9 @@ class InstructorController extends Controller
         }
 
         // Create the Instructor record
-        Instructor::create($instructorData);
+        $instructor = Instructor::create($instructorData);
 
-        return redirect()->route('admin.instructors.index')->with('success', 'Instructor created successfully.');
+        return redirect()->route('admin.instructors.show', $instructor)->with('success', 'Instructor created successfully.');
     }
 
     /**
@@ -313,7 +313,7 @@ class InstructorController extends Controller
             return back()->with('error', 'Failed to update instructor. Please try again.');
         }
 
-        return redirect()->route('admin.instructors.index')->with('success', 'Instructor updated successfully.');
+        return redirect()->route('admin.instructors.edit', $instructor)->with('success', 'Instructor updated successfully.');
     }
 
     /**
