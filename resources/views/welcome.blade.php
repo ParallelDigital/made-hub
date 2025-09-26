@@ -853,14 +853,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
                     <!-- Single Class -->
                     <div class="pricing-card bg-black rounded-xl p-8 flex flex-col">
-                        <h3 class="text-2xl font-bold text-white mb-4">Single Class</h3>
-                        <p class="text-5xl font-extrabold text-white mb-2">$25</p>
-                        <p class="text-gray-400 mb-6">per class</p>
-                        <ul class="space-y-4 text-white mb-8 flex-grow">
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Access to any class</li>
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Valid for 30 days</li>
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Equipment included</li>
-                        </ul>
+                        <h3 class="text-2xl font-bold text-white mb-4">5 CLASSES</h3>
+                        <p class="text-5xl font-extrabold text-white mb-2">£32.50</p>
+                        <p class="text-gray-400 mb-6">£6.50per class</p>
+                       
                         <button class="w-full bg-gray-700 text-white font-bold py-3 rounded-lg hover:bg-gray-600 transition-colors">Purchase</button>
                     </div>
 
@@ -870,28 +866,16 @@
                             <span class="bg-purple-400 text-black text-sm font-bold px-4 py-1 rounded-full">Most Popular</span>
                         </div>
                         <h3 class="text-2xl font-bold text-white mb-4 mt-4">10 Class Pack</h3>
-                        <p class="text-5xl font-extrabold text-white mb-2">$200</p>
-                        <p class="text-gray-400 mb-6">$20 per class</p>
-                        <ul class="space-y-4 text-white mb-8 flex-grow">
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>10 classes included</li>
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Valid for 3 months</li>
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Share with friends</li>
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Priority booking</li>
-                        </ul>
+                        <p class="text-5xl font-extrabold text-white mb-2">£50.00</p>
+                        <p class="text-gray-400 mb-6">£5 per class</p>
                         <button class="w-full bg-purple-400 text-black font-bold py-3 rounded-lg hover:bg-purple-300 transition-colors">Purchase</button>
                     </div>
 
                     <!-- Monthly Unlimited -->
                     <div class="pricing-card bg-black rounded-xl p-8 flex flex-col">
                         <h3 class="text-2xl font-bold text-white mb-4">Monthly Unlimited</h3>
-                        <p class="text-5xl font-extrabold text-white mb-2">$150</p>
+                        <p class="text-5xl font-extrabold text-white mb-2">£90.00</p>
                         <p class="text-gray-400 mb-6">unlimited classes</p>
-                        <ul class="space-y-4 text-white mb-8 flex-grow">
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Unlimited classes</li>
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>30 days access</li>
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Guest passes included</li>
-                            <li class="flex items-center"><svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Locker included</li>
-                        </ul>
                         <button class="w-full bg-gray-700 text-white font-bold py-3 rounded-lg hover:bg-gray-600 transition-colors">Purchase</button>
                     </div>
                 </div>
