@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Checkout' }} - {{ config('app.name') }}</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('made-running.png') }}">
+    <link rel="icon" type="image/webp" href="{{ asset('favicon.webp') }}">
     <link rel="apple-touch-icon" href="{{ asset('made-running.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
