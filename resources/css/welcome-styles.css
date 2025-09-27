@@ -1,0 +1,697 @@
+/* Welcome Page Custom Styles - Extracted for Performance */
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+/* Pricing Card Styles */
+.pricing-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 9px;
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments for pricing cards */
+@media (max-width: 1024px) {
+    #class-packages .grid, #class-pass .grid {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    #class-packages .grid, #class-pass .grid {
+        max-width: 100%;
+        gap: 1.5rem;
+    }
+    
+    #class-packages .pricing-card, #class-pass .pricing-card {
+        padding: 1.5rem;
+    }
+    
+    #class-packages h2, #class-pass h2 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 640px) {
+    #class-packages, #class-pass {
+        padding: 3rem 0;
+    }
+    
+    #class-packages .pricing-card, #class-pass .pricing-card {
+        padding: 1.25rem;
+    }
+    
+    #class-packages .pricing-card h3, #class-pass .pricing-card h3 {
+        font-size: 1.125rem;
+    }
+    
+    #class-packages .pricing-card .text-4xl, #class-pass .pricing-card .text-4xl {
+        font-size: 2.5rem;
+    }
+}
+
+/* Clean minimalist calendar design */
+.schedule-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.week-nav-container {
+    background: #f9fafb;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+html { scroll-behavior: smooth; }
+
+.week-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    max-width: 100%;
+    flex: 1;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0.5rem 0.75rem;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scroll-padding-left: 24px;
+    scroll-padding-right: 24px;
+}
+
+.week-navigation::-webkit-scrollbar {
+    display: none;
+}
+
+.week-day-btn {
+    flex-shrink: 0;
+    min-width: 80px;
+    padding: 0.5rem;
+    text-align: center;
+    border: none;
+    background: transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-family: inherit;
+    scroll-snap-align: center;
+    scroll-margin-inline: 24px;
+}
+
+.week-day-btn .day-name {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.week-day-btn .day-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+}
+
+.week-day-btn.selected .day-name {
+    color: #000;
+    font-weight: 600;
+}
+
+.week-day-btn.selected .day-number {
+    color: #000;
+}
+
+.week-day-btn.selected::after {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 3px;
+    background: #000;
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
+}
+
+.week-day-btn.today:not(.selected) .day-name {
+    color: #000;
+    font-weight: 600;
+}
+
+.week-day-btn.today:not(.selected) .day-number {
+    color: #000;
+    font-weight: 800;
+}
+
+.nav-arrow {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: -1rem;
+    z-index: 13;
+}
+
+.nav-arrow:hover {
+    background: #f3f4f6;
+    border-radius: 50%;
+}
+
+/* Date header styling */
+.date-header {
+    background: white;
+    color: #000;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.date-header h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    color: #000;
+}
+
+.today-btn {
+    background: transparent;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.today-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+/* Class cards styling */
+.classes-section {
+    padding: 0;
+    background: white;
+}
+
+.class-card {
+    background: white;
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    padding: 1.5rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.class-card:hover {
+    background: #fafafa;
+}
+
+.class-card:last-child {
+    border-bottom: none;
+}
+
+.class-time-section {
+    flex-shrink: 0;
+    width: 80px;
+    text-align: left;
+}
+
+.class-time {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #000;
+    line-height: 1.2;
+}
+
+.class-duration {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.125rem;
+    text-transform: uppercase;
+}
+
+.class-location {
+    flex-shrink: 0;
+    width: 100px;
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-align: left;
+}
+
+.instructor-section {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 60px;
+}
+
+.instructor-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.class-info-section {
+    flex: 1;
+    min-width: 0;
+}
+
+.class-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.class-instructor-name {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0 0 0.25rem 0;
+    text-transform: uppercase;
+}
+
+.class-room {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.book-section {
+    flex-shrink: 0;
+    width: 120px;
+}
+
+.reserve-button {
+    background: transparent;
+    color: #000;
+    border: 1px solid #000;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    min-height: 44px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.reserve-button:hover {
+    background: #000;
+    color: white;
+}
+
+.reserve-button:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #d1d5db;
+    cursor: not-allowed;
+}
+
+.reserve-button:disabled:hover {
+    background: #f3f4f6;
+    color: #9ca3af;
+}
+
+/* H1 styling */
+h1.hero-title span {
+    font-family: sans-serif !important;
+    font-weight: 900 !important;
+}
+
+h2 {
+    font-family: sans-serif !important;
+    font-weight: 900 !important;
+}
+
+/* Ribbon for members-only classes */
+.class-card { position: relative; }
+.ribbon-members {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #111;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.65rem;
+    padding: 0.35rem 0.5rem;
+    border-bottom-right-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    z-index: 2;
+}
+
+.no-classes {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6b7280;
+}
+
+.no-classes-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+    opacity: 0.5;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .schedule-container {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        overflow: hidden;
+        width: 100%;
+    }
+    
+    .week-nav-container {
+        padding: 1rem;
+        margin-bottom: 0;
+    }
+    
+    .week-navigation {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(42px, 1fr));
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        scroll-behavior: auto;
+        overflow: visible;
+    }
+    
+    .week-day-btn {
+        min-width: 0;
+        width: 100%;
+        padding: 0.25rem 0.25rem;
+        font-size: 0.9rem;
+        scroll-margin-inline: 0;
+    }
+    
+    .week-day-btn .day-number {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+    }
+    
+    .week-day-btn .day-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #6b7280;
+    }
+    
+    .week-day-btn.selected .day-name {
+        color: #000;
+    }
+    
+    .week-day-btn.today .day-name {
+        color: #000;
+        font-weight: 800;
+    }
+    
+    .date-header {
+        padding: 1.5rem;
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .date-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000;
+    }
+    
+    .today-btn {
+        background: transparent;
+        border: 1px solid #d1d5db;
+        color: #6b7280;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .class-card {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .class-time-section {
+        width: 80px;
+        flex-shrink: 0;
+    }
+    
+    .class-time {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #6b7280;
+        line-height: 1.2;
+    }
+    
+    .class-duration {
+        font-size: 0.875rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+        text-transform: uppercase;
+    }
+    
+    .instructor-section {
+        width: 60px;
+        flex-shrink: 0;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .instructor-avatar {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .class-info-section {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .class-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #000;
+        margin: 0 0 0.5rem 0;
+        text-decoration: underline;
+        text-transform: uppercase;
+    }
+    
+    .class-instructor-name {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0 0 0.25rem 0;
+        text-transform: uppercase;
+    }
+    
+    .class-room {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0 0 0.125rem 0;
+    }
+    
+    .class-location {
+        display: none;
+    }
+
+    .book-section {
+        display: none !important;
+    }
+    .class-card {
+        cursor: pointer;
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        grid-template-rows: auto auto;
+        grid-template-areas: 'time info' 'instructor info';
+        gap: 0.75rem;
+    }
+    .class-time-section { grid-area: time; }
+    .instructor-section { grid-area: instructor; }
+    .class-info-section { grid-area: info; }
+}
+
+/* Scrolling Images Animations */
+.scrolling-container-mobile {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.scrolling-track-mobile {
+    display: flex;
+    width: calc(100% * 5);
+    animation: scroll-left 30s linear infinite;
+    gap: 1rem;
+}
+
+.scrolling-container-left {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.scrolling-track-left {
+    display: flex;
+    width: calc(100% * 3);
+    animation: scroll-left 25s linear infinite;
+    gap: 2rem;
+}
+
+.scrolling-container-right {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.scrolling-track-right {
+    display: flex;
+    width: calc(100% * 3);
+    animation: scroll-right 25s linear infinite;
+    gap: 2rem;
+}
+
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes scroll-right {
+    0% {
+        transform: translateX(-50%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* Pause animation on hover */
+.scrolling-container-mobile:hover .scrolling-track-mobile,
+.scrolling-container-left:hover .scrolling-track-left,
+.scrolling-container-right:hover .scrolling-track-right {
+    animation-play-state: paused;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .scrolling-track-mobile {
+        gap: 0.5rem;
+    }
+
+    .scrolling-track-mobile img {
+        height: 200px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .scrolling-track-mobile img {
+        height: 160px !important;
+    }
+}
+
+/* Facilities carousel */
+.carousel-container {
+    position: relative;
+}
+.carousel-track {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0.25rem;
+    scroll-behavior: smooth;
+}
+.carousel-track::-webkit-scrollbar { display: none; }
+.carousel-item {
+    flex: 0 0 auto;
+    width: 260px;
+    height: 170px;
+    border-radius: 16px;
+    object-fit: cover;
+    scroll-snap-align: start;
+    background: #111;
+}
+@media (min-width: 640px) {
+    .carousel-item { width: 320px; height: 200px; }
+}
+@media (min-width: 1024px) {
+    .carousel-item { width: 360px; height: 220px; }
+}
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 9999px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+.carousel-arrow:hover { background: rgba(196,167,255,0.9); color: black; }
+.carousel-arrow:active { transform: translateY(-50%) scale(0.98); }
+.carousel-arrow.left { left: 0.25rem; }
+.carousel-arrow.right { right: 0.25rem; }
+
+.popular-badge-wrapper {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #000; 
+    padding: 0 0.2rem;
+}
+
+.popular-badge {
+    background-color: #c8b7ed;
+    color: black;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.375rem 1.25rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+}
