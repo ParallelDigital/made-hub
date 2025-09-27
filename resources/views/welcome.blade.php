@@ -984,7 +984,7 @@
                             <p class="text-4xl font-bold text-white mb-1">£90.00</p>
                             <p class="text-gray-400 text-sm">Unlimited classes</p>
                         </div>
-                        <a href="https://gym.made-reg.co.uk/purchase/package/unlimted" target="_blank" rel="noopener noreferrer" class="w-full">
+                        <a href="https://gym.made-reg.co.uk/purchase/package/unlimited" target="_blank" rel="noopener noreferrer" class="w-full">
                             <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
                         </a>
                     </div>
