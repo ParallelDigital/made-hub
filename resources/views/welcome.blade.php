@@ -935,7 +935,7 @@
                         <h3 class="text-xl font-bold text-white mb-6">5 CLASSES</h3>
                         <div class="mb-6">
                             <p class="text-4xl font-bold text-white mb-1">£32.50</p>
-                            <p class="text-gray-400 text-sm">£6.50per class</p>
+                            <p class="text-gray-400 text-sm">£6.50 per class</p>
                         </div>
                         <button class="w-full bg-[#3a3a54] text-white font-semibold py-3 rounded-lg hover:bg-[#4a4a64] transition-colors">Purchase</button>
                     </div>
@@ -958,7 +958,7 @@
                         <h3 class="text-xl font-bold text-white mb-6">Monthly Unlimited</h3>
                         <div class="mb-6">
                             <p class="text-4xl font-bold text-white mb-1">£90.00</p>
-                            <p class="text-gray-400 text-sm">unlimited classes</p>
+                            <p class="text-gray-400 text-sm">Unlimited classes</p>
                         </div>
                         <button class="w-full bg-[#3a3a54] text-white font-semibold py-3 rounded-lg hover:bg-[#4a4a64] transition-colors">Purchase</button>
                     </div>
