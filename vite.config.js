@@ -23,10 +23,7 @@ export default defineConfig({
         // Optimize chunk size
         rollupOptions: {
             output: {
-                manualChunks: {
-                    'welcome': ['resources/js/welcome-scripts.js'],
-                    'welcome-styles': ['resources/css/welcome-styles.css']
-                }
+                // Let Vite handle chunking automatically
             }
         }
     },
