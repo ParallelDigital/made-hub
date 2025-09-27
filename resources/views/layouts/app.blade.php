@@ -28,19 +28,19 @@
             @include('layouts.navigation')
 
             <!-- Page Heading -->
-            @isset($header)
+            @hasSection('header')
                 <header class="bg-accent shadow border-b border-neutral-800">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-secondary">
-                        {{ $header }}
+                        @yield('header')
                     </div>
                 </header>
-            @endisset
+            @endif
 
             <!-- Page Content -->
             <main class="min-h-[calc(100vh-4rem)]">
                 <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
                     <div class="w-full overflow-x-auto">
-                        {{ $slot }}
+                        @yield('content')
                     </div>
                 </div>
             </main>
