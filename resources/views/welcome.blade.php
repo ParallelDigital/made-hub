@@ -931,7 +931,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
                    <!-- Single Class -->
-                    <div class="pricing-card bg-[#0f0f23] rounded-2xl p-8 flex flex-col border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
+                    <div class="pricing-card bg-black rounded-2xl p-8 flex flex-col border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
                         <h3 class="text-xl font-bold text-white mb-6">5 CLASSES</h3>
                         <div class="mb-6">
                             <p class="text-4xl font-bold text-white mb-1">£32.50</p>
@@ -941,7 +941,7 @@
                     </div>
 
                     <!-- 10 Class Pack - Most Popular -->
-                    <div class="relative pricing-card bg-[#0f0f23] rounded-2xl p-8 flex flex-col border-2 border-[#c4a7ff] hover:border-[#d4b7ff] transition-all duration-300">
+                    <div class="relative pricing-card bg-black rounded-2xl p-8 flex flex-col border-2 border-[#c4a7ff] hover:border-[#d4b7ff] transition-all duration-300">
                         <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
                             <span class="bg-[#c4a7ff] text-black text-xs font-bold px-4 py-1 rounded-full">Most Popular</span>
                         </div>
@@ -954,7 +954,7 @@
                     </div>
 
                     <!-- Monthly Unlimited -->
-                    <div class="pricing-card bg-[#0f0f23] rounded-2xl p-8 flex flex-col border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
+                    <div class="pricing-card bg-black rounded-2xl p-8 flex flex-col border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
                         <h3 class="text-xl font-bold text-white mb-6">Monthly Unlimited</h3>
                         <div class="mb-6">
                             <p class="text-4xl font-bold text-white mb-1">£90.00</p>
