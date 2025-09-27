@@ -958,7 +958,9 @@
                             <p class="text-4xl font-bold text-white mb-1">£32.50</p>
                             <p class="text-gray-400 text-sm">£6.50 per class</p>
                         </div>
-                        <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
+                        <a href="https://gym.made-reg.co.uk/purchase/package/package_5" target="_blank" rel="noopener noreferrer" class="w-full">
+                            <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
+                        </a>
                     </div>
 
                     <!-- 10 Class Pack - Most Popular -->
@@ -971,7 +973,9 @@
                             <p class="text-4xl font-bold text-white mb-1">£50.00</p>
                             <p class="text-gray-400 text-sm">£5 per class</p>
                         </div>
-                        <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
+                        <a href="https://gym.made-reg.co.uk/purchase/package/package_10" target="_blank" rel="noopener noreferrer" class="w-full">
+                            <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
+                        </a>
                     </div>
 
                     <!-- Monthly Unlimited -->
@@ -981,7 +985,9 @@
                             <p class="text-4xl font-bold text-white mb-1">£90.00</p>
                             <p class="text-gray-400 text-sm">Unlimited classes</p>
                         </div>
-                        <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
+                        <a href="https://gym.made-reg.co.uk/purchase/package/unlimted" target="_blank" rel="noopener noreferrer" class="w-full">
+                            <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
+                        </a>
                     </div>
                 </div>
             </div>
