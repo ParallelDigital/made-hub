@@ -1169,7 +1169,10 @@
                                 <div class="text-left">
                                     <div id="useCreditsLabel" class="font-medium text-gray-900">Use Credits</div>
                                     @if(auth()->user()->hasActiveUnlimitedPass())
-                                        <div class="text-sm text-gray-500">Unlimited pass active @if(auth()->user()->unlimited_pass_expires_at) until {{ auth()->user()->unlimited_pass_expires_at->format('j M Y') }} @endif</div>
+                                        @php
+                                            $activePass = auth()->user()->passes()->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString())->orderBy('expires_at', 'desc')->first();
+                                        @endphp
+                                        <div class="text-sm text-gray-500">Unlimited pass active @if($activePass) until {{ $activePass->expires_at->format('j M Y') }} @endif</div>
                                     @else
                                         <div class="text-sm text-gray-500">You have {{ auth()->user()->hasActiveMembership() ? auth()->user()->getAvailableCredits() : auth()->user()->getNonMemberAvailableCredits() }} {{ auth()->user()->hasActiveMembership() ? 'monthly credits' : 'credits' }}</div>
                                     @endif
