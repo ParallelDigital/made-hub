@@ -256,12 +256,19 @@ class User extends Authenticatable
      */
     public function allocateCreditsWithExpiry(int $amount, \Carbon\CarbonInterface $expiresAt, string $source = 'admin_grant'): void
     {
-        $this->passes()->create([
-            'pass_type' => 'credits',
-            'credits' => $amount,
-            'expires_at' => $expiresAt,
-            'source' => $source,
-        ]);
+        try {
+            $this->passes()->create([
+                'pass_type' => 'credits',
+                'credits' => $amount,
+                'expires_at' => $expiresAt,
+                'source' => $source,
+            ]);
+        } catch (\Exception $e) {
+            // Fallback to old system if user_passes table doesn't exist
+            $this->credits = ($this->credits ?? 0) + $amount;
+            $this->credits_expires_at = $expiresAt;
+            $this->save();
+        }
     }
 
     /**
@@ -269,11 +276,17 @@ class User extends Authenticatable
      */
     public function activateUnlimitedPass(\Carbon\CarbonInterface $expiresAt, string $source = 'admin_grant'): void
     {
-        $this->passes()->create([
-            'pass_type' => 'unlimited',
-            'expires_at' => $expiresAt,
-            'source' => $source,
-        ]);
+        try {
+            $this->passes()->create([
+                'pass_type' => 'unlimited',
+                'expires_at' => $expiresAt,
+                'source' => $source,
+            ]);
+        } catch (\Exception $e) {
+            // Fallback to old system if user_passes table doesn't exist
+            $this->unlimited_pass_expires_at = $expiresAt;
+            $this->save();
+        }
     }
 
     /**

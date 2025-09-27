@@ -233,22 +233,22 @@ class PurchaseController extends Controller
         $allocatedMessage = '';
         try {
             if ($type === 'package_5') {
-                $user->allocateCreditsWithExpiry(5, $expiresAt);
+                $user->allocateCreditsWithExpiry(5, $expiresAt, 'package_purchase');
                 $allocated = true;
                 $allocatedMessage = '5 credits added (valid for 1 month).';
                 // Notify user
                 try {
-                    Mail::to($user->email)->send(new \App\Mail\CreditsAllocated($user, 5, 'credits', (int)($user->credits ?? 0), 'Valid for 1 month'));
+                    Mail::to($user->email)->send(new \App\Mail\CreditsAllocated($user, 5, 'credits', $user->getNonMemberAvailableCredits(), 'Valid for 1 month', 'Package Purchase'));
                 } catch (\Throwable $e) { \Log::warning('Credits email failed: '.$e->getMessage()); }
             } elseif ($type === 'package_10') {
-                $user->allocateCreditsWithExpiry(10, $expiresAt);
+                $user->allocateCreditsWithExpiry(10, $expiresAt, 'package_purchase');
                 $allocated = true;
                 $allocatedMessage = '10 credits added (valid for 1 month).';
                 try {
-                    Mail::to($user->email)->send(new \App\Mail\CreditsAllocated($user, 10, 'credits', (int)($user->credits ?? 0), 'Valid for 1 month'));
+                    Mail::to($user->email)->send(new \App\Mail\CreditsAllocated($user, 10, 'credits', $user->getNonMemberAvailableCredits(), 'Valid for 1 month', 'Package Purchase'));
                 } catch (\Throwable $e) { \Log::warning('Credits email failed: '.$e->getMessage()); }
             } elseif ($type === 'unlimited') {
-                $user->activateUnlimitedPass($expiresAt);
+                $user->activateUnlimitedPass($expiresAt, 'package_purchase');
                 $allocated = true;
                 $allocatedMessage = 'Unlimited pass activated for 1 month.';
                 // Optional: email notification could be added here
