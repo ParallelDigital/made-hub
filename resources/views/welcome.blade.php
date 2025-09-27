@@ -874,7 +874,7 @@
         <div id="class-packages" class="bg-[#1a1a2e] text-white py-14 sm:py-16 lg:py-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Flexible Class Passes</h2>
+                    <h3 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Flexible Class Passes</h3>
                     <p class="text-gray-400 text-lg">Choose the perfect plan for your lifestyle</p>
                 </div>
 
