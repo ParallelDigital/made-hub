@@ -922,7 +922,7 @@
 
         <!-- Flexible Class Passes Section -->
         <div id="class-packages" class="relative bg-[#1a1a2e] text-white py-14 sm:py-16 lg:py-20 overflow-hidden">
-            <div aria-hidden="true" class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('made-1.jpg') }}'); opacity: 0.15;"></div>
+            <div aria-hidden="true" class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('made-1.jpg') }}'); opacity: 0.10;"></div>
             <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
                     <h3 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">CLASS PASSESS</h3>
@@ -968,6 +968,7 @@
 
         <!-- Schedule Section -->
         <div id="schedule" class="bg-white text-black py-6 sm:py-8">
+            <h3 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-center mt-5 pt-5">BOOK A CLASS</h3>
             <div class="schedule-container max-w-7xl mx-auto" style="opacity: 0; transition: opacity 0.3s ease-in-out;">
                 <!-- Week Navigation -->
                 <div class="week-nav-container">
