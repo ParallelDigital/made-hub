@@ -1309,8 +1309,8 @@
                     <div id="facilitiesTrack" class="carousel-track">
                         <img src="{{ asset('class-1.jpg') }}" alt="Gym facility 1" class="carousel-item shadow-lg" loading="lazy">
                         <img src="{{ asset('class-2.jpg') }}" alt="Yoga studio" class="carousel-item shadow-lg" loading="lazy">
-                        <img src="{{ asset('class-3.jpg') }}" alt="Cardio area with treadmills" class="carousel-item shadow-lg" loading="lazy">
-                        <img src="{{ asset('class-4.jpg') }}" alt="Group class in session" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('meeting-room.jpg') }}" alt="Meeting room" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('studio.jpg') }}" alt="Yoga Studio" class="carousel-item shadow-lg" loading="lazy">
                         <img src="{{ asset('class.jpg') }}" alt="Training equipment" class="carousel-item shadow-lg" loading="lazy">
                     </div>
                     <button id="facilitiesNext" class="carousel-arrow right" aria-label="Next">
@@ -1335,22 +1335,47 @@
                     track.dataset.looped = '1';
                 }
 
-                // Auto-scroll state
-                let isAuto = true;
-                let lastTime = performance.now();
-                // Slightly faster on desktop
-                let pxPerSecond = window.innerWidth < 768 ? 60 : 90; // px/sec
+                // Auto-scroll state (discrete slide every 1s)
+                let autoTimer = null;
                 let resumeTimer = null;
+                let isProgrammatic = false; // ignore scroll events we trigger ourselves
+                const AUTO_MS = 1000; // change slide every 1 second
 
                 function amount() {
                     const card = track.querySelector('.carousel-item');
                     return card ? (card.clientWidth + 16) : Math.max(240, track.clientWidth * 0.6);
                 }
 
+                function stopAuto() {
+                    if (autoTimer) {
+                        clearInterval(autoTimer);
+                        autoTimer = null;
+                    }
+                }
+
+                function safeScrollBy(dx) {
+                    try {
+                        track.scrollBy({ left: dx, behavior: 'smooth' });
+                    } catch (e) {
+                        // Fallback for browsers without smooth options support
+                        track.scrollLeft += dx;
+                    }
+                }
+
+                function startAuto() {
+                    stopAuto();
+                    autoTimer = setInterval(() => {
+                        isProgrammatic = true;
+                        safeScrollBy(amount());
+                        // Normalize and then re-allow user scroll detection
+                        setTimeout(() => { normalizeLoop(); isProgrammatic = false; }, AUTO_MS * 0.5);
+                    }, AUTO_MS);
+                }
+
                 function pauseAuto(ms = 2000) {
-                    isAuto = false;
+                    stopAuto();
                     if (resumeTimer) clearTimeout(resumeTimer);
-                    resumeTimer = setTimeout(() => { isAuto = true; }, ms);
+                    resumeTimer = setTimeout(() => { startAuto(); }, ms);
                 }
 
                 // Keep scroll position within the first half to avoid overflow
@@ -1361,46 +1386,38 @@
                     }
                 }
 
-                function step(now) {
-                    const dt = Math.max(0, Math.min(100, now - lastTime)); // clamp
-                    lastTime = now;
-                    if (isAuto) {
-                        const dx = (pxPerSecond * dt) / 1000; // px this frame
-                        track.scrollLeft += dx;
-                        normalizeLoop();
-                    }
-                    requestAnimationFrame(step);
-                }
-                requestAnimationFrame(step);
+                // Kick off autoplay immediately
+                startAuto();
 
                 // Controls pause auto-scroll briefly
                 prev.addEventListener('click', () => {
                     pauseAuto(2500);
-                    track.scrollBy({ left: -amount(), behavior: 'smooth' });
+                    safeScrollBy(-amount());
                 });
                 next.addEventListener('click', () => {
                     pauseAuto(2500);
-                    track.scrollBy({ left: amount(), behavior: 'smooth' });
+                    safeScrollBy(amount());
                 });
 
                 // Pause on hover/touch and while user manually scrolls
-                track.addEventListener('mouseenter', () => pauseAuto(999999));
-                track.addEventListener('mouseleave', () => { isAuto = true; });
-                track.addEventListener('touchstart', () => pauseAuto(8000), { passive: true });
+                track.addEventListener('mouseenter', () => stopAuto());
+                track.addEventListener('mouseleave', () => startAuto());
+                track.addEventListener('touchstart', () => stopAuto(), { passive: true });
                 track.addEventListener('touchend', () => pauseAuto(2000), { passive: true });
 
                 let manualScrollTimer;
                 track.addEventListener('scroll', () => {
+                    if (isProgrammatic) return;
                     // Normalize while user scrolls too
                     normalizeLoop();
-                    isAuto = false;
+                    stopAuto();
                     clearTimeout(manualScrollTimer);
-                    manualScrollTimer = setTimeout(() => { isAuto = true; }, 1500);
+                    manualScrollTimer = setTimeout(() => { startAuto(); }, 1200);
                 }, { passive: true });
 
-                // Recalculate speed on resize
+                // Restart after resize to keep step size consistent
                 window.addEventListener('resize', () => {
-                    pxPerSecond = window.innerWidth < 768 ? 60 : 90;
+                    pauseAuto(800);
                 });
             })();
         </script>
