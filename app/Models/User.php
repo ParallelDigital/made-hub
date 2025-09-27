@@ -124,6 +124,11 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class);
     }
 
+    public function passes(): HasMany
+    {
+        return $this->hasMany(UserPass::class);
+    }
+
     public function membership()
     {
         return $this->belongsTo(Membership::class);
@@ -162,10 +167,10 @@ class User extends Authenticatable
      */
     public function getNonMemberAvailableCredits(): int
     {
-        if (($this->credits_expires_at && $this->credits_expires_at->isFuture()) || ($this->credits_expires_at && $this->credits_expires_at->isToday())) {
-            return (int) ($this->credits ?? 0);
-        }
-        return 0;
+        return $this->passes()
+            ->where('pass_type', 'credits')
+            ->where('expires_at', '>=', now()->toDateString())
+            ->sum('credits');
     }
 
     /**
@@ -198,24 +203,28 @@ class User extends Authenticatable
      */
     public function useCredit(): bool
     {
-        if (!$this->hasActiveMembership()) {
-            // Fallback to old credits system
-            // Respect credit expiry window
-            $hasValidWindow = $this->credits_expires_at && ($this->credits_expires_at->isFuture() || $this->credits_expires_at->isToday());
-            if ($hasValidWindow && ($this->credits > 0)) {
-                $this->decrement('credits');
+        // Prioritize membership credits
+        if ($this->hasActiveMembership()) {
+            $this->refreshMonthlyCreditsIfNeeded();
+            if ($this->monthly_credits > 0) {
+                $this->decrement('monthly_credits');
                 return true;
             }
-            return false;
         }
 
-        $this->refreshMonthlyCreditsIfNeeded();
-        
-        if ($this->monthly_credits > 0) {
-            $this->decrement('monthly_credits');
+        // If no membership credits, try to use credits from passes
+        $creditPass = $this->passes()
+            ->where('pass_type', 'credits')
+            ->where('expires_at', '>=', now()->toDateString())
+            ->where('credits', '>', 0)
+            ->orderBy('expires_at', 'asc') // Use the one that expires soonest
+            ->first();
+
+        if ($creditPass) {
+            $creditPass->decrement('credits');
             return true;
         }
-        
+
         return false;
     }
 
@@ -224,31 +233,36 @@ class User extends Authenticatable
      */
     public function hasActiveUnlimitedPass(): bool
     {
-        return (bool) ($this->unlimited_pass_expires_at && ($this->unlimited_pass_expires_at->isFuture() || $this->unlimited_pass_expires_at->isToday()));
+        return $this->passes()
+            ->where('pass_type', 'unlimited')
+            ->where('expires_at', '>=', now()->toDateString())
+            ->exists();
     }
 
     /**
      * Allocate N credits to a non-member with a given expiry date (1 month passes, etc.)
      * If the user has an existing later expiry, keep the later one.
      */
-    public function allocateCreditsWithExpiry(int $amount, \Carbon\CarbonInterface $expiresAt): void
+    public function allocateCreditsWithExpiry(int $amount, \Carbon\CarbonInterface $expiresAt, string $source = 'admin_grant'): void
     {
-        $this->credits = (int) ($this->credits ?? 0) + max(0, $amount);
-        if ($this->credits_expires_at) {
-            $this->credits_expires_at = $this->credits_expires_at->greaterThan($expiresAt) ? $this->credits_expires_at : $expiresAt->toDateString();
-        } else {
-            $this->credits_expires_at = $expiresAt->toDateString();
-        }
-        $this->save();
+        $this->passes()->create([
+            'pass_type' => 'credits',
+            'credits' => $amount,
+            'expires_at' => $expiresAt,
+            'source' => $source,
+        ]);
     }
 
     /**
      * Activate an unlimited pass until the given expiry date
      */
-    public function activateUnlimitedPass(\Carbon\CarbonInterface $expiresAt): void
+    public function activateUnlimitedPass(\Carbon\CarbonInterface $expiresAt, string $source = 'admin_grant'): void
     {
-        $this->unlimited_pass_expires_at = $expiresAt->toDateString();
-        $this->save();
+        $this->passes()->create([
+            'pass_type' => 'unlimited',
+            'expires_at' => $expiresAt,
+            'source' => $source,
+        ]);
     }
 
     /**

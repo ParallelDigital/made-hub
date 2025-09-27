@@ -15,70 +15,46 @@ class ClassPassController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search', '');
-        $sortBy = $request->input('sort_by', 'unlimited_pass_expires_at');
+        $sortBy = $request->input('sort_by', 'expires_at');
         $sortOrder = $request->input('sort_order', 'desc');
-        $filter = $request->input('filter', 'all'); // all, active, expired, credits
+        $filter = $request->input('filter', 'all');
 
-        // Build the query
-        $query = User::query();
+        $query = User::query()->whereHas('passes');
 
-        // Apply search filter
         if (!empty($search)) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
                   ->orWhere('email', 'like', '%' . $search . '%');
             });
         }
 
-        // Apply pass type filter
-        switch ($filter) {
-            case 'active_unlimited':
-                $query->whereNotNull('unlimited_pass_expires_at')
-                      ->where('unlimited_pass_expires_at', '>=', now()->toDateString());
-                break;
-            case 'expired_unlimited':
-                $query->whereNotNull('unlimited_pass_expires_at')
-                      ->where('unlimited_pass_expires_at', '<', now()->toDateString());
-                break;
-            case 'active_credits':
-                $query->where('credits', '>', 0)
-                      ->where(function($q) {
-                          $q->whereNull('credits_expires_at')
-                            ->orWhere('credits_expires_at', '>=', now()->toDateString());
-                      });
-                break;
-            case 'expired_credits':
-                $query->where('credits', '>', 0)
-                      ->whereNotNull('credits_expires_at')
-                      ->where('credits_expires_at', '<', now()->toDateString());
-                break;
-            case 'all':
-            default:
-                $query->where(function($q) {
-                    $q->whereNotNull('unlimited_pass_expires_at')
-                      ->orWhere('credits', '>', 0);
-                });
-                break;
-        }
+        $query->with(['passes' => function ($q) {
+            $q->orderBy('expires_at', 'desc');
+        }]);
 
-        // Apply sorting
-        switch ($sortBy) {
-            case 'name':
-                $query->orderBy('name', $sortOrder);
-                break;
-            case 'email':
-                $query->orderBy('email', $sortOrder);
-                break;
-            case 'credits':
-                $query->orderBy('credits', $sortOrder);
-                break;
-            case 'credits_expires_at':
-                $query->orderBy('credits_expires_at', $sortOrder);
-                break;
-            case 'unlimited_pass_expires_at':
-            default:
-                $query->orderBy('unlimited_pass_expires_at', $sortOrder);
-                break;
+        $query->whereHas('passes', function ($q) use ($filter) {
+            switch ($filter) {
+                case 'active_unlimited':
+                    $q->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString());
+                    break;
+                case 'expired_unlimited':
+                    $q->where('pass_type', 'unlimited')->where('expires_at', '<', now()->toDateString());
+                    break;
+                case 'active_credits':
+                    $q->where('pass_type', 'credits')->where('credits', '>', 0)->where('expires_at', '>=', now()->toDateString());
+                    break;
+                case 'expired_credits':
+                    $q->where('pass_type', 'credits')->where('expires_at', '<', now()->toDateString());
+                    break;
+            }
+        });
+
+        if ($sortBy === 'name' || $sortBy === 'email') {
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            // Sorting by pass attributes is more complex and may require subqueries or joins.
+            // For now, we sort by user name as a fallback.
+            $query->orderBy('name', 'asc');
         }
 
         $users = $query->paginate(20)->appends($request->query());
@@ -109,12 +85,13 @@ class ClassPassController extends Controller
         $user = User::where('email', $request->user_email)->firstOrFail();
 
         if ($request->pass_type === 'unlimited') {
-            $user->activateUnlimitedPass(Carbon::parse($request->expires_at));
+            $user->activateUnlimitedPass(Carbon::parse($request->expires_at), 'admin_grant');
             $message = "Unlimited pass activated for {$user->name} until " . Carbon::parse($request->expires_at)->format('M j, Y');
         } else {
             $user->allocateCreditsWithExpiry(
                 (int) $request->credits_amount,
-                Carbon::parse($request->expires_at)
+                Carbon::parse($request->expires_at),
+                'admin_grant'
             );
             $message = "{$request->credits_amount} credits allocated to {$user->name} until " . Carbon::parse($request->expires_at)->format('M j, Y');
         }
@@ -152,28 +129,27 @@ class ClassPassController extends Controller
 
         switch ($request->action) {
             case 'extend_unlimited':
-                $user->activateUnlimitedPass(Carbon::parse($request->expires_at));
+                $user->activateUnlimitedPass(Carbon::parse($request->expires_at), 'admin_grant');
                 $message = "Unlimited pass extended until " . Carbon::parse($request->expires_at)->format('M j, Y');
                 break;
 
             case 'add_credits':
                 $user->allocateCreditsWithExpiry(
                     (int) $request->credits_amount,
-                    Carbon::parse($request->expires_at)
+                    Carbon::parse($request->expires_at),
+                    'admin_grant'
                 );
                 $message = "{$request->credits_amount} credits added, expiring " . Carbon::parse($request->expires_at)->format('M j, Y');
                 break;
 
             case 'expire_unlimited':
-                $user->unlimited_pass_expires_at = now()->subDay();
-                $user->save();
-                $message = "Unlimited pass expired";
+                $user->passes()->where('pass_type', 'unlimited')->update(['expires_at' => now()->subDay()]);
+                $message = "Unlimited passes expired";
                 break;
 
             case 'expire_credits':
-                $user->credits_expires_at = now()->subDay();
-                $user->save();
-                $message = "Credits expired";
+                $user->passes()->where('pass_type', 'credits')->update(['expires_at' => now()->subDay()]);
+                $message = "All credit passes expired";
                 break;
         }
 
@@ -186,11 +162,7 @@ class ClassPassController extends Controller
      */
     public function destroy(User $user)
     {
-        // Reset both unlimited pass and credits
-        $user->unlimited_pass_expires_at = null;
-        $user->credits = 0;
-        $user->credits_expires_at = null;
-        $user->save();
+        $user->passes()->delete();
 
         return redirect()->route('admin.class-passes.index')
             ->with('success', "All class passes removed for {$user->name}");

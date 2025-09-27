@@ -83,115 +83,75 @@
         <table class="w-full">
             <thead class="bg-gray-800">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors" onclick="sortTable('name')">
-                        User
-                        @if($sortBy === 'name')
-                            <span class="ml-1">{{ $sortOrder === 'asc' ? '↑' : '↓' }}</span>
-                        @endif
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors" onclick="sortTable('unlimited_pass_expires_at')">
-                        Unlimited Pass
-                        @if($sortBy === 'unlimited_pass_expires_at')
-                            <span class="ml-1">{{ $sortOrder === 'asc' ? '↑' : '↓' }}</span>
-                        @endif
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors" onclick="sortTable('credits')">
-                        Credits
-                        @if($sortBy === 'credits')
-                            <span class="ml-1">{{ $sortOrder === 'asc' ? '↑' : '↓' }}</span>
-                        @endif
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors" onclick="sortTable('credits_expires_at')">
-                        Credits Expiry
-                        @if($sortBy === 'credits_expires_at')
-                            <span class="ml-1">{{ $sortOrder === 'asc' ? '↑' : '↓' }}</span>
-                        @endif
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Status
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        Actions
-                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Active Pass / Credits</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Expires</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Source</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-gray-800 divide-y divide-gray-700" id="passes-table">
                 @forelse($users as $user)
                     @php
                         $hasActiveUnlimited = $user->hasActiveUnlimitedPass();
-                        $hasActiveCredits = $user->getNonMemberAvailableCredits() > 0;
-                        $unlimitedExpiry = $user->unlimited_pass_expires_at;
-                        $creditsExpiry = $user->credits_expires_at;
+                        $totalCredits = $user->getNonMemberAvailableCredits();
+                        $activeUnlimitedPass = $user->passes()->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString())->orderBy('expires_at', 'desc')->first();
+                        $firstCreditPass = $user->passes()->where('pass_type', 'credits')->where('expires_at', '>=', now()->toDateString())->orderBy('expires_at', 'asc')->first();
                     @endphp
                     <tr class="hover:bg-gray-700/50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex flex-col">
-                                <div class="text-sm font-medium text-white">{{ $user->name }}</div>
+                                <a href="{{ route('admin.users.edit', $user) }}" class="text-sm font-medium text-white hover:text-primary hover:underline">{{ $user->name }}</a>
                                 <div class="text-sm text-gray-400">{{ $user->email }}</div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            @if($unlimitedExpiry)
-                                <div class="flex flex-col">
-                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $hasActiveUnlimited ? 'bg-green-800 text-green-100' : 'bg-red-800 text-red-100' }}">
-                                        {{ $hasActiveUnlimited ? 'Active' : 'Expired' }}
-                                    </span>
-                                    <span class="text-xs text-gray-400 mt-1">
-                                        Until {{ $unlimitedExpiry->format('M j, Y') }}
-                                    </span>
-                                </div>
+                            @if($hasActiveUnlimited && $activeUnlimitedPass)
+                                <span class="font-semibold text-purple-300">Unlimited Pass</span>
+                            @elseif($totalCredits > 0)
+                                <span class="font-semibold text-blue-300">{{ $totalCredits }} Credits</span>
                             @else
-                                <span class="text-gray-500">No unlimited pass</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            @if($user->credits > 0)
-                                <div class="flex flex-col">
-                                    <span class="text-white font-medium">{{ $user->credits }} credits</span>
-                                    <span class="text-xs {{ $hasActiveCredits ? 'text-green-400' : 'text-red-400' }}">
-                                        {{ $hasActiveCredits ? 'Available' : 'Expired' }}
-                                    </span>
-                                </div>
-                            @else
-                                <span class="text-gray-500">No credits</span>
+                                <span class="text-gray-500">No Active Pass</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            @if($creditsExpiry)
-                                {{ $creditsExpiry->format('M j, Y') }}
+                            @if($activeUnlimitedPass)
+                                {{ $activeUnlimitedPass->expires_at->format('M j, Y') }}
+                            @elseif($firstCreditPass)
+                                {{ $firstCreditPass->expires_at->format('M j, Y') }}
                             @else
-                                <span class="text-gray-500">No expiry</span>
+                                <span class="text-gray-500">N/A</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                            @if($activeUnlimitedPass)
+                                {{ Str::title(str_replace('_', ' ', $activeUnlimitedPass->source)) }}
+                            @elseif($firstCreditPass)
+                                {{ Str::title(str_replace('_', ' ', $firstCreditPass->source)) }}
+                            @else
+                                <span class="text-gray-500">-</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            @if($hasActiveUnlimited)
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-800 text-purple-100">
-                                    Unlimited Active
-                                </span>
-                            @elseif($hasActiveCredits)
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-800 text-blue-100">
-                                    Credits Active
-                                </span>
+                             @if($hasActiveUnlimited)
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-800 text-green-100">Active</span>
+                            @elseif($totalCredits > 0)
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-800 text-green-100">Active</span>
                             @else
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-700 text-gray-300">
-                                    No Active Pass
-                                </span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-800 text-red-100">Expired</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <a href="{{ route('admin.class-passes.show', $user) }}" class="text-primary hover:text-purple-400">
-                                    View
-                                </a>
-                                <a href="{{ route('admin.class-passes.edit', $user) }}" class="text-blue-400 hover:text-blue-300">
-                                    Edit
-                                </a>
+                                <a href="{{ route('admin.class-passes.show', $user) }}" class="text-primary hover:text-purple-400">View</a>
+                                <a href="{{ route('admin.class-passes.edit', $user) }}" class="text-blue-400 hover:text-blue-300">Edit</a>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-10 text-center text-gray-400">No class passes found.</td>
+                        <td colspan="6" class="px-6 py-10 text-center text-gray-400">No users with class passes found.</td>
                     </tr>
                 @endforelse
             </tbody>
