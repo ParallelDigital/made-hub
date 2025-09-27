@@ -19,7 +19,7 @@ class ClassPassController extends Controller
         $sortOrder = $request->input('sort_order', 'desc');
         $filter = $request->input('filter', 'all');
 
-        $query = User::query()->whereHas('passes');
+        $query = User::query();
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
@@ -45,6 +45,10 @@ class ClassPassController extends Controller
                     break;
                 case 'expired_credits':
                     $q->where('pass_type', 'credits')->where('expires_at', '<', now()->toDateString());
+                    break;
+                case 'all':
+                default:
+                    // Show all users who have any passes (no additional filter)
                     break;
             }
         });
