@@ -92,6 +92,7 @@ Route::get('/purchase', [App\Http\Controllers\PurchaseController::class, 'index'
 Route::get('/purchase/package/{type}', [App\Http\Controllers\PurchaseController::class, 'showPackageCheckout'])->name('purchase.package.checkout');
 Route::post('/purchase/package/{type}', [App\Http\Controllers\PurchaseController::class, 'processPackageCheckout'])->name('purchase.package.process');
 Route::get('/purchase/package/{type}/success', [App\Http\Controllers\PurchaseController::class, 'packageSuccess'])->name('purchase.package.success');
+Route::get('/purchase/confirmation', [App\Http\Controllers\PurchaseController::class, 'showConfirmation'])->name('purchase.confirmation');
 
 // AJAX login for in-modal authentication (guests only)
 Route::post('/ajax/login', function (\Illuminate\Http\Request $request) {

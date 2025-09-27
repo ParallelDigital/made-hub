@@ -206,6 +206,7 @@ class PurchaseController extends Controller
                 'name' => ($session && ($session->metadata->name ?? null)) ? $session->metadata->name : 'Guest',
                 // Create a secure random password for new users; they can set their own later
                 'password' => Hash::make(bin2hex(random_bytes(16))),
+                'email_verified_at' => now(), // Consider the email verified since they made a purchase
             ]
         );
 
@@ -221,9 +222,27 @@ class PurchaseController extends Controller
         // If the account was just created, email them a password setup link
         if ($user->wasRecentlyCreated) {
             try {
-                Password::sendResetLink(['email' => $user->email]);
+                $status = Password::sendResetLink(['email' => $user->email]);
+                
+                if ($status === Password::RESET_LINK_SENT) {
+                    \Log::info('Password setup link sent successfully to: ' . $user->email);
+                } else {
+                    \Log::warning('Failed to send password setup link to: ' . $user->email . ', Status: ' . $status);
+                }
             } catch (\Throwable $e) {
-                \Log::warning('Failed to send password setup link: '.$e->getMessage());
+                \Log::error('Exception sending password setup link to: ' . $user->email . ', Error: ' . $e->getMessage());
+                
+                // Try to trigger the password reset more explicitly
+                try {
+                    $token = app('auth.password.broker')->createToken($user);
+                    \Log::info('Manual password reset token created for: ' . $user->email);
+                    
+                    // You could send a custom email here if needed
+                    // Mail::to($user)->send(new CustomPasswordSetupMail($token));
+                    
+                } catch (\Throwable $e2) {
+                    \Log::error('Failed to create manual password reset token: ' . $e2->getMessage());
+                }
             }
         }
 
@@ -275,7 +294,12 @@ class PurchaseController extends Controller
             \Log::warning('Failed to store package code audit record: '.$e->getMessage());
         }
 
-        return redirect()->route('purchase.index')->with('success', 'Purchase successful! ' . $allocatedMessage . ' You can now book classes.');
+        // Get package info for confirmation page
+        $packages = collect($this->getPackages());
+        $package = $packages->firstWhere('type', $type);
+        
+        return view('purchase.confirmation', compact('user', 'type', 'package', 'allocatedMessage'))
+            ->with('message', 'Purchase successful! ' . $allocatedMessage);
     }
 
     private function getPackages(): array
@@ -422,5 +446,15 @@ class PurchaseController extends Controller
     public function showSuccessPage()
     {
         return view('checkout.success');
+    }
+
+    public function showConfirmation()
+    {
+        return view('purchase.confirmation', [
+            'type' => 'package',
+            'package' => ['name' => 'Class Pass', 'price' => 0],
+            'allocatedMessage' => 'Your purchase has been processed.',
+            'user' => auth()->user()
+        ]);
     }
 }
