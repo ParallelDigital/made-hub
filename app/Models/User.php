@@ -168,10 +168,15 @@ class User extends Authenticatable
      */
     public function getNonMemberAvailableCredits(): int
     {
-        return $this->passes()
-            ->where('pass_type', 'credits')
-            ->where('expires_at', '>=', now()->toDateString())
-            ->sum('credits');
+        try {
+            return $this->passes()
+                ->where('pass_type', 'credits')
+                ->where('expires_at', '>=', now()->toDateString())
+                ->sum('credits');
+        } catch (\Exception $e) {
+            // Fallback if user_passes table doesn't exist
+            return (int) ($this->credits ?? 0);
+        }
     }
 
     /**
@@ -234,10 +239,15 @@ class User extends Authenticatable
      */
     public function hasActiveUnlimitedPass(): bool
     {
-        return $this->passes()
-            ->where('pass_type', 'unlimited')
-            ->where('expires_at', '>=', now()->toDateString())
-            ->exists();
+        try {
+            return $this->passes()
+                ->where('pass_type', 'unlimited')
+                ->where('expires_at', '>=', now()->toDateString())
+                ->exists();
+        } catch (\Exception $e) {
+            // Fallback to old system if user_passes table doesn't exist
+            return false;
+        }
     }
 
     /**
