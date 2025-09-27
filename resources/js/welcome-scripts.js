@@ -21,9 +21,11 @@ function initializeAuthStatus() {
 function initializeFacilitiesCarousel() {
     const leftArrow = document.querySelector('.carousel-arrow.left');
     const rightArrow = document.querySelector('.carousel-arrow.right');
-    const track = document.querySelector('.carousel-track');
+    const track = document.querySelector('#facilitiesTrack');
     
-    if (!leftArrow || !rightArrow || !track) return;
+    if (!leftArrow || !rightArrow || !track) {
+        return;
+    }
     
     leftArrow.addEventListener('click', () => {
         track.scrollBy({ left: -320, behavior: 'smooth' });
