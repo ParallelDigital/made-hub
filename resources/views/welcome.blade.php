@@ -941,9 +941,9 @@
                     </div>
 
                     <!-- 10 Class Pack - Most Popular -->
-                    <div class="relative pricing-card bg-black rounded-2xl p-8 flex flex-col border-2 border-[#c8b7ed] hover:border-[#c8b7ed] transition-all duration-300">
-                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                            <span class="bg-[#c8b7ed] text-black text-xs font-bold px-4 py-1 rounded-full">Most Popular</span>
+                    <div class="relative pricing-card bg-black rounded-2xl p-8 flex flex-col border-2 border-[#c8b7ed] hover:border-[#d8c7ff] transition-all duration-300">
+                        <div class="absolute -top-4 left-1/2 -translate-x-1/2">
+                            <span class="bg-[#c8b7ed] text-black text-sm font-semibold px-5 py-1.5 rounded-full">Most Popular</span>
                         </div>
                         <h3 class="text-xl font-bold text-white mb-6 mt-2">10 CLASSES</h3>
                         <div class="mb-6">
