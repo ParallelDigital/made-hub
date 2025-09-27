@@ -643,6 +643,56 @@
                     height: 160px !important;
                 }
             }
+            /* Facilities carousel */
+            .carousel-container {
+                position: relative;
+            }
+            .carousel-track {
+                display: flex;
+                gap: 1rem;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding: 0.25rem;
+                scroll-behavior: smooth;
+            }
+            .carousel-track::-webkit-scrollbar { display: none; }
+            .carousel-item {
+                flex: 0 0 auto;
+                width: 260px;
+                height: 170px;
+                border-radius: 16px;
+                object-fit: cover;
+                scroll-snap-align: start;
+                background: #111;
+            }
+            @media (min-width: 640px) {
+                .carousel-item { width: 320px; height: 200px; }
+            }
+            @media (min-width: 1024px) {
+                .carousel-item { width: 360px; height: 220px; }
+            }
+            .carousel-arrow {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 42px;
+                height: 42px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(255,255,255,0.2);
+                border-radius: 9999px;
+                background: rgba(0,0,0,0.5);
+                color: white;
+                cursor: pointer;
+                transition: background 0.2s ease, transform 0.2s ease;
+            }
+            .carousel-arrow:hover { background: rgba(196,167,255,0.9); color: black; }
+            .carousel-arrow:active { transform: translateY(-50%) scale(0.98); }
+            .carousel-arrow.left { left: 0.25rem; }
+            .carousel-arrow.right { right: 0.25rem; }
         </style>
     </head>
     <body class="bg-black text-white">
@@ -874,7 +924,7 @@
         <div id="class-packages" class="bg-[#1a1a2e] text-white py-14 sm:py-16 lg:py-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h3 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Flexible Class Passes</h3>
+                    <h3 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">CLASS PASSESS</h3>
                     <p class="text-gray-400 text-lg">Choose the perfect plan for your lifestyle</p>
                 </div>
 
@@ -899,7 +949,7 @@
                             <p class="text-4xl font-bold text-white mb-1">£50.00</p>
                             <p class="text-gray-400 text-sm">£5 per class</p>
                         </div>
-                        <button class="w-full bg-[#c4a7ff] text-black font-semibold py-3 rounded-lg hover:bg-[#d4b7ff] transition-colors">Purchase</button>
+                        <button class="w-full sm:w-auto bg-primary text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">Purchase</button>
                     </div>
 
                     <!-- Monthly Unlimited -->
@@ -1245,7 +1295,48 @@
         </div>
 
         <!-- Scrolling Images Section -->
-        
+        <section id="facilities" class="bg-black text-white py-10 sm:py-14">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6">
+                <h3 class="text-center text-2xl sm:text-4xl font-black tracking-tight mb-6">
+                    State-of-the-Art <span class="text-primary">Facilities</span>
+                </h3>
+                <div class="carousel-container">
+                    <button id="facilitiesPrev" class="carousel-arrow left" aria-label="Previous">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <div id="facilitiesTrack" class="carousel-track">
+                        <img src="{{ asset('class-1.jpg') }}" alt="Gym facility 1" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('class-2.jpg') }}" alt="Yoga studio" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('class-3.jpg') }}" alt="Cardio area with treadmills" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('class-4.jpg') }}" alt="Group class in session" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('class.jpg') }}" alt="Training equipment" class="carousel-item shadow-lg" loading="lazy">
+                    </div>
+                    <button id="facilitiesNext" class="carousel-arrow right" aria-label="Next">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <script>
+            (function() {
+                const track = document.getElementById('facilitiesTrack');
+                const prev = document.getElementById('facilitiesPrev');
+                const next = document.getElementById('facilitiesNext');
+                if (!track || !prev || !next) return;
+                function amount() {
+                    const card = track.querySelector('.carousel-item');
+                    return card ? (card.clientWidth + 16) : Math.max(240, track.clientWidth * 0.6);
+                }
+                prev.addEventListener('click', () => track.scrollBy({ left: -amount(), behavior: 'smooth' }));
+                next.addEventListener('click', () => track.scrollBy({ left: amount(), behavior: 'smooth' }));
+            })();
+        </script>
+
         <!-- Membership section has been moved above the Schedule section -->
 
         <!-- Footer -->
