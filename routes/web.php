@@ -172,17 +172,34 @@ Route::get('/dashboard', function () {
 
     $remainingCancellations = max(0, 2 - $cancellationsThisQuarter);
 
+    // Ensure user has QR code
+    if (!$user->qr_code) {
+        // Generate QR code if missing
+        $user->qr_code = 'QR' . strtoupper(substr(md5($user->id . $user->email . time()), 0, 8));
+        $user->save();
+    }
+
     // Signed URL for user's universal check-in (based on their personal QR code)
-    $userQrUrl = \Illuminate\Support\Facades\URL::signedRoute('user.checkin', [
-        'user' => $user->id,
-        'qr_code' => $user->qr_code,
-    ]);
+    try {
+        $userQrUrl = \Illuminate\Support\Facades\URL::signedRoute('user.checkin', [
+            'user' => $user->id,
+            'qr_code' => $user->qr_code,
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Failed to generate QR URL for user ' . $user->id . ': ' . $e->getMessage());
+        $userQrUrl = route('welcome'); // Fallback URL
+    }
 
     // Pre-generate an SVG QR image for the dashboard (safe to embed inline on web)
-    $qrSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
-        ->size(220)
-        ->errorCorrection('M')
-        ->generate($userQrUrl);
+    try {
+        $qrSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+            ->size(220)
+            ->errorCorrection('M')
+            ->generate($userQrUrl);
+    } catch (\Exception $e) {
+        \Log::error('Failed to generate QR SVG for user ' . $user->id . ': ' . $e->getMessage());
+        $qrSvg = '<svg width="220" height="220"><text x="110" y="110" text-anchor="middle">QR Code Error</text></svg>';
+    }
 
     return view('dashboard', [
         'upcomingBookings' => $upcomingBookings,

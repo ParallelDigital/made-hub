@@ -75,7 +75,12 @@
         </div>
         <div class="mt-4 text-xs break-all text-gray-300">
             <span class="block mb-1 text-gray-400">Backup link:</span>
-            <a href="{{ $userQrUrl }}" class="underline text-primary hover:opacity-90 break-all">{{ $userQrUrl }}</a>
+            @if(isset($userQrUrl) && $userQrUrl)
+                <a href="{{ $userQrUrl }}" class="underline text-primary hover:opacity-90 break-all" target="_blank" rel="noopener">{{ $userQrUrl }}</a>
+                <p class="text-xs text-gray-500 mt-1">Click to open your check-in page</p>
+            @else
+                <span class="text-red-400">QR URL not available - please contact support</span>
+            @endif
         </div>
     </div>
 
