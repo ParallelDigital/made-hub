@@ -947,7 +947,7 @@
             <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
                     <h3 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">CLASS PASSESS</h3>
-                    <p class="text-gray-400 text-lg">Choose the perfect plan for your lifestyle</p>
+                    <p class="text-gray-400 text-lg uppercase">Choose the perfect plan for your lifestyle</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
