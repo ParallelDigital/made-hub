@@ -1308,11 +1308,11 @@
                         </svg>
                     </button>
                     <div id="facilitiesTrack" class="carousel-track">
-                        <img src="{{ asset('class-1.jpg') }}" alt="Gym facility 1" class="carousel-item shadow-lg" loading="lazy">
-                        <img src="{{ asset('class-2.jpg') }}" alt="Yoga studio" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('meeting-room2.jpg') }}" alt="Meeting Room" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('physio-room.jpg') }}" alt="Physio Room" class="carousel-item shadow-lg" loading="lazy">
                         <img src="{{ asset('meeting-room.jpg') }}" alt="Meeting room" class="carousel-item shadow-lg" loading="lazy">
                         <img src="{{ asset('studio.jpg') }}" alt="Yoga Studio" class="carousel-item shadow-lg" loading="lazy">
-                        <img src="{{ asset('class.jpg') }}" alt="Training equipment" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('gym-1.jpg') }}" alt="Made Running Gym" class="carousel-item shadow-lg" loading="lazy">
                     </div>
                     <button id="facilitiesNext" class="carousel-arrow right" aria-label="Next">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
