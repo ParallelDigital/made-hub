@@ -114,6 +114,15 @@
             </form>
         @endif
 
+        <form method="POST" action="{{ route('admin.bookings.destroy', $booking) }}" class="inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" onclick="return confirm('Are you sure you want to permanently delete this booking? This action cannot be undone.')"
+                    class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-md text-sm">
+                Delete Booking
+            </button>
+        </form>
+
         <a href="{{ route('admin.bookings.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
             Back to List
         </a>

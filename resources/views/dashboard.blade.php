@@ -152,11 +152,14 @@
                                 $canCancel = $booking->status === 'confirmed' && !$classStart->isPast();
                             @endphp
                             @if($canCancel)
-                                @if($remainingCancellations > 0)
-                                    <button onclick="cancelBooking({{ $booking->id }}, '{{ $booking->fitnessClass->name }}')" class="text-red-500 hover:text-red-700 hover:underline text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center">Cancel</button>
-                                @else
-                                    <span class="text-gray-500 text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center" title="No cancellations remaining this quarter">Cancel Limit Reached</span>
-                                @endif
+                                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                                    @if($remainingCancellations > 0)
+                                        <button onclick="cancelBooking({{ $booking->id }}, '{{ $booking->fitnessClass->name }}')" class="text-red-500 hover:text-red-700 hover:underline text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center">Cancel</button>
+                                    @else
+                                        <span class="text-gray-500 text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center" title="No cancellations remaining this quarter">Cancel Limit Reached</span>
+                                    @endif
+                                    <button onclick="deleteBooking({{ $booking->id }}, '{{ $booking->fitnessClass->name }}')" class="text-red-800 hover:text-red-900 hover:underline text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center">Delete</button>
+                                </div>
                             @endif
                         </div>
                     </li>
@@ -455,6 +458,45 @@
                 {
                     title: 'Cancel Booking',
                     yesText: 'Yes, Cancel',
+                    noText: 'Keep Booking',
+                    danger: true,
+                    icon: 'warning'
+                }
+            );
+        };
+
+        // Delete booking function with enhanced modal
+        window.deleteBooking = function(bookingId, className) {
+            showConfirmModal(
+                `Are you sure you want to permanently delete your booking for "${className}"?\n\nThis will completely remove the booking from the system and cannot be undone.`,
+                function() {
+                    // User confirmed - proceed with deletion
+                    fetch(`{{ url('/delete-booking') }}/${bookingId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message || 'Booking deleted successfully!', 'success', 'Success');
+                            // Reload the page to refresh the upcoming bookings list
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            alert(data.message || 'Deletion failed.', 'error', 'Error');
+                        }
+                    })
+                    .catch(() => alert('Network error. Please try again.', 'error', 'Error'));
+                },
+                function() {
+                    // User cancelled - do nothing
+                },
+                {
+                    title: 'Delete Booking',
+                    yesText: 'Yes, Delete Permanently',
                     noText: 'Keep Booking',
                     danger: true,
                     icon: 'warning'

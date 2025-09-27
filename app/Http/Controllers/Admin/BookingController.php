@@ -87,6 +87,31 @@ class BookingController extends Controller
     }
 
     /**
+     * Delete the specified booking.
+     */
+    public function destroy(Booking $booking)
+    {
+        try {
+            $userName = $booking->user->name;
+            $className = $booking->fitnessClass->name;
+            $classDate = $booking->fitnessClass->class_date->format('M j, Y');
+            
+            $booking->delete();
+
+            return redirect()->route('admin.bookings.index')
+                ->with('success', "Booking for {$userName} in {$className} on {$classDate} has been permanently deleted.");
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to delete booking ID: ' . $booking->id, [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect()->back()->with('error', 'Failed to delete booking. Please try again.');
+        }
+    }
+
+    /**
      * Resend the booking confirmation email.
      */
     public function resendConfirmation(Booking $booking)

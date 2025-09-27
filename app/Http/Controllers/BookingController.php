@@ -491,6 +491,43 @@ class BookingController extends Controller
     }
 
     /**
+     * Delete a booking (permanent removal)
+     */
+    public function delete(Request $request, $bookingId)
+    {
+        if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Please log in to delete bookings.'], 401);
+        }
+
+        $user = Auth::user();
+        $booking = Booking::with('fitnessClass')->findOrFail($bookingId);
+
+        // Check if booking belongs to user
+        if ($booking->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'You can only delete your own bookings.'], 403);
+        }
+
+        // Check if class has already started
+        $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->toDateString() . ' ' . $booking->fitnessClass->start_time);
+        if ($classStart->isPast()) {
+            return response()->json(['success' => false, 'message' => 'You cannot delete a booking for a class that has already started.'], 400);
+        }
+
+        // Store class info for response
+        $className = $booking->fitnessClass->name;
+        $classDate = $booking->fitnessClass->class_date->format('M j, Y');
+        $classTime = $booking->fitnessClass->start_time;
+
+        // Delete the booking permanently
+        $booking->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Booking for {$className} on {$classDate} at {$classTime} has been permanently deleted."
+        ]);
+    }
+
+    /**
      * Get the number of cancellations for the current quarter
      */
     private function getCancellationsThisQuarter($userId)

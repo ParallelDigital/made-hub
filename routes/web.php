@@ -112,6 +112,7 @@ Route::post('/book-with-credits/{classId}', [App\Http\Controllers\BookingControl
 Route::get('/checkout/{class_id}', [App\Http\Controllers\PurchaseController::class, 'showCheckoutForm'])->name('checkout.show');
 Route::post('/checkout/{class_id}', [App\Http\Controllers\PurchaseController::class, 'processCheckout'])->name('booking.process-checkout');
 Route::post('/cancel-booking/{bookingId}', [App\Http\Controllers\BookingController::class, 'cancel'])->name('booking.cancel');
+Route::delete('/delete-booking/{bookingId}', [App\Http\Controllers\BookingController::class, 'delete'])->name('booking.delete');
 Route::post('/apply-coupon', [App\Http\Controllers\PurchaseController::class, 'applyCoupon'])->name('booking.apply-coupon');
 Route::get('/booking/success', [App\Http\Controllers\BookingController::class, 'success'])->name('booking.success');
 Route::get('/booking/confirmation/{classId}', [App\Http\Controllers\BookingController::class, 'confirmation'])->name('booking.confirmation');
@@ -213,7 +214,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
     Route::resource('memberships', App\Http\Controllers\Admin\MembershipController::class);
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);
     // Admin bookings list
-    Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show', 'update']);
+    Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::post('bookings/{booking}/resend-confirmation', [App\Http\Controllers\Admin\BookingController::class, 'resendConfirmation'])->name('bookings.resend-confirmation');
     Route::get('users/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
     Route::post('users', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
