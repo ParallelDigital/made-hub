@@ -1299,9 +1299,6 @@
         <!-- Scrolling Images Section -->
         <section id="facilities" class="bg-black text-white py-10 sm:py-14">
             <div class="max-w-7xl mx-auto px-4 sm:px-6">
-                <h3 class="text-center text-2xl sm:text-4xl font-black tracking-tight mb-6">
-                    State-of-the-Art <span class="text-primary">Facilities</span>
-                </h3>
                 <div class="carousel-container">
                     <button id="facilitiesPrev" class="carousel-arrow left" aria-label="Previous">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
