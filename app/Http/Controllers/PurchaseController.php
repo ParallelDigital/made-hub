@@ -314,19 +314,33 @@ class PurchaseController extends Controller
 
     public function applyCoupon(Request $request)
     {
-        $request->validate([
-            'coupon_code' => 'required|string',
-            'class_id' => 'required|exists:fitness_classes,id',
-        ]);
+        // Validate based on whether it's a class or package discount
+        if ($request->has('class_id')) {
+            // Individual class discount
+            $request->validate([
+                'coupon_code' => 'required|string',
+                'class_id' => 'required|exists:fitness_classes,id',
+            ]);
+            
+            $class = FitnessClass::findOrFail($request->class_id);
+            $originalPrice = $class->price;
+        } else {
+            // Package discount
+            $request->validate([
+                'coupon_code' => 'required|string',
+                'package_type' => 'required|string',
+                'original_price' => 'required|numeric',
+            ]);
+            
+            $originalPrice = $request->original_price;
+        }
 
         $coupon = Coupon::where('code', $request->coupon_code)->where('status', 'active')->first();
-        $class = FitnessClass::findOrFail($request->class_id);
 
         if (!$coupon) {
             return response()->json(['success' => false, 'message' => 'Invalid or inactive coupon code.']);
         }
 
-        $originalPrice = $class->price;
         $discount = 0;
 
         if ($coupon->type === 'fixed') {

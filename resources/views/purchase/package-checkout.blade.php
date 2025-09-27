@@ -76,6 +76,31 @@
                         </svg>
                         Secure Payment Processing
                     </div>
+                    
+                    <!-- Coupon Section -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="coupon-code" name="coupon_code" placeholder="Enter discount code" value="{{ old('coupon_code') }}" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                            <button type="button" id="apply-coupon" class="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors">Apply</button>
+                        </div>
+                        <div id="coupon-message" class="mt-2 text-sm"></div>
+                    </div>
+
+                    <!-- Pricing Summary -->
+                    <div class="border-t border-gray-200 pt-4 space-y-2">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-700">Subtotal:</span>
+                            <span class="font-semibold text-black">£{{ number_format($package->price, 2) }}</span>
+                        </div>
+                        <div id="discount-row" class="flex justify-between items-center text-sm text-green-600 hidden">
+                            <span class="text-gray-600">Discount:</span>
+                            <span id="discount-amount" class="font-medium">-£0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg font-extrabold">
+                            <span class="text-black">Total:</span>
+                            <span id="total-price" class="text-black">£{{ number_format($package->price, 2) }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -189,22 +214,8 @@
                         </div>
                     @endguest
 
-                    <!-- Coupon Code -->
-                    <div class="relative">
-                        <input id="coupon_code" name="coupon_code" type="text" value="{{ old('coupon_code') }}"
-                               class="peer w-full px-4 py-3 rounded-lg border-2 border-gray-200 placeholder-transparent focus:border-primary transition-colors"
-                               placeholder="Discount Code (Optional)" />
-                        <label for="coupon_code"
-                               class="absolute left-2 -top-2.5 text-sm text-gray-600 transition-all
-                                      peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4
-                                      peer-focus:-top-2.5 peer-focus:left-2 peer-focus:text-sm peer-focus:text-primary floating-label">
-                            Discount Code (Optional)
-                        </label>
-                        <div class="mt-1 text-sm text-gray-500">Enter a discount code if you have one</div>
-                        @error('coupon_code')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <!-- Hidden field for coupon code (will be populated by JavaScript) -->
+                    <input type="hidden" name="coupon_code" id="applied-coupon-code" value="{{ old('coupon_code') }}">
 
                     <div class="pt-4">
                         <button type="submit" 
@@ -241,5 +252,94 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Add CSRF token to meta tag if missing
+        if (!document.querySelector('meta[name="csrf-token"]')) {
+            const meta = document.createElement('meta');
+            meta.name = 'csrf-token';
+            meta.content = '{{ csrf_token() }}';
+            document.head.appendChild(meta);
+        }
+
+        // Coupon code functionality
+        document.getElementById('apply-coupon').addEventListener('click', function(e) {
+            e.preventDefault();
+            const couponCode = document.getElementById('coupon-code').value;
+            const packageType = '{{ $package->type }}';
+            const originalPrice = {{ $package->price }};
+
+            if (!couponCode.trim()) {
+                const messageEl = document.getElementById('coupon-message');
+                messageEl.textContent = 'Please enter a discount code';
+                messageEl.className = 'mt-2 text-sm text-red-600';
+                return;
+            }
+
+            // Disable button during request
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Applying...';
+
+            fetch('{{ route("booking.apply-coupon") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ 
+                    coupon_code: couponCode, 
+                    package_type: packageType,
+                    original_price: originalPrice
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageEl = document.getElementById('coupon-message');
+                if (data.success) {
+                    messageEl.textContent = data.message;
+                    messageEl.className = 'mt-2 text-sm text-green-600';
+                    
+                    // Show discount in pricing summary
+                    document.getElementById('discount-row').classList.remove('hidden');
+                    document.getElementById('discount-amount').textContent = `-£${data.discount_amount.toFixed(2)}`;
+                    document.getElementById('total-price').textContent = `£${data.new_total.toFixed(2)}`;
+                    
+                    // Update form with applied coupon
+                    document.getElementById('applied-coupon-code').value = couponCode;
+                    
+                    // Disable input and change button text
+                    const couponInput = document.getElementById('coupon-code');
+                    couponInput.disabled = true;
+                    couponInput.classList.add('bg-gray-100', 'text-gray-500');
+                    btn.textContent = 'Applied';
+                    btn.classList.add('bg-green-600', 'hover:bg-green-700');
+                    btn.classList.remove('bg-black', 'hover:bg-gray-800');
+                } else {
+                    messageEl.textContent = data.message;
+                    messageEl.className = 'mt-2 text-sm text-red-600';
+                }
+            })
+            .catch(error => {
+                const messageEl = document.getElementById('coupon-message');
+                messageEl.textContent = 'An unexpected error occurred.';
+                messageEl.className = 'mt-2 text-sm text-red-600';
+            })
+            .finally(() => {
+                if (!document.getElementById('applied-coupon-code').value) {
+                    btn.disabled = false;
+                    btn.textContent = 'Apply';
+                }
+            });
+        });
+
+        // Allow applying coupon with Enter key
+        document.getElementById('coupon-code').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('apply-coupon').click();
+            }
+        });
+    </script>
 </body>
 </html>
