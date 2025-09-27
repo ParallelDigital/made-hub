@@ -842,7 +842,7 @@
                     <p class="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-gray-300">Unlock unlimited access to our world-class facilities</p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
                     <!-- Features -->
                     <div class="space-y-6 sm:space-y-7 max-w-xl mx-auto lg:mx-0">
                         <div class="flex items-start gap-4">
@@ -867,16 +867,15 @@
                             </div>
                         </div>
 
-                        <div class="flex items-start gap-4">
+                        <!-- <div class="flex items-start gap-4">
                             <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
-                                <!-- ticket icon -->
                                 <svg class="svg-inline--fa fa-calendar-check w-9 h-4" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="calendar-check" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zM329 305c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-95 95-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L329 305z"></path></svg>
                             </div>
                             <div>
                                 <div class="font-semibold leading-tight">First Access on Events</div>
                                 <div class="text-gray-400 text-sm leading-relaxed">Priority booking for special events</div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="flex items-start gap-4">
                             <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-purple-300 flex items-center justify-center">
