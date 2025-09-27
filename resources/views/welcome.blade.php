@@ -12,7 +12,7 @@
         <link rel="apple-touch-icon" href="{{ asset('made-running.png') }}">
 
         <!-- Vite Assets (optimized for performance) -->
-        @vite(['resources/css/app.css', 'resources/css/welcome-styles.css', 'resources/js/app.js', 'resources/js/welcome-scripts.js'])
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-black text-white">
         <!-- Navigation -->
