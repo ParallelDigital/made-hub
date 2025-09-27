@@ -1328,12 +1328,80 @@
                 const prev = document.getElementById('facilitiesPrev');
                 const next = document.getElementById('facilitiesNext');
                 if (!track || !prev || !next) return;
+
+                // Seamless loop: duplicate items once
+                if (!track.dataset.looped) {
+                    track.innerHTML = track.innerHTML + track.innerHTML;
+                    track.dataset.looped = '1';
+                }
+
+                // Auto-scroll state
+                let isAuto = true;
+                let lastTime = performance.now();
+                // Slightly faster on desktop
+                let pxPerSecond = window.innerWidth < 768 ? 60 : 90; // px/sec
+                let resumeTimer = null;
+
                 function amount() {
                     const card = track.querySelector('.carousel-item');
                     return card ? (card.clientWidth + 16) : Math.max(240, track.clientWidth * 0.6);
                 }
-                prev.addEventListener('click', () => track.scrollBy({ left: -amount(), behavior: 'smooth' }));
-                next.addEventListener('click', () => track.scrollBy({ left: amount(), behavior: 'smooth' }));
+
+                function pauseAuto(ms = 2000) {
+                    isAuto = false;
+                    if (resumeTimer) clearTimeout(resumeTimer);
+                    resumeTimer = setTimeout(() => { isAuto = true; }, ms);
+                }
+
+                // Keep scroll position within the first half to avoid overflow
+                function normalizeLoop() {
+                    const half = track.scrollWidth / 2;
+                    if (half > 0 && track.scrollLeft >= half) {
+                        track.scrollLeft = track.scrollLeft - half;
+                    }
+                }
+
+                function step(now) {
+                    const dt = Math.max(0, Math.min(100, now - lastTime)); // clamp
+                    lastTime = now;
+                    if (isAuto) {
+                        const dx = (pxPerSecond * dt) / 1000; // px this frame
+                        track.scrollLeft += dx;
+                        normalizeLoop();
+                    }
+                    requestAnimationFrame(step);
+                }
+                requestAnimationFrame(step);
+
+                // Controls pause auto-scroll briefly
+                prev.addEventListener('click', () => {
+                    pauseAuto(2500);
+                    track.scrollBy({ left: -amount(), behavior: 'smooth' });
+                });
+                next.addEventListener('click', () => {
+                    pauseAuto(2500);
+                    track.scrollBy({ left: amount(), behavior: 'smooth' });
+                });
+
+                // Pause on hover/touch and while user manually scrolls
+                track.addEventListener('mouseenter', () => pauseAuto(999999));
+                track.addEventListener('mouseleave', () => { isAuto = true; });
+                track.addEventListener('touchstart', () => pauseAuto(8000), { passive: true });
+                track.addEventListener('touchend', () => pauseAuto(2000), { passive: true });
+
+                let manualScrollTimer;
+                track.addEventListener('scroll', () => {
+                    // Normalize while user scrolls too
+                    normalizeLoop();
+                    isAuto = false;
+                    clearTimeout(manualScrollTimer);
+                    manualScrollTimer = setTimeout(() => { isAuto = true; }, 1500);
+                }, { passive: true });
+
+                // Recalculate speed on resize
+                window.addEventListener('resize', () => {
+                    pxPerSecond = window.innerWidth < 768 ? 60 : 90;
+                });
             })();
         </script>
 
