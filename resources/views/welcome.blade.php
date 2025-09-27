@@ -1310,6 +1310,7 @@
                     <div id="facilitiesTrack" class="carousel-track">
                         <img src="{{ asset('meeting-room.jpg') }}" alt="Meeting room" class="carousel-item shadow-lg" loading="lazy">
                         <img src="{{ asset('gym-1.jpg') }}" alt="Made Running Gym" class="carousel-item shadow-lg" loading="lazy">
+                        <img src="{{ asset('made-1.jpg') }}" alt="Outside Made Running" class="carousel-item shadow-lg" loading="lazy">
                         <img src="{{ asset('physio-room.jpg') }}" alt="Physio Room" class="carousel-item shadow-lg" loading="lazy">
                         <img src="{{ asset('studio.jpg') }}" alt="Yoga Studio" class="carousel-item shadow-lg" loading="lazy">
                         <img src="{{ asset('meeting-room2.jpg') }}" alt="Meeting Room" class="carousel-item shadow-lg" loading="lazy">
