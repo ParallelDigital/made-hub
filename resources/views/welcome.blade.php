@@ -693,6 +693,26 @@
             .carousel-arrow:active { transform: translateY(-50%) scale(0.98); }
             .carousel-arrow.left { left: 0.25rem; }
             .carousel-arrow.right { right: 0.25rem; }
+
+            .popular-badge-wrapper {
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                /* Use the card's background color to hide the border behind the badge */
+                background: #000; 
+                padding: 0 0.5rem; /* Adjust spacing around the badge */
+            }
+
+            .popular-badge {
+                background-color: #c8b7ed;
+                color: black;
+                font-size: 0.875rem; /* 14px */
+                font-weight: 600;
+                padding: 0.375rem 1.25rem; /* 6px 20px */
+                border-radius: 9999px;
+                white-space: nowrap;
+            }
         </style>
     </head>
     <body class="bg-black text-white">
@@ -942,15 +962,15 @@
 
                     <!-- 10 Class Pack - Most Popular -->
                     <div class="relative pricing-card bg-black rounded-2xl p-8 flex flex-col border-2 border-[#c8b7ed] hover:border-[#d8c7ff] transition-all duration-300">
-                        <div class="absolute -top-4 left-1/2 -translate-x-1/2">
-                            <span class="bg-[#c8b7ed] text-black text-sm font-semibold px-5 py-1.5 rounded-full">Most Popular</span>
+                        <div class="popular-badge-wrapper">
+                            <span class="popular-badge">Most Popular</span>
                         </div>
                         <h3 class="text-xl font-bold text-white mb-6 mt-2">10 CLASSES</h3>
-                        <div class="mb-6">
+                        <div class="mb-6 flex-grow">
                             <p class="text-4xl font-bold text-white mb-1">£50.00</p>
                             <p class="text-gray-400 text-sm">£5 per class</p>
                         </div>
-                        <button class="w-full sm:w-auto bg-primary text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded hover:bg-opacity-90 transition-all transform hover:scale-105 text-center">Purchase</button>
+                        <button class="w-full bg-[#c8b7ed] text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
                     </div>
 
                     <!-- Monthly Unlimited -->
