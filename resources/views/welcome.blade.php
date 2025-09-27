@@ -702,7 +702,7 @@
                 transform: translate(-50%, -50%);
                 /* Use the card's background color to hide the border behind the badge */
                 background: #000; 
-                padding: 0 0.5rem; /* Adjust spacing around the badge */
+                padding: 0 0.2rem; /* Adjust spacing around the badge */
             }
 
             .popular-badge {
