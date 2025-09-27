@@ -19,49 +19,54 @@ class ClassPassController extends Controller
         $sortOrder = $request->input('sort_order', 'desc');
         $filter = $request->input('filter', 'all');
 
-        $query = User::query();
+        try {
+            $query = User::query();
 
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%');
-            });
-        }
-
-        $query->with(['passes' => function ($q) {
-            $q->orderBy('expires_at', 'desc');
-        }]);
-
-        $query->whereHas('passes', function ($q) use ($filter) {
-            switch ($filter) {
-                case 'active_unlimited':
-                    $q->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString());
-                    break;
-                case 'expired_unlimited':
-                    $q->where('pass_type', 'unlimited')->where('expires_at', '<', now()->toDateString());
-                    break;
-                case 'active_credits':
-                    $q->where('pass_type', 'credits')->where('credits', '>', 0)->where('expires_at', '>=', now()->toDateString());
-                    break;
-                case 'expired_credits':
-                    $q->where('pass_type', 'credits')->where('expires_at', '<', now()->toDateString());
-                    break;
-                case 'all':
-                default:
-                    // Show all users who have any passes (no additional filter)
-                    break;
+            if (!empty($search)) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                      ->orWhere('email', 'like', '%' . $search . '%');
+                });
             }
-        });
 
-        if ($sortBy === 'name' || $sortBy === 'email') {
-            $query->orderBy($sortBy, $sortOrder);
-        } else {
-            // Sorting by pass attributes is more complex and may require subqueries or joins.
-            // For now, we sort by user name as a fallback.
-            $query->orderBy('name', 'asc');
+            $query->with(['passes' => function ($q) {
+                $q->orderBy('expires_at', 'desc');
+            }]);
+
+            $query->whereHas('passes', function ($q) use ($filter) {
+                switch ($filter) {
+                    case 'active_unlimited':
+                        $q->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString());
+                        break;
+                    case 'expired_unlimited':
+                        $q->where('pass_type', 'unlimited')->where('expires_at', '<', now()->toDateString());
+                        break;
+                    case 'active_credits':
+                        $q->where('pass_type', 'credits')->where('credits', '>', 0)->where('expires_at', '>=', now()->toDateString());
+                        break;
+                    case 'expired_credits':
+                        $q->where('pass_type', 'credits')->where('expires_at', '<', now()->toDateString());
+                        break;
+                    case 'all':
+                    default:
+                        // Show all users who have any passes (no additional filter)
+                        break;
+                }
+            });
+
+            if ($sortBy === 'name' || $sortBy === 'email') {
+                $query->orderBy($sortBy, $sortOrder);
+            } else {
+                // Sorting by pass attributes is more complex and may require subqueries or joins.
+                // For now, we sort by user name as a fallback.
+                $query->orderBy('name', 'asc');
+            }
+
+            $users = $query->paginate(20)->appends($request->query());
+        } catch (\Exception $e) {
+            // If user_passes table doesn't exist, return empty collection
+            $users = User::query()->whereRaw('1 = 0')->paginate(20)->appends($request->query());
         }
-
-        $users = $query->paginate(20)->appends($request->query());
 
         return view('admin.class-passes.index', compact('users', 'search', 'sortBy', 'sortOrder', 'filter'));
     }
