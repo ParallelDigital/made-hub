@@ -443,14 +443,14 @@
                     .then(r => r.json())
                     .then(data => {
                         if (data.success) {
-                            alert(data.message || 'Booking cancelled successfully!', 'success', 'Success');
+                            showResultModal(data.message || 'Booking cancelled successfully!', 'success', 'Success');
                             // Reload the page to refresh the upcoming bookings list
                             setTimeout(() => window.location.reload(), 1000);
                         } else {
-                            alert(data.message || 'Cancellation failed.', 'error', 'Error');
+                            showResultModal(data.message || 'Cancellation failed.', 'error', 'Error');
                         }
                     })
-                    .catch(() => alert('Network error. Please try again.', 'error', 'Error'));
+                    .catch(() => showResultModal('Network error. Please try again.', 'error', 'Error'));
                 },
                 function() {
                     // User cancelled - do nothing
@@ -482,14 +482,14 @@
                     .then(r => r.json())
                     .then(data => {
                         if (data.success) {
-                            alert(data.message || 'Booking deleted successfully!', 'success', 'Success');
+                            showResultModal(data.message || 'Booking deleted successfully!', 'success', 'Success');
                             // Reload the page to refresh the upcoming bookings list
                             setTimeout(() => window.location.reload(), 1000);
                         } else {
-                            alert(data.message || 'Deletion failed.', 'error', 'Error');
+                            showResultModal(data.message || 'Deletion failed.', 'error', 'Error');
                         }
                     })
-                    .catch(() => alert('Network error. Please try again.', 'error', 'Error'));
+                    .catch(() => showResultModal('Network error. Please try again.', 'error', 'Error'));
                 },
                 function() {
                     // User cancelled - do nothing
@@ -502,6 +502,11 @@
                     icon: 'warning'
                 }
             );
+        };
+
+        // Result modal function using the existing alert modal system
+        window.showResultModal = function(message, type = 'info', title = null) {
+            showAlertModal(message, type, title);
         };
 
         // Add scroll event listener for indicators
