@@ -11,8 +11,710 @@
         <link rel="icon" type="image/webp" href="{{ asset('favicon.webp') }}">
         <link rel="apple-touch-icon" href="{{ asset('made-running.png') }}">
 
-        <!-- Vite Assets (optimized for performance) -->
+        <!-- Vite Assets (single source of CSS/JS to keep styles stable) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <style>
+            .uppercase {
+                text-transform: uppercase;
+            }
+
+            /* Pricing Card Styles */
+            .pricing-card {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border-radius: 9px;
+            }
+
+            .pricing-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Responsive adjustments for pricing cards */
+            @media (max-width: 1024px) {
+                #class-packages .grid, #class-pass .grid {
+                    grid-template-columns: 1fr;
+                    max-width: 500px; /* Center cards on tablet */
+                    margin: 0 auto;
+                }
+            }
+
+            @media (max-width: 768px) {
+                #class-packages .grid, #class-pass .grid {
+                    max-width: 100%; /* Full width on mobile */
+                    gap: 1.5rem; /* Reduce gap on mobile */
+                }
+                
+                #class-packages .pricing-card, #class-pass .pricing-card {
+                    padding: 1.5rem; /* Reduce padding on mobile */
+                }
+                
+                #class-packages h2, #class-pass h2 {
+                    font-size: 2rem; /* Smaller title on mobile */
+                }
+            }
+
+            @media (max-width: 640px) {
+                #class-packages, #class-pass {
+                    padding: 3rem 0; /* Reduce section padding on small mobile */
+                }
+                
+                #class-packages .pricing-card, #class-pass .pricing-card {
+                    padding: 1.25rem; /* Further reduce padding on small mobile */
+                }
+                
+                #class-packages .pricing-card h3, #class-pass .pricing-card h3 {
+                    font-size: 1.125rem; /* Smaller card titles */
+                }
+                
+                #class-packages .pricing-card .text-4xl, #class-pass .pricing-card .text-4xl {
+                    font-size: 2.5rem; /* Smaller price text */
+                }
+            }
+
+            /* Week scroller arrow behavior is implemented in the JS script block below */
+            
+            /* Clean minimalist calendar design matching brand */
+            .schedule-container {
+                background: white;
+                border-radius: 8px;
+                overflow: hidden;
+                border: 1px solid #e5e7eb;
+            }
+            
+            /* Week navigation styling */
+            .week-nav-container {
+                background: #f9fafb;
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            html { scroll-behavior: smooth; }
+            
+            .week-navigation {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1.5rem;
+                max-width: 100%;
+                flex: 1; /* fill space between arrows */
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding: 0.5rem 0.75rem; /* give breathing room near arrows */
+                scroll-behavior: smooth; /* smoother programmatic scrolls */
+                scroll-snap-type: x proximity; /* smoother day snapping */
+                scroll-padding-left: 24px;
+                scroll-padding-right: 24px;
+            }
+            
+            .week-navigation::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .week-day-btn {
+                flex-shrink: 0;
+                min-width: 80px;
+                padding: 0.5rem;
+                text-align: center;
+                border: none;
+                background: transparent;
+                transition: all 0.2s ease;
+                cursor: pointer;
+                font-family: inherit;
+                scroll-snap-align: center;
+                scroll-margin-inline: 24px; /* avoid clipping near edges */
+            }
+            
+            .week-day-btn .day-name {
+                font-size: 0.875rem;
+                color: #6b7280;
+                font-weight: 500;
+                margin-bottom: 0.25rem;
+            }
+            
+            .week-day-btn .day-number {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #374151;
+                text-transform: uppercase;
+            }
+            
+            .week-day-btn.selected .day-name {
+                color: #000;
+                font-weight: 600;
+            }
+            
+            .week-day-btn.selected .day-number {
+                color: #000;
+            }
+            
+            .week-day-btn.selected::after {
+                content: '';
+                display: block;
+                width: 24px;
+                height: 3px;
+                background: #000;
+                margin: 0.5rem auto 0;
+                border-radius: 2px;
+            }
+            
+            .week-day-btn.today:not(.selected) .day-name {
+                color: #000;
+                font-weight: 600;
+            }
+            
+            .week-day-btn.today:not(.selected) .day-number {
+                color: #000;
+                font-weight: 800;
+            }
+            
+            .nav-arrow {
+                flex-shrink: 0;
+                width: 32px;
+                height: 32px;
+                background: transparent;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin: -1rem;
+                z-index: 13;
+            }
+            
+            .nav-arrow:hover {
+                background: #f3f4f6;
+                border-radius: 50%;
+            }
+            
+            /* Date header styling */
+            .date-header {
+                background: white;
+                color: #000;
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            .date-header h2 {
+                font-size: 1.125rem;
+                font-weight: 600;
+                margin: 0;
+                color: #000;
+            }
+            
+            .today-btn {
+                background: transparent;
+                color: #6b7280;
+                border: 1px solid #d1d5db;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                font-size: 0.875rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            
+            .today-btn:hover {
+                background: #f9fafb;
+                border-color: #9ca3af;
+            }
+            
+            /* Class cards styling */
+            .classes-section {
+                padding: 0;
+                background: white;
+            }
+            
+            .class-card {
+                background: white;
+                border: none;
+                border-bottom: 1px solid #f3f4f6;
+                padding: 1.5rem;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                transition: background-color 0.2s ease;
+            }
+            
+            .class-card:hover {
+                background: #fafafa;
+            }
+            
+            .class-card:last-child {
+                border-bottom: none;
+            }
+            
+            .class-time-section {
+                flex-shrink: 0;
+                width: 80px;
+                text-align: left;
+            }
+            
+            .class-time {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #000;
+                line-height: 1.2;
+            }
+            
+            .class-duration {
+                font-size: 0.875rem;
+                color: #6b7280;
+                margin-top: 0.125rem;
+                text-transform: uppercase;
+            }
+            
+            .class-location {
+                flex-shrink: 0;
+                width: 100px;
+                font-size: 0.875rem;
+                color: #6b7280;
+                text-align: left;
+            }
+            
+            .instructor-section {
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                width: 60px;
+            }
+            
+            .instructor-avatar {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+            
+            .class-info-section {
+                flex: 1;
+                min-width: 0;
+            }
+            
+            .class-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #000;
+                margin: 0 0 0.25rem 0;
+                line-height: 1.3;
+                text-transform: uppercase;
+            }
+            
+            .class-instructor-name {
+                font-size: 0.875rem;
+                color: #6b7280;
+                margin: 0 0 0.25rem 0;
+                text-transform: uppercase;
+            }
+            
+            .class-room {
+                font-size: 0.875rem;
+                color: #6b7280;
+                margin: 0;
+            }
+            
+            .book-section {
+                flex-shrink: 0;
+                width: 120px;
+            }
+            
+            .reserve-button {
+                background: transparent;
+                color: #000;
+                border: 1px solid #000;
+                padding: 0.75rem 1.5rem;
+                border-radius: 4px;
+                font-weight: 600;
+                font-size: 0.875rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                width: 100%;
+                min-height: 44px;
+                text-transform: uppercase;
+                letter-spacing: 0.025em;
+            }
+            
+            .reserve-button:hover {
+                background: #000;
+                color: white;
+            }
+            
+            .reserve-button:disabled {
+                background: #f3f4f6;
+                color: #9ca3af;
+                border-color: #d1d5db;
+                cursor: not-allowed;
+            }
+            
+            .reserve-button:disabled:hover {
+                background: #f3f4f6;
+                color: #9ca3af;
+            }
+
+            /* H1 styling */
+            h1.hero-title span {
+                font-family: sans-serif !important;
+                font-weight: 900 !important;
+            }
+
+            h2 {
+                font-family: sans-serif !important;
+                font-weight: 900 !important;
+            }
+
+            /* Ribbon for members-only classes */
+            .class-card { position: relative; }
+            .ribbon-members {
+                position: absolute;
+                top: 0;
+                left: 0;
+                background: #111;
+                color: #fff;
+                font-weight: 800;
+                font-size: 0.65rem;
+                padding: 0.35rem 0.5rem;
+                border-bottom-right-radius: 6px;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                z-index: 2;
+            }
+            
+            .no-classes {
+                text-align: center;
+                padding: 3rem 1rem;
+                color: #6b7280;
+            }
+            
+            .no-classes-icon {
+                width: 48px;
+                height: 48px;
+                margin: 0 auto 1rem;
+                opacity: 0.5;
+            }
+            
+            /* Mobile optimizations */
+            @media (max-width: 768px) {
+                .schedule-container {
+                    border-radius: 0;
+                    border-left: none;
+                    border-right: none;
+                    overflow: hidden;
+                    width: 100%;
+                }
+                
+                .week-nav-container {
+                    padding: 1rem;
+                    margin-bottom: 0;
+                }
+                
+                .week-navigation {
+                    display: grid;
+                    grid-template-columns: repeat(7, minmax(42px, 1fr));
+                    gap: 0.5rem;
+                    padding: 0.5rem 0.75rem; /* match desktop spacing */
+                    scroll-behavior: auto; /* no horizontal scroll needed */
+                    overflow: visible;
+                }
+                
+                .week-day-btn {
+                    min-width: 0;
+                    width: 100%;
+                    padding: 0.25rem 0.25rem;
+                    font-size: 0.9rem;
+                    scroll-margin-inline: 0;
+                }
+                
+                .week-day-btn .day-number {
+                    font-size: 0.8rem;
+                    font-weight: 500;
+                    color: #6b7280;
+                    margin-bottom: 0.25rem;
+                    text-transform: uppercase;
+                }
+                
+                .week-day-btn .day-name {
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    color: #6b7280;
+                }
+                
+                .week-day-btn.selected .day-name {
+                    color: #000;
+                }
+                
+                .week-day-btn.today .day-name {
+                    color: #000;
+                    font-weight: 800;
+                }
+                
+                .date-header {
+                    padding: 1.5rem;
+                    text-align: left;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                
+                .date-header h2 {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: #000;
+                }
+                
+                .today-btn {
+                    background: transparent;
+                    border: 1px solid #d1d5db;
+                    color: #6b7280;
+                    padding: 0.5rem 1rem;
+                    border-radius: 0.375rem;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                }
+                
+                .class-card {
+                    flex-direction: row;
+                    align-items: flex-start;
+                    gap: 1rem;
+                    padding: 1.5rem;
+                    border-bottom: 1px solid #f3f4f6;
+                }
+                
+                .class-time-section {
+                    width: 80px;
+                    flex-shrink: 0;
+                }
+                
+                .class-time {
+                    font-size: 1.125rem;
+                    font-weight: 700;
+                    color: #6b7280;
+                    line-height: 1.2;
+                }
+                
+                .class-duration {
+                    font-size: 0.875rem;
+                    color: #9ca3af;
+                    margin-top: 0.25rem;
+                    text-transform: uppercase;
+                }
+                
+                .instructor-section {
+                    width: 60px;
+                    flex-shrink: 0;
+                    display: flex;
+                    justify-content: center;
+                }
+                
+                .instructor-avatar {
+                    width: 48px;
+                    height: 48px;
+                }
+                
+                .class-info-section {
+                    flex: 1;
+                    min-width: 0;
+                }
+                
+                .class-title {
+                    font-size: 1rem;
+                    font-weight: 700;
+                    color: #000;
+                    margin: 0 0 0.5rem 0;
+                    text-decoration: underline;
+                    text-transform: uppercase;
+                }
+                
+                .class-instructor-name {
+                    font-size: 0.875rem;
+                    color: #6b7280;
+                    margin: 0 0 0.25rem 0;
+                    text-transform: uppercase;
+                }
+                
+                .class-room {
+                    font-size: 0.875rem;
+                    color: #6b7280;
+                    margin: 0 0 0.125rem 0;
+                }
+                
+                .class-location {
+                    display: none; /* Hide on mobile */
+                }
+
+                /* Hide Reserve button on mobile; make entire card tappable */
+                .book-section {
+                    display: none !important;
+                }
+                .class-card {
+                    cursor: pointer;
+                    /* Grid layout: time above image on left, info spanning right */
+                    display: grid;
+                    grid-template-columns: 80px 1fr;
+                    grid-template-rows: auto auto;
+                    grid-template-areas: 'time info' 'instructor info';
+                    gap: 0.75rem;
+                }
+                .class-time-section { grid-area: time; }
+                .instructor-section { grid-area: instructor; }
+                .class-info-section { grid-area: info; }
+            }
+
+            /* Scrolling Images Animations */
+            .scrolling-container-mobile {
+                width: 100%;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .scrolling-track-mobile {
+                display: flex;
+                width: calc(100% * 5); /* 5 images for smooth looping */
+                animation: scroll-left 30s linear infinite;
+                gap: 1rem;
+            }
+
+            .scrolling-container-left {
+                width: 100%;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .scrolling-track-left {
+                display: flex;
+                width: calc(100% * 3); /* 3 images for smooth looping */
+                animation: scroll-left 25s linear infinite;
+                gap: 2rem;
+            }
+
+            .scrolling-container-right {
+                width: 100%;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .scrolling-track-right {
+                display: flex;
+                width: calc(100% * 3); /* 3 images for smooth looping */
+                animation: scroll-right 25s linear infinite;
+                gap: 2rem;
+            }
+
+            @keyframes scroll-left {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(-50%);
+                }
+            }
+
+            @keyframes scroll-right {
+                0% {
+                    transform: translateX(-50%);
+                }
+                100% {
+                    transform: translateX(0);
+                }
+            }
+
+            /* Pause animation on hover */
+            .scrolling-container-mobile:hover .scrolling-track-mobile,
+            .scrolling-container-left:hover .scrolling-track-left,
+            .scrolling-container-right:hover .scrolling-track-right {
+                animation-play-state: paused;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 640px) {
+                .scrolling-track-mobile {
+                    gap: 0.5rem;
+                }
+
+                .scrolling-track-mobile img {
+                    height: 200px !important;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .scrolling-track-mobile img {
+                    height: 160px !important;
+                }
+            }
+            /* Facilities carousel */
+            .carousel-container {
+                position: relative;
+            }
+            .carousel-track {
+                display: flex;
+                gap: 1rem;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding: 0.25rem;
+                scroll-behavior: smooth;
+            }
+            .carousel-track::-webkit-scrollbar { display: none; }
+            .carousel-item {
+                flex: 0 0 auto;
+                width: 260px;
+                height: 170px;
+                border-radius: 16px;
+                object-fit: cover;
+                scroll-snap-align: start;
+                background: #111;
+            }
+            @media (min-width: 640px) {
+                .carousel-item { width: 320px; height: 200px; }
+            }
+            @media (min-width: 1024px) {
+                .carousel-item { width: 360px; height: 220px; }
+            }
+            .carousel-arrow {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 42px;
+                height: 42px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(255,255,255,0.2);
+                border-radius: 9999px;
+                background: rgba(0,0,0,0.5);
+                color: white;
+                cursor: pointer;
+                transition: background 0.2s ease, transform 0.2s ease;
+            }
+            .carousel-arrow:hover { background: rgba(196,167,255,0.9); color: black; }
+            .carousel-arrow:active { transform: translateY(-50%) scale(0.98); }
+            .carousel-arrow.left { left: 0.25rem; }
+            .carousel-arrow.right { right: 0.25rem; }
+
+            .popular-badge-wrapper {
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                /* Use the card's background color to hide the border behind the badge */
+                background: #000; 
+                padding: 0 0.5rem; /* Adjust spacing around the badge */
+            }
+
+            .popular-badge {
+                background-color: #c8b7ed; /* Direct color for CSS */
+                color: black;
+                font-size: 0.875rem; /* 14px */
+                font-weight: 600;
+                padding: 0.375rem 1.25rem; /* 6px 20px */
+                border-radius: 9999px;
+                white-space: nowrap;
+            }
+        </style>
     </head>
     <body class="bg-black text-white">
         <!-- Navigation -->
@@ -644,6 +1346,105 @@
             </div>
         </section>
 
+        <script>
+            (function() {
+                const track = document.getElementById('facilitiesTrack');
+                const prev = document.getElementById('facilitiesPrev');
+                const next = document.getElementById('facilitiesNext');
+                if (!track || !prev || !next) return;
+
+                // Seamless loop: duplicate items once
+                if (!track.dataset.looped) {
+                    track.innerHTML = track.innerHTML + track.innerHTML;
+                    track.dataset.looped = '1';
+                }
+
+                // Auto-scroll state (discrete slide every 1s)
+                let autoTimer = null;
+                let resumeTimer = null;
+                let isProgrammatic = false; // ignore scroll events we trigger ourselves
+                const AUTO_MS = 1000; // change slide every 1 second
+
+                function amount() {
+                    const card = track.querySelector('.carousel-item');
+                    return card ? (card.clientWidth + 16) : Math.max(240, track.clientWidth * 0.6);
+                }
+
+                function stopAuto() {
+                    if (autoTimer) {
+                        clearInterval(autoTimer);
+                        autoTimer = null;
+                    }
+                }
+
+                function safeScrollBy(dx) {
+                    try {
+                        track.scrollBy({ left: dx, behavior: 'smooth' });
+                    } catch (e) {
+                        // Fallback for browsers without smooth options support
+                        track.scrollLeft += dx;
+                    }
+                }
+
+                function startAuto() {
+                    stopAuto();
+                    autoTimer = setInterval(() => {
+                        isProgrammatic = true;
+                        safeScrollBy(amount());
+                        // Normalize and then re-allow user scroll detection
+                        setTimeout(() => { normalizeLoop(); isProgrammatic = false; }, AUTO_MS * 0.5);
+                    }, AUTO_MS);
+                }
+
+                function pauseAuto(ms = 2000) {
+                    stopAuto();
+                    if (resumeTimer) clearTimeout(resumeTimer);
+                    resumeTimer = setTimeout(() => { startAuto(); }, ms);
+                }
+
+                // Keep scroll position within the first half to avoid overflow
+                function normalizeLoop() {
+                    const half = track.scrollWidth / 2;
+                    if (half > 0 && track.scrollLeft >= half) {
+                        track.scrollLeft = track.scrollLeft - half;
+                    }
+                }
+
+                // Kick off autoplay immediately
+                startAuto();
+
+                // Controls pause auto-scroll briefly
+                prev.addEventListener('click', () => {
+                    pauseAuto(2500);
+                    safeScrollBy(-amount());
+                });
+                next.addEventListener('click', () => {
+                    pauseAuto(2500);
+                    safeScrollBy(amount());
+                });
+
+                // Pause on hover/touch and while user manually scrolls
+                track.addEventListener('mouseenter', () => stopAuto());
+                track.addEventListener('mouseleave', () => startAuto());
+                track.addEventListener('touchstart', () => stopAuto(), { passive: true });
+                track.addEventListener('touchend', () => pauseAuto(2000), { passive: true });
+
+                let manualScrollTimer;
+                track.addEventListener('scroll', () => {
+                    if (isProgrammatic) return;
+                    // Normalize while user scrolls too
+                    normalizeLoop();
+                    stopAuto();
+                    clearTimeout(manualScrollTimer);
+                    manualScrollTimer = setTimeout(() => { startAuto(); }, 1200);
+                }, { passive: true });
+
+                // Restart after resize to keep step size consistent
+                window.addEventListener('resize', () => {
+                    pauseAuto(800);
+                });
+            })();
+        </script>
 
         <!-- Membership section has been moved above the Schedule section -->
 
@@ -702,14 +1503,697 @@
             </div>
         </div>
 
-
-        <!-- Laravel Auth Data for JavaScript -->
         <script>
-            window.laravelAuth = {
-                isAuth: {{ auth()->check() ? 'true' : 'false' }},
-                isMember: {{ auth()->check() && auth()->user()->hasActiveMembership() ? 'true' : 'false' }},
-                isUnlimited: {{ auth()->check() && method_exists(auth()->user(), 'hasActiveUnlimitedPass') && auth()->user()->hasActiveUnlimitedPass() ? 'true' : 'false' }}
-            };
+            window.IS_AUTH = {{ auth()->check() ? 'true' : 'false' }};
+            window.IS_MEMBER = {{ auth()->check() && auth()->user()->hasActiveMembership() ? 'true' : 'false' }};
+            window.IS_UNLIMITED = {{ auth()->check() && method_exists(auth()->user(), 'hasActiveUnlimitedPass') && auth()->user()->hasActiveUnlimitedPass() ? 'true' : 'false' }};
+            let currentDate = '{{ $selectedDate->format("Y-m-d") }}';
+            const CLASSES_API = '{{ url('/api/classes') }}';
+            const MEMBERSHIP_URL = '{{ route('purchase.package.checkout', ['type' => 'membership']) }}';
+            let isLoading = false;
+            window.SHOW_PAST = {{ ($showPast ?? false) ? 'true' : 'false' }};
+
+            // Animate week scroller before loading a new week for a smoother transition
+            function onArrowNav(date) {
+                const weekDaysEl = document.getElementById('week-days');
+                if (weekDaysEl && typeof weekDaysEl.scrollBy === 'function') {
+                    try {
+                        const dir = (new Date(date) < new Date(currentDate)) ? -1 : 1;
+                        const delta = Math.max(weekDaysEl.clientWidth * 0.6, 240);
+                        weekDaysEl.scrollBy({ left: dir * delta, behavior: 'smooth' });
+                    } catch (e) { /* no-op */ }
+                }
+                setTimeout(() => loadDate(date), 160);
+            }
+
+            function loadDate(date) {
+                if (isLoading) return;
+
+                isLoading = true;
+                currentDate = date;
+
+                // Show loading spinner
+                document.getElementById('loading-spinner').classList.remove('hidden');
+                document.getElementById('classes-container').classList.add('hidden');
+
+                // Update URL without page reload
+                const url = new URL(window.location);
+                url.searchParams.set('date', date);
+                if (window.SHOW_PAST) { url.searchParams.set('show_past', '1'); } else { url.searchParams.delete('show_past'); }
+                window.history.pushState({}, '', url);
+                
+                // Fetch new data
+                fetch(`/api/classes?date=${date}&show_past=${window.SHOW_PAST ? 1 : 0}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateUI(data);
+                        isLoading = false;
+                    })
+                    .catch(error => {
+                        console.error('Error loading classes:', error);
+                        isLoading = false;
+                        // Hide loading spinner on error and show a friendly message
+                        document.getElementById('loading-spinner').classList.add('hidden');
+                        const container = document.getElementById('classes-container');
+                        container.classList.remove('hidden');
+                        container.innerHTML = `
+                            <div class="text-center py-12">
+                                <h3 class="text-lg font-medium text-black mb-2">Unable to load classes</h3>
+                                <p class="text-gray-600">Please refresh the page or try again in a moment.</p>
+                            </div>
+                        `;
+                    });
+            }
+
+            function updateUI(data) {
+                // Update date header
+                document.getElementById('selected-date-header').textContent = data.selectedDate;
+
+                // Update week navigation
+                const weekDays = Array.isArray(data.weekDays) ? data.weekDays : [];
+
+                // Update classes list
+                updateClassesList(data.classes);
+
+                // Hide loading spinner and show content
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('classes-container').classList.remove('hidden');
+
+                // Sync show past state and button label
+                window.SHOW_PAST = !!data.showPast;
+                const weekDaysContainer = document.getElementById('week-days');
+                weekDaysContainer.innerHTML = '';
+
+                weekDays.forEach(day => {
+                    const button = document.createElement('button');
+                    button.setAttribute('data-date', day.full_date);
+                    button.onclick = () => loadDate(day.full_date);
+                    
+                    let classes = 'week-day-btn ';
+                    if (day.is_selected) {
+                        classes += 'selected';
+                    } else if (day.is_today) {
+                        classes += 'today';
+                    }
+
+                    button.className = classes;
+                    const label = day.is_today ? 'Today' : formatMonthDay(day.full_date);
+                    const dayName = (day.day || '').toString().toUpperCase();
+                    button.innerHTML = `
+                        <div class="day-number">${label}</div>
+                        <div class="day-name">${dayName}</div>
+                    `;
+
+                    weekDaysContainer.appendChild(button);
+                });
+
+                // Update arrow buttons
+                document.getElementById('prev-week-btn').setAttribute('onclick', `onArrowNav('${data.prevWeek}')`);
+                document.getElementById('next-week-btn').setAttribute('onclick', `onArrowNav('${data.nextWeek}')`);
+
+                // Smoothly center the selected day in the scroll container
+                const selectedBtn = weekDaysContainer.querySelector('.week-day-btn.selected') || weekDaysContainer.querySelector('.week-day-btn.today');
+                if (selectedBtn && typeof selectedBtn.scrollIntoView === 'function') {
+                    selectedBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            }
+
+            // Delegated click listener to ensure date selection works even if inline handlers fail
+            if (!window.__weekDaysClickBound) {
+                const weekDaysContainer = document.getElementById('week-days');
+                if (weekDaysContainer) {
+                    weekDaysContainer.addEventListener('click', (e) => {
+                        const target = e.target.closest('[data-date]');
+                        if (target && weekDaysContainer.contains(target)) {
+                            const date = target.getAttribute('data-date');
+                            if (date) {
+                                loadDate(date);
+                            }
+                        }
+                    });
+                    window.__weekDaysClickBound = true;
+                }
+            }
+
+            // Helpers to safely parse and format times from "HH:mm" or "HH:mm:ss"
+            function parseTimeToMinutes(t) {
+                if (!t || typeof t !== 'string') return null;
+                const parts = t.split(':').map(v => parseInt(v, 10));
+                if (Number.isNaN(parts[0])) return null;
+                const h = parts[0] || 0;
+                const m = parts[1] || 0;
+                return h * 60 + m;
+            }
+
+            function formatTime12(t) {
+                const mins = parseTimeToMinutes(t);
+                if (mins === null) return '';
+                let h = Math.floor(mins / 60);
+                const m = mins % 60;
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12;
+                if (h === 0) h = 12;
+                const mm = m.toString().padStart(2, '0');
+                return `${h}:${mm} ${ampm}`;
+            }
+
+            // Format ISO date (YYYY-MM-DD) as "Mon 15" style: "Sep 15"
+            function formatMonthDay(iso) {
+                if (!iso) return '';
+                const d = new Date(iso + 'T00:00:00');
+                if (isNaN(d.getTime())) return '';
+                const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                return `${months[d.getMonth()]} ${d.getDate()}`;
+            }
+
+            // Normalize time string ("HH:mm" or "HH:mm:ss") to "HH:mm" for stable keys in de-duplication
+            function normalizeTimeKey(t) {
+                if (!t || typeof t !== 'string') return '';
+                const parts = t.split(':');
+                const h = (parts[0] || '00').padStart(2, '0');
+                const m = (parts[1] || '00').padStart(2, '0');
+                return `${h}:${m}`;
+            }
+
+            function updateClassesList(classes) {
+                const container = document.getElementById('classes-container');
+
+                // Front-end safety: de-duplicate classes by (name | normalized time | instructor)
+                const uniq = new Map();
+                const classesArr = Array.isArray(classes) ? classes : [];
+                classesArr.forEach(c => {
+                    const name = (c?.name || '').toString().trim().toLowerCase();
+                    const timeKey = normalizeTimeKey(c?.start_time);
+                    const instr = (c?.instructor?.name || '').toString().trim().toLowerCase();
+                    const key = `${name}|${timeKey}|${instr}`;
+                    const existing = uniq.get(key);
+                    if (!existing) {
+                        uniq.set(key, c);
+                    } else {
+                        // Prefer the one booked by me, otherwise keep the first
+                        if ((c?.is_booked_by_me && !existing?.is_booked_by_me)) {
+                            uniq.set(key, c);
+                        }
+                    }
+                });
+                const deduped = Array.from(uniq.values());
+
+                if (deduped.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-classes">
+                            <svg class="no-classes-icon mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No classes scheduled</h3>
+                            <p class="text-gray-600">There are no classes scheduled for this date.</p>
+                        </div>
+                    `;
+                } else {
+                    const classesHTML = deduped.map(classItem => {
+                        // Ensure price is defined and a number
+                        classItem.price = classItem.price || 0;
+
+                        // Use duration from API if available, otherwise default
+                        const duration = classItem.duration || 60;
+
+                        const startLabel = formatTime12(classItem.start_time);
+                        const photo = (classItem && classItem.instructor && classItem.instructor.photo_url) ? classItem.instructor.photo_url : 'https://www.gravatar.com/avatar/?d=mp&s=100';
+                        const instrName = (classItem && classItem.instructor && classItem.instructor.name) ? classItem.instructor.name : 'No Instructor';
+                        const isMembersOnly = !!classItem.members_only;
+
+                        return `
+                            <div class=\"class-card\" data-class-id=\"${classItem.id}\" data-price=\"${classItem.price || 0}\" data-is-past=\"${classItem.is_past ? 1 : 0}\" data-is-full=\"${(classItem.available_spots <= 0) ? 1 : 0}\" data-is-booked=\"${classItem.is_booked_by_me ? 1 : 0}\" data-members-only=\"${isMembersOnly ? 1 : 0}\" data-description=\"${classItem.description || ''}\">
+                                ${isMembersOnly ? '<div class="ribbon-members">Members Class</div>' : ''}
+                                <div class="class-time-section">
+                                    <div class="class-time">${startLabel}</div>
+                                    <div class="class-duration">${duration} min.</div>
+                                </div>
+                                
+                                <div class="class-location">
+                                    Manchester
+                                </div>
+                                
+                                <div class="instructor-section">
+                                    <img src="${photo}" alt="${instrName}" class="instructor-avatar">
+                                </div>
+                                
+                                <div class="class-info-section">
+                                    <h3 class="class-title">${classItem.name} (${duration} Min)</h3>
+                                    <p class="class-instructor-name">${instrName}</p>
+                                </div>
+                                
+                                <div class="book-section">
+                                    ${classItem.is_past
+                                        ? `<button disabled class="reserve-button">Past</button>`
+                                        : (classItem.is_booked_by_me
+                                            ? `<button disabled class="reserve-button bg-green-100 text-green-700 border-green-300">Booked</button>`
+                                            : (classItem.available_spots <= 0
+                                                ? `<button disabled class="reserve-button">Class Full</button>`
+                                                : (isMembersOnly
+                                                    ? (window.IS_MEMBER
+                                                        ? `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Book (Members)</button>`
+                                                        : (window.IS_AUTH
+                                                            ? `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Members Only</button>`
+                                                            : `<button onclick=\"openBookingModal(${classItem.id}, 0)\" class=\"reserve-button\">Members Only</button>`
+                                                          )
+                                                      )
+                                                    : `<button onclick=\"openBookingModal(${classItem.id}, ${classItem.price})\" class=\"reserve-button\">Reserve</button>`
+                                                  )
+                                              )
+                                          )
+                                    }
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    container.innerHTML = `<div class="classes-section">${classesHTML}</div>`;
+                }
+            }
+
+            // Mobile: tap class card to open booking modal
+            if (!window.__classCardClickBound) {
+                const container = document.getElementById('classes-container');
+                if (container) {
+                    container.addEventListener('click', function(e) {
+                        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                        if (!isMobile) return;
+                        const card = e.target.closest('.class-card');
+                        if (!card || !container.contains(card)) return;
+                        const ds = card.dataset || {};
+                        const classId = parseInt(ds.classId || '0', 10);
+                        if (!classId) return;
+                        const price = parseInt(ds.price || '0', 10) || 0;
+                        const isPast = ds.isPast === '1';
+                        const isFull = ds.isFull === '1';
+                        const isBooked = ds.isBooked === '1';
+                        const isMembersOnly = ds.membersOnly === '1';
+                        const description = ds.description || '';
+                        
+                        // Store description for modal use
+                        window.selectedClassDescription = description;
+                        
+                        if (isPast) { openFeedbackModal('Unavailable', 'This class has already happened.'); return; }
+                        if (isBooked) { openFeedbackModal('Already booked', 'You have already booked this class.'); return; }
+                        if (isFull) { openFeedbackModal('Class full', 'This class is fully booked.'); return; }
+                        if (isMembersOnly && !window.IS_MEMBER) { 
+                            if (window.IS_AUTH) {
+                                openBookingModal(classId, 0); 
+                            } else {
+                                openBookingModal(classId, 0); 
+                            }
+                            return; 
+                        }
+                        openBookingModal(classId, price);
+                    });
+                    window.__classCardClickBound = true;
+                }
+            }
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function(event) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const date = urlParams.get('date') || '{{ now()->format("Y-m-d") }}';
+                const sp = urlParams.get('show_past');
+                window.SHOW_PAST = (sp === '1' || sp === 'true');
+                if (date !== currentDate) {
+                    loadDate(date);
+                }
+            });
+
+            // Ensure calendar shows only after page is fully loaded and layout is stable
+            function initializeCalendar() {
+                const scheduleContainer = document.querySelector('.schedule-container');
+                if (scheduleContainer) {
+                    // Force a layout reflow to ensure all CSS is applied
+                    scheduleContainer.offsetHeight;
+                    
+                    // Add a small delay to ensure all fonts and styles are loaded
+                    setTimeout(() => {
+                        scheduleContainer.style.opacity = '1';
+                        // After reveal, center currently selected week day
+                        const container = document.getElementById('week-days');
+                        const selected = container?.querySelector('.week-day-btn.selected') || container?.querySelector('.week-day-btn.today');
+                        if (selected && typeof selected.scrollIntoView === 'function') {
+                            selected.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        }
+                    }, 100);
+                }
+            }
+
+            // Toggle show/hide past
+            function toggleShowPast() {
+                window.SHOW_PAST = !window.SHOW_PAST;
+                loadDate(currentDate);
+            }
+
+            // Wait for DOM and all resources to be fully loaded
+            if (document.readyState === 'complete') {
+                initializeCalendar();
+            } else {
+                window.addEventListener('load', initializeCalendar);
+            }
+
+            // Fallback: ensure calendar shows after a reasonable timeout
+            setTimeout(() => {
+                const scheduleContainer = document.querySelector('.schedule-container');
+                if (scheduleContainer && scheduleContainer.style.opacity === '0') {
+                    scheduleContainer.style.opacity = '1';
+                }
+            }, 1000);
+        </script>
+
+        <script>
+            window.selectedClassId = null;
+            window.selectedClassPrice = 0;
+            window.selectedClassDescription = '';
+
+            function openBookingModal(classId, price) {
+                window.selectedClassId = classId;
+                window.selectedClassPrice = price || 0;
+
+                // Ensure price is a valid number
+                const priceNum = parseInt(price) || 0;
+                // Update the price in the modal
+                document.getElementById('modalClassPrice').textContent = `£${priceNum.toLocaleString()}`;
+
+                // Get class description
+                let classDescription = '';
+                const card = document.querySelector(`.class-card[data-class-id="${classId}"]`);
+                
+                if (card && card.dataset && card.dataset.description) {
+                    classDescription = card.dataset.description;
+                } else if (window.selectedClassDescription) {
+                    // For dynamically loaded classes on mobile
+                    classDescription = window.selectedClassDescription;
+                    // Clear it after use
+                    window.selectedClassDescription = '';
+                }
+                
+                // Show/hide description
+                const descElement = document.getElementById('classDescription');
+                if (classDescription && classDescription.trim()) {
+                    descElement.textContent = classDescription;
+                    descElement.style.display = 'block';
+                } else {
+                    descElement.style.display = 'none';
+                }
+
+                // Adjust modal labels and content for members-only classes
+                const isMembersOnly = card && card.dataset && card.dataset.membersOnly === '1';
+                const useCreditsLabel = document.getElementById('useCreditsLabel');
+                const useCreditsRight = document.getElementById('useCreditsRight');
+                const payBtn = document.getElementById('payButton');
+                const membersOnlyOptions = document.getElementById('membersOnlyOptions');
+                const bookingModalMessage = document.getElementById('bookingModalMessage');
+                const useCreditsBtn = document.querySelector('#bookingModal button[onclick*="bookWithCredits"]');
+
+                if (isMembersOnly) {
+                    bookingModalMessage.textContent = 'This class is for members only:';
+                    
+                    if (window.IS_MEMBER) {
+                        // Member: show booking options
+                        if (useCreditsLabel) useCreditsLabel.textContent = 'Book (Members)';
+                        if (useCreditsRight) useCreditsRight.textContent = 'Free';
+                        if (payBtn) payBtn.classList.add('hidden');
+                        if (membersOnlyOptions) membersOnlyOptions.classList.add('hidden');
+                        if (useCreditsBtn) useCreditsBtn.classList.remove('hidden');
+                    } else {
+                        // Non-member: hide all booking options, show only membership
+                        if (payBtn) payBtn.classList.add('hidden');
+                        if (membersOnlyOptions) membersOnlyOptions.classList.remove('hidden');
+                        if (useCreditsBtn) useCreditsBtn.classList.add('hidden');
+                    }
+                } else {
+                    // Regular class: show normal options
+                    bookingModalMessage.textContent = 'Choose how you\'d like to book this class:';
+                    if (useCreditsLabel) useCreditsLabel.textContent = 'Use Credits';
+                    if (useCreditsRight) useCreditsRight.textContent = '1 Credit';
+                    if (payBtn) payBtn.classList.remove('hidden');
+                    if (membersOnlyOptions) membersOnlyOptions.classList.add('hidden');
+                    if (useCreditsBtn) useCreditsBtn.classList.remove('hidden');
+                }
+
+                document.getElementById('bookingModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeBookingModal() {
+                document.getElementById('bookingModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                // Do not clear selectedClassId so we can continue flows (login/confirm) reliably
+            }
+
+            function bookWithCredits(classId) {
+                // Capture the class id before any UI changes
+                const cid = classId || window.selectedClassId;
+                @auth
+                    const card = document.querySelector(`.class-card[data-class-id="${cid}"]`);
+                    const isMembersOnly = card && card.dataset && card.dataset.membersOnly === '1';
+                    if (isMembersOnly && window.IS_MEMBER) {
+                        closeBookingModal();
+                        openConfirmModal('Book this members-only class for free?', function() {
+                            performCreditBooking(cid);
+                        });
+                    } else if (isMembersOnly && !window.IS_MEMBER) {
+                        closeBookingModal();
+                        openMembersOnlyModal();
+                    } else {
+                        // If user has an unlimited pass, allow booking without checking numeric credits
+                        if (window.IS_UNLIMITED) {
+                            closeBookingModal();
+                            openConfirmModal('Book with your unlimited pass?', function() {
+                                performCreditBooking(cid);
+                            });
+                            return;
+                        }
+                        // Determine available credits from hidden data attribute
+                        const span = document.getElementById('availableCreditsData');
+                        const available = span ? (parseInt(span.getAttribute('data-credits')) || 0) : 0;
+                        if (available > 0) {
+                            // Hide the booking modal then confirm using the captured id
+                            closeBookingModal();
+                            openConfirmModal('Use 1 credit to book this class?', function() {
+                                performCreditBooking(cid);
+                            });
+                        } else {
+                            closeBookingModal();
+                            openNoCreditsModal();
+                        }
+                    }
+                @else
+                    // Keep booking modal in background, and open login so we preserve cid for redirect
+                    openLoginModal();
+                @endauth
+            }
+
+            function buySpot(classId) {
+                closeBookingModal();
+                const card = document.querySelector(`.class-card[data-class-id="${classId}"]`);
+                const isMembersOnly = card && card.dataset && card.dataset.membersOnly === '1';
+                if (isMembersOnly && !window.IS_MEMBER) {
+                    openMembersOnlyModal();
+                    return;
+                }
+                // Redirect to checkout page
+                window.location.href = `/checkout/${classId}`;
+            }
+
+            function redirectToLogin(classId, price) {
+                closeBookingModal();
+                const cid = (typeof classId !== 'undefined' && classId !== null) ? classId : window.selectedClassId;
+                const prRaw = (typeof price !== 'undefined' && price !== null) ? price : window.selectedClassPrice;
+                const priceNum = parseInt(prRaw || 0) || 0;
+                // Pass a plain absolute path as redirect so backend accepts it
+                const redirectPath = `/?openBooking=1&classId=${cid||''}&price=${priceNum}`;
+                window.location.href = `/login?redirect=${redirectPath}`;
+            }
+
+            // Submit inline login (AJAX) for guests within the modal
+            function submitModalLogin() {
+                const email = (document.getElementById('loginEmail')?.value || '').trim();
+                const password = (document.getElementById('loginPassword')?.value || '').trim();
+                const errorEl = document.getElementById('loginError');
+                if (!email || !password) {
+                    errorEl?.classList.remove('hidden');
+                    errorEl.textContent = 'Please enter your email and password.';
+                    return;
+                }
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                fetch('/ajax/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                })
+                .then(async (res) => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok || !data.success) throw new Error(data.message || 'Invalid credentials.');
+                    return data;
+                })
+                .then(() => {
+                    // After login, reload and auto-open the booking modal via query params to render authenticated content
+                    const classId = window.selectedClassId;
+                    const price = window.selectedClassPrice || 0;
+                    window.location.href = `/?openBooking=1&classId=${classId||''}&price=${price||0}`;
+                })
+                .catch((err) => {
+                    errorEl?.classList.remove('hidden');
+                    errorEl.textContent = err.message || 'Invalid email or password.';
+                });
+            }
+
+            // Auto-open modal after login redirect if instructed
+            (function() {
+                const url = new URL(window.location.href);
+                const sp = url.searchParams;
+                if (sp.get('openBooking') === '1') {
+                    const classId = parseInt(sp.get('classId')) || null;
+                    const price = parseInt(sp.get('price')) || 0;
+                    if (classId) {
+                        // Ensure state then open
+                        window.selectedClassId = classId;
+                        window.selectedClassPrice = price;
+                        // Open modal now
+                        openBookingModal(classId, price);
+                        // Clean the URL so refresh doesn't reopen
+                        sp.delete('openBooking');
+                        // do not remove classId/price to allow re-open if needed; or clean all:
+                        sp.delete('classId');
+                        sp.delete('price');
+                        const newUrl = url.pathname + (sp.toString() ? ('?' + sp.toString()) : '');
+                        window.history.replaceState({}, '', newUrl);
+                    }
+                }
+            })();
+
+            // (PIN no longer required for booking with credits)
+
+            // Login modal helpers
+            function openLoginModal() {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                    const email = document.getElementById('loginEmail');
+                    setTimeout(() => { email && email.focus(); }, 0);
+                }
+            }
+            function closeLoginModal() {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+
+            // Modal utilities (confirm + feedback)
+            function openConfirmModal(message, onConfirm) {
+                const modal = document.getElementById('confirmModal');
+                const msg = document.getElementById('confirmMessage');
+                msg.textContent = message || 'Are you sure?';
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                window.__confirmCb = function(){ try { onConfirm && onConfirm(); } finally { closeConfirmModal(); } };
+            }
+            function closeConfirmModal() {
+                const modal = document.getElementById('confirmModal');
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                window.__confirmCb = null;
+            }
+            function confirmModalYes(){ if (window.__confirmCb) window.__confirmCb(); }
+            function confirmModalNo(){ closeConfirmModal(); }
+
+            function openFeedbackModal(title, message) {
+                const modal = document.getElementById('feedbackModal');
+                document.getElementById('feedbackTitle').textContent = title || 'Notice';
+                document.getElementById('feedbackMessage').textContent = message || '';
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeFeedbackModal() {
+                document.getElementById('feedbackModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            // Perform booking with credits (AJAX) after confirmation (no PIN required)
+            function performCreditBooking(classId) {
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const payload = {};
+                fetch(`/book-with-credits/${classId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(async (res) => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
+                    return data;
+                })
+                .then((data) => {
+                    // Redirect to the same confirmation page used for Stripe flow
+                    window.location.href = `/booking/confirmation/${classId}`;
+                })
+                .catch((err) => {
+                    openFeedbackModal('Booking failed', err.message || 'Unable to book with credits.');
+                });
+            }
+
+
+            // No-credits modal helpers
+            function openNoCreditsModal() {
+                const modal = document.getElementById('noCreditsModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            function closeNoCreditsModal() {
+                const modal = document.getElementById('noCreditsModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+
+            // Members-only modal helpers
+            function openMembersOnlyModal() {
+                const modal = document.getElementById('membersOnlyModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            function closeMembersOnlyModal() {
+                const modal = document.getElementById('membersOnlyModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+
+            // Close modal when clicking outside
+            document.addEventListener('click', function(event) {
+                const modal = document.getElementById('bookingModal');
+                if (event.target === modal) {
+                    closeBookingModal();
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeBookingModal();
+                }
+            });
         </script>
     </body>
 </html>
