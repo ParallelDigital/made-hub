@@ -76,6 +76,7 @@ class PurchaseController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
+                'coupon_code' => 'nullable|string',
             ]);
         } elseif ($mode === 'account') {
             // Sign in and checkout
@@ -87,6 +88,7 @@ class PurchaseController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
                 'password' => ['required','string'],
+                'coupon_code' => 'nullable|string',
             ]);
 
             if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
@@ -99,12 +101,33 @@ class PurchaseController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
+                'coupon_code' => 'nullable|string',
             ]);
         }
 
         $packages = collect($this->getPackages());
         $package = $packages->firstWhere('type', $type);
         abort_unless($package, 404);
+
+        // Calculate price with coupon discount
+        $price = $package['price'];
+        $discountAmount = 0;
+        $couponCode = null;
+        
+        if ($request->filled('coupon_code')) {
+            $coupon = Coupon::where('code', $request->coupon_code)->where('status', 'active')->first();
+            if ($coupon) {
+                $couponCode = $coupon->code;
+                if ($coupon->type === 'fixed') {
+                    $discountAmount = $coupon->value;
+                } elseif ($coupon->type === 'percentage') {
+                    $discountAmount = ($price * $coupon->value) / 100;
+                }
+                $price = max(0, $price - $discountAmount);
+            } else {
+                return back()->withInput()->with('error', 'Invalid or inactive coupon code.');
+            }
+        }
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -116,7 +139,7 @@ class PurchaseController extends Controller
                     'product_data' => [
                         'name' => $package['name'],
                     ],
-                    'unit_amount' => (int) round($package['price'] * 100),
+                    'unit_amount' => (int) round($price * 100),
                 ],
                 'quantity' => 1,
             ];
@@ -138,6 +161,8 @@ class PurchaseController extends Controller
                     'name' => $request->name,
                     'email' => $request->email,
                     'checkout_mode' => $mode,
+                    'coupon_code' => $couponCode,
+                    'discount_amount' => $discountAmount,
                 ],
             ]);
 
@@ -331,7 +356,6 @@ class PurchaseController extends Controller
         $class = FitnessClass::findOrFail($class_id);
 
         // Check if the class has already started
-        $classStart = \Carbon\Carbon::parse($class->class_date->toDateString() . ' ' . $class->start_time);
         if ($classStart->isPast()) {
             return back()->with('error', 'This class has already started and cannot be booked.');
         }
