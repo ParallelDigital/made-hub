@@ -96,8 +96,37 @@
                     @php
                         $hasActiveUnlimited = $user->hasActiveUnlimitedPass();
                         $totalCredits = $user->getNonMemberAvailableCredits();
-                        $activeUnlimitedPass = $user->passes()->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString())->orderBy('expires_at', 'desc')->first();
-                        $firstCreditPass = $user->passes()->where('pass_type', 'credits')->where('expires_at', '>=', now()->toDateString())->orderBy('expires_at', 'asc')->first();
+                        
+                        // Check new system first
+                        $activeUnlimitedPass = null;
+                        $firstCreditPass = null;
+                        $passSource = 'Unknown';
+                        $passExpiry = null;
+                        
+                        try {
+                            $activeUnlimitedPass = $user->passes()->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString())->orderBy('expires_at', 'desc')->first();
+                            $firstCreditPass = $user->passes()->where('pass_type', 'credits')->where('expires_at', '>=', now()->toDateString())->orderBy('expires_at', 'asc')->first();
+                        } catch (\Exception $e) {
+                            // Fallback to old system
+                        }
+                        
+                        // Determine source and expiry
+                        if ($activeUnlimitedPass) {
+                            $passSource = $activeUnlimitedPass->source;
+                            $passExpiry = $activeUnlimitedPass->expires_at;
+                        } elseif ($firstCreditPass) {
+                            $passSource = $firstCreditPass->source;
+                            $passExpiry = $firstCreditPass->expires_at;
+                        } else {
+                            // Check old system for fallback display
+                            if ($hasActiveUnlimited && $user->unlimited_pass_expires_at) {
+                                $passSource = 'legacy_system';
+                                $passExpiry = $user->unlimited_pass_expires_at;
+                            } elseif ($totalCredits > 0 && $user->credits_expires_at) {
+                                $passSource = 'legacy_system';
+                                $passExpiry = $user->credits_expires_at;
+                            }
+                        }
                     @endphp
                     <tr class="hover:bg-gray-700/50">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -116,22 +145,14 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            @if($activeUnlimitedPass)
-                                {{ $activeUnlimitedPass->expires_at->format('M j, Y') }}
-                            @elseif($firstCreditPass)
-                                {{ $firstCreditPass->expires_at->format('M j, Y') }}
+                            @if($passExpiry)
+                                {{ $passExpiry->format('M j, Y') }}
                             @else
                                 <span class="text-gray-500">N/A</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                            @if($activeUnlimitedPass)
-                                {{ Str::title(str_replace('_', ' ', $activeUnlimitedPass->source)) }}
-                            @elseif($firstCreditPass)
-                                {{ Str::title(str_replace('_', ' ', $firstCreditPass->source)) }}
-                            @else
-                                <span class="text-gray-500">-</span>
-                            @endif
+                            {{ Str::title(str_replace('_', ' ', $passSource)) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                              @if($hasActiveUnlimited)
