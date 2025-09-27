@@ -21,6 +21,7 @@
             /* Pricing Card Styles */
             .pricing-card {
                 transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border-radius: 9px;
             }
 
             .pricing-card:hover {
@@ -705,7 +706,7 @@
             }
 
             .popular-badge {
-                background-color: #c8b7ed;
+                background-color: #c8b7ed; /* Direct color for CSS */
                 color: black;
                 font-size: 0.875rem; /* 14px */
                 font-weight: 600;
@@ -961,7 +962,7 @@
                     </div>
 
                     <!-- 10 Class Pack - Most Popular -->
-                    <div class="relative pricing-card bg-black rounded-2xl p-8 flex flex-col border-2 border-[#c8b7ed] hover:border-[#d8c7ff] transition-all duration-300">
+                    <div class="relative pricing-card bg-black rounded-2xl p-8 flex flex-col border-2 border-primary hover:border-[#d8c7ff] transition-all duration-300">
                         <div class="popular-badge-wrapper">
                             <span class="popular-badge">Most Popular</span>
                         </div>
@@ -970,7 +971,7 @@
                             <p class="text-4xl font-bold text-white mb-1">£50.00</p>
                             <p class="text-gray-400 text-sm">£5 per class</p>
                         </div>
-                        <button class="w-full bg-[#c8b7ed] text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
+                        <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
                     </div>
 
                     <!-- Monthly Unlimited -->
