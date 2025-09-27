@@ -958,7 +958,7 @@
                             <p class="text-4xl font-bold text-white mb-1">£32.50</p>
                             <p class="text-gray-400 text-sm">£6.50 per class</p>
                         </div>
-                        <button class="w-full bg-[#3a3a54] text-white font-semibold py-3 rounded-lg hover:bg-[#4a4a64] transition-colors">Purchase</button>
+                        <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
                     </div>
 
                     <!-- 10 Class Pack - Most Popular -->
@@ -981,7 +981,7 @@
                             <p class="text-4xl font-bold text-white mb-1">£90.00</p>
                             <p class="text-gray-400 text-sm">Unlimited classes</p>
                         </div>
-                        <button class="w-full bg-[#3a3a54] text-white font-semibold py-3 rounded-lg hover:bg-[#4a4a64] transition-colors">Purchase</button>
+                        <button class="w-full bg-primary text-black font-semibold py-3 rounded-lg hover:bg-[#d8c7ff] transition-colors">Purchase</button>
                     </div>
                 </div>
             </div>
