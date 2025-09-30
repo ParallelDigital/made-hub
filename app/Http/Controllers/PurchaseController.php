@@ -394,6 +394,7 @@ class PurchaseController extends Controller
         $class = FitnessClass::findOrFail($class_id);
 
         // Check if the class has already started
+        $classStart = \Carbon\Carbon::parse($class->class_date->toDateString() . ' ' . $class->start_time);
         if ($classStart->isPast()) {
             return back()->with('error', 'This class has already started and cannot be booked.');
         }
