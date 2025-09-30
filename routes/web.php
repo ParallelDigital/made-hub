@@ -9,15 +9,23 @@ use App\Http\Controllers\StripeWebhookController;
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
 
 // START: TEMPORARY DEBUG ROUTE FOR CLASS TIMING
-Route::get('/debug-class-time', function () {
+Route::get('/debug-class-time', function (\Illuminate\Http\Request $request) {
     $output = '';
-    $class = \App\Models\FitnessClass::where('class_date', '>=', now()->subDay())
-        ->orderBy('class_date')
-        ->orderBy('start_time')
-        ->first();
+
+    $query = \App\Models\FitnessClass::query();
+
+    if ($request->filled('class_id')) {
+        $query->where('id', $request->input('class_id'));
+    } else {
+        $query->where('class_date', '>=', now()->subDay())
+              ->orderBy('class_date')
+              ->orderBy('start_time');
+    }
+
+    $class = $query->first();
 
     if (!$class) {
-        return '<h2>No upcoming classes found in the database to test.</h2>';
+        return '<h2>No classes found. Provide ?class_id=### to inspect a specific class.</h2>';
     }
 
     $output .= '<h1>Class Timing Debug</h1>';
