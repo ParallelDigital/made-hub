@@ -27,7 +27,8 @@ class BookingController extends Controller
 
         // Check if the class has already started (use Europe/London timezone)
         $tz = 'Europe/London';
-        $classStart = \Carbon\Carbon::parse($class->class_date->format('Y-m-d') . ' ' . $class->start_time, $tz);
+        $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        $classStart = \Carbon\Carbon::parse($classDate . ' ' . $class->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'This class has already started.'], 400);
         }
@@ -463,7 +464,8 @@ class BookingController extends Controller
 
         // Check if class has already started (use Europe/London timezone)
         $tz = 'Europe/London';
-        $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->format('Y-m-d') . ' ' . $booking->fitnessClass->start_time, $tz);
+        $classDate = \Carbon\Carbon::parse($booking->fitnessClass->class_date)->setTimezone($tz)->format('Y-m-d');
+        $classStart = \Carbon\Carbon::parse($classDate . ' ' . $booking->fitnessClass->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'You cannot cancel a class that has already started.'], 400);
         }
@@ -511,7 +513,8 @@ class BookingController extends Controller
 
         // Check if class has already started (use Europe/London timezone)
         $tz = 'Europe/London';
-        $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->format('Y-m-d') . ' ' . $booking->fitnessClass->start_time, $tz);
+        $classDate = \Carbon\Carbon::parse($booking->fitnessClass->class_date)->setTimezone($tz)->format('Y-m-d');
+        $classStart = \Carbon\Carbon::parse($classDate . ' ' . $booking->fitnessClass->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'You cannot delete a booking for a class that has already started.'], 400);
         }

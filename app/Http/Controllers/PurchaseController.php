@@ -30,7 +30,8 @@ class PurchaseController extends Controller
 
         // Check if the class has already started (use Europe/London timezone)
         $tz = 'Europe/London';
-        $classStart = \Carbon\Carbon::parse($class->class_date->format('Y-m-d') . ' ' . $class->start_time, $tz);
+        $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        $classStart = \Carbon\Carbon::parse($classDate . ' ' . $class->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return redirect()->route('welcome')->with('error', 'This class has already started and cannot be booked.');
         }
@@ -396,7 +397,8 @@ class PurchaseController extends Controller
 
         // Check if the class has already started (use Europe/London timezone)
         $tz = 'Europe/London';
-        $classStart = \Carbon\Carbon::parse($class->class_date->format('Y-m-d') . ' ' . $class->start_time, $tz);
+        $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        $classStart = \Carbon\Carbon::parse($classDate . ' ' . $class->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return back()->with('error', 'This class has already started and cannot be booked.');
         }

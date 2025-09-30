@@ -148,9 +148,11 @@ class HomeController extends Controller
                 // Determine if the class (for the selected day) is in the past
                 $selectedStart = null;
                 if (!empty($class->start_time)) {
-                    $selectedStart = \Carbon\Carbon::parse($selectedDate->toDateString() . ' ' . $class->start_time);
+                    $tz = 'Europe/London';
+                    $dateString = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->toDateString();
+                    $selectedStart = \Carbon\Carbon::parse($dateString . ' ' . $class->start_time, $tz);
                 }
-                $isPast = $selectedStart ? $selectedStart->lessThan(now()) : false;
+                $isPast = $selectedStart ? $selectedStart->lessThan(\Carbon\Carbon::now('Europe/London')) : false;
                 
                 $user = $request->user();
                 $isBookedByMe = $user ? ($class->relationLoaded('bookings') ? $class->bookings->contains('user_id', $user->id) : $class->bookings()->where('user_id', $user->id)->exists()) : false;
