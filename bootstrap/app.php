@@ -3,12 +3,12 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Throwable;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
-        health: '/up',
     )
     ->withSchedule(function ($schedule) {
         // Update member credits monthly on the 1st
@@ -37,6 +37,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // e.g. $middleware->alias(['role' => \App\Http\Middleware\RoleMiddleware::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Redirect to homepage on errors when enabled, for non-JSON requests
+        $exceptions->render(function (Throwable $e, $request) {
+            if (config('errors.redirect_on_error') && !$request->expectsJson()) {
+                $route = config('errors.redirect_route', '/');
+                return redirect($route);
+            }
+            return null; // fall back to default rendering
+        });
     })
     ->create();
