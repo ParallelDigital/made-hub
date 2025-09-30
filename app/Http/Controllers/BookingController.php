@@ -26,8 +26,18 @@ class BookingController extends Controller
         $class = FitnessClass::findOrFail($classId);
 
         // Check if the class has already started (use Europe/London timezone)
+        // For recurring classes, use the selected_date from the request if provided
         $tz = 'Europe/London';
-        $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        $selectedDate = $request->input('selected_date');
+        
+        if ($selectedDate && $class->recurring) {
+            // For recurring classes, use the date the user selected
+            $classDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
+        } else {
+            // For regular classes, use the stored class_date
+            $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        }
+        
         $classStart = \Carbon\Carbon::parse($classDate . ' ' . $class->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'This class has already started.'], 400);

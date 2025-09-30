@@ -1998,8 +1998,8 @@
                     openMembersOnlyModal();
                     return;
                 }
-                // Redirect to checkout page
-                window.location.href = `/checkout/${classId}`;
+                // Redirect to checkout page with selected date for recurring classes
+                window.location.href = `/checkout/${classId}?selected_date=${encodeURIComponent(currentDate)}`;
             }
 
             function redirectToLogin(classId, price) {
@@ -2126,7 +2126,9 @@
             // Perform booking with credits (AJAX) after confirmation (no PIN required)
             function performCreditBooking(classId) {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                const payload = {};
+                const payload = {
+                    selected_date: currentDate // Pass the selected date for recurring classes
+                };
                 fetch(`/book-with-credits/${classId}`, {
                     method: 'POST',
                     headers: {
