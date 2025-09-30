@@ -25,9 +25,10 @@ class BookingController extends Controller
         
         $class = FitnessClass::findOrFail($classId);
 
-        // Check if the class has already started
-        $classStart = \Carbon\Carbon::parse($class->class_date->toDateString() . ' ' . $class->start_time);
-        if ($classStart->isPast()) {
+        // Check if the class has already started (use Europe/London timezone)
+        $tz = 'Europe/London';
+        $classStart = \Carbon\Carbon::parse($class->class_date->format('Y-m-d') . ' ' . $class->start_time, $tz);
+        if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'This class has already started.'], 400);
         }
 
@@ -460,9 +461,10 @@ class BookingController extends Controller
             return response()->json(['success' => false, 'message' => 'This booking is already cancelled.'], 400);
         }
 
-        // Check if class has already started
-        $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->toDateString() . ' ' . $booking->fitnessClass->start_time);
-        if ($classStart->isPast()) {
+        // Check if class has already started (use Europe/London timezone)
+        $tz = 'Europe/London';
+        $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->format('Y-m-d') . ' ' . $booking->fitnessClass->start_time, $tz);
+        if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'You cannot cancel a class that has already started.'], 400);
         }
 
@@ -507,9 +509,10 @@ class BookingController extends Controller
             return response()->json(['success' => false, 'message' => 'You can only delete your own bookings.'], 403);
         }
 
-        // Check if class has already started
-        $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->toDateString() . ' ' . $booking->fitnessClass->start_time);
-        if ($classStart->isPast()) {
+        // Check if class has already started (use Europe/London timezone)
+        $tz = 'Europe/London';
+        $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->format('Y-m-d') . ' ' . $booking->fitnessClass->start_time, $tz);
+        if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'You cannot delete a booking for a class that has already started.'], 400);
         }
 
