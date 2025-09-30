@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Models\User;
 use App\Models\UserPass;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ClassPassConfirmed;
 use Stripe\Stripe;
 use Stripe\StripeClient;
 use Carbon\Carbon;
@@ -97,14 +99,24 @@ class SyncStripeClassPasses extends Command
                         case 'package_5':
                             $user->allocateCreditsWithExpiry(5, $expiresAt, 'stripe_purchase');
                             $this->info("  → Allocated 5 class pass");
+                            // Send confirmation email
+                            try {
+                                Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 5, $expiresAt, 'Stripe Purchase'));
+                            } catch (\Throwable $e) { $this->warn("  → Failed to send pass email: " . $e->getMessage()); }
                             break;
                         case 'package_10':
                             $user->allocateCreditsWithExpiry(10, $expiresAt, 'stripe_purchase');
                             $this->info("  → Allocated 10 class pass");
+                            try {
+                                Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 10, $expiresAt, 'Stripe Purchase'));
+                            } catch (\Throwable $e) { $this->warn("  → Failed to send pass email: " . $e->getMessage()); }
                             break;
                         case 'unlimited':
                             $user->activateUnlimitedPass($expiresAt, 'stripe_purchase');
                             $this->info("  → Allocated unlimited pass");
+                            try {
+                                Mail::to($user->email)->send(new ClassPassConfirmed($user, 'unlimited', null, $expiresAt, 'Stripe Purchase'));
+                            } catch (\Throwable $e) { $this->warn("  → Failed to send pass email: " . $e->getMessage()); }
                             break;
                     }
 

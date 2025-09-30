@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MembershipStatusMail;
+use App\Mail\ClassPassConfirmed;
 use Stripe\Stripe;
 use Stripe\Webhook as StripeWebhook;
 
@@ -183,14 +184,18 @@ class StripeWebhookController extends Controller
                 case 'package_5':
                     $user->allocateCreditsWithExpiry(5, $expiresAt, 'stripe_purchase');
                     Log::info('5 class pass allocated via webhook', ['user_id' => $user->id]);
+                    // Send confirmation email
+                    try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 5, $expiresAt, 'Stripe Purchase')); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
                     break;
                 case 'package_10':
                     $user->allocateCreditsWithExpiry(10, $expiresAt, 'stripe_purchase');
                     Log::info('10 class pass allocated via webhook', ['user_id' => $user->id]);
+                    try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 10, $expiresAt, 'Stripe Purchase')); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
                     break;
                 case 'unlimited':
                     $user->activateUnlimitedPass($expiresAt, 'stripe_purchase');
                     Log::info('Unlimited pass allocated via webhook', ['user_id' => $user->id]);
+                    try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'unlimited', null, $expiresAt, 'Stripe Purchase')); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
                     break;
                 default:
                     Log::warning('Unknown package type in webhook', ['package_type' => $packageType, 'session_id' => $session->id]);
