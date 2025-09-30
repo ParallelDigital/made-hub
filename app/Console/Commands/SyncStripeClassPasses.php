@@ -1,0 +1,155 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\User;
+use App\Models\UserPass;
+use Illuminate\Console\Command;
+use Stripe\Stripe;
+use Stripe\StripeClient;
+use Carbon\Carbon;
+
+class SyncStripeClassPasses extends Command
+{
+    protected $signature = 'stripe:sync-class-passes {--days=30 : How many days back to check} {--email= : Specific email to sync}';
+    protected $description = 'Sync class pass purchases from Stripe that may have been missed by webhooks';
+
+    public function handle()
+    {
+        try {
+            Stripe::setApiKey(config('services.stripe.secret'));
+            $client = new StripeClient(config('services.stripe.secret'));
+        } catch (\Exception $e) {
+            $this->error('Failed to initialize Stripe client: ' . $e->getMessage());
+            return 1;
+        }
+
+        $days = $this->option('days');
+        $specificEmail = $this->option('email');
+        
+        $this->info("Syncing class pass purchases from the last {$days} days...");
+        
+        try {
+            // Get completed checkout sessions for one-time payments (class passes)
+            $sessions = $client->checkout->sessions->all([
+                'limit' => 100,
+                'created' => ['gte' => strtotime("-{$days} days")],
+                'status' => 'complete',
+            ]);
+
+            $processed = 0;
+            $created = 0;
+            $errors = 0;
+
+            foreach ($sessions->data as $session) {
+                // Only process payment mode sessions (not subscriptions)
+                if ($session->mode !== 'payment') {
+                    continue;
+                }
+
+                $email = $session->customer_details->email ?? $session->customer_email ?? null;
+                if (!$email) {
+                    continue;
+                }
+
+                // If specific email provided, only process that one
+                if ($specificEmail && strtolower($email) !== strtolower($specificEmail)) {
+                    continue;
+                }
+
+                $packageType = $session->metadata->package_type ?? null;
+                if (!$packageType || !in_array($packageType, ['package_5', 'package_10', 'unlimited'])) {
+                    continue;
+                }
+
+                $this->line("Processing session {$session->id} for {$email} - {$packageType}");
+
+                try {
+                    // Find or create user
+                    $user = User::firstOrCreate(
+                        ['email' => $email],
+                        [
+                            'name' => $session->metadata->name ?? 'Guest',
+                            'password' => bcrypt('temporary_password_' . time()),
+                            'email_verified_at' => now(),
+                        ]
+                    );
+
+                    $wasNewUser = $user->wasRecentlyCreated;
+
+                    // Check if they already have this type of pass from this time period
+                    $sessionDate = Carbon::createFromTimestamp($session->created);
+                    $existingPass = $user->passes()
+                        ->where('source', 'stripe_purchase')
+                        ->where('created_at', '>=', $sessionDate->subHours(1))
+                        ->where('created_at', '<=', $sessionDate->addHours(1))
+                        ->first();
+
+                    if ($existingPass) {
+                        $this->line("  → Pass already exists, skipping");
+                        continue;
+                    }
+
+                    // Allocate the pass
+                    $expiresAt = Carbon::createFromTimestamp($session->created)->addMonth();
+                    
+                    switch ($packageType) {
+                        case 'package_5':
+                            $user->allocateCreditsWithExpiry(5, $expiresAt, 'stripe_purchase');
+                            $this->info("  → Allocated 5 class pass");
+                            break;
+                        case 'package_10':
+                            $user->allocateCreditsWithExpiry(10, $expiresAt, 'stripe_purchase');
+                            $this->info("  → Allocated 10 class pass");
+                            break;
+                        case 'unlimited':
+                            $user->activateUnlimitedPass($expiresAt, 'stripe_purchase');
+                            $this->info("  → Allocated unlimited pass");
+                            break;
+                    }
+
+                    $created++;
+
+                    // Send password reset for newly created users
+                    if ($wasNewUser) {
+                        try {
+                            \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
+                            $this->line("  → Password reset link sent to new user");
+                        } catch (\Throwable $e) {
+                            $this->warn("  → Failed to send password reset: " . $e->getMessage());
+                        }
+                    }
+
+                } catch (\Exception $e) {
+                    $this->error("  → Error processing session: " . $e->getMessage());
+                    $errors++;
+                }
+
+                $processed++;
+            }
+
+            $this->info("\nSync completed:");
+            $this->line("- Sessions processed: {$processed}");
+            $this->line("- Passes created: {$created}");
+            $this->line("- Errors: {$errors}");
+
+            if ($specificEmail) {
+                $user = User::where('email', $specificEmail)->first();
+                if ($user) {
+                    $passes = $user->passes()->get();
+                    $this->info("\nCurrent passes for {$specificEmail}:");
+                    foreach ($passes as $pass) {
+                        $status = $pass->expires_at && $pass->expires_at->isFuture() ? 'Active' : 'Expired';
+                        $this->line("- {$pass->pass_type}: {$pass->credits} credits, expires: {$pass->expires_at}, status: {$status}");
+                    }
+                }
+            }
+
+            return 0;
+
+        } catch (\Exception $e) {
+            $this->error('Error syncing Stripe sessions: ' . $e->getMessage());
+            return 1;
+        }
+    }
+}

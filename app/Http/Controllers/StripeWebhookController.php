@@ -68,10 +68,20 @@ class StripeWebhookController extends Controller
 
     protected function handleCheckoutSessionCompleted($session): void
     {
-        // Only act for subscriptions (membership purchases)
-        if (!isset($session->mode) || $session->mode !== 'subscription') {
+        // Handle both subscription (membership) and payment (class passes) modes
+        if (!isset($session->mode) || !in_array($session->mode, ['subscription', 'payment'])) {
             return;
         }
+
+        if ($session->mode === 'subscription') {
+            $this->handleMembershipPurchase($session);
+        } elseif ($session->mode === 'payment') {
+            $this->handleClassPassPurchase($session);
+        }
+    }
+
+    protected function handleMembershipPurchase($session): void
+    {
 
         $email = $session->customer_details->email ?? $session->customer_email ?? null;
         if (!$email) return;
@@ -132,6 +142,66 @@ class StripeWebhookController extends Controller
             Mail::to($user->email)->send(new MembershipStatusMail($user, 'activation'));
         } catch (\Throwable $e) {
             Log::warning('Failed to send membership activation email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
+    }
+
+    protected function handleClassPassPurchase($session): void
+    {
+        $email = $session->customer_details->email ?? $session->customer_email ?? null;
+        if (!$email) return;
+
+        // Get package type from metadata
+        $packageType = $session->metadata->package_type ?? null;
+        if (!$packageType) {
+            Log::warning('Class pass purchase without package_type', ['session_id' => $session->id]);
+            return;
+        }
+
+        // Find or create user
+        $user = User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => $session->metadata->name ?? 'Guest',
+                'password' => bcrypt('temporary_password_' . time()),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Send password reset for new users
+        if ($user->wasRecentlyCreated) {
+            try {
+                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
+            } catch (\Throwable $e) {
+                Log::warning('Failed to send password reset for webhook-created user', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+            }
+        }
+
+        // Allocate the pass based on package type
+        $expiresAt = now()->addMonth();
+        try {
+            switch ($packageType) {
+                case 'package_5':
+                    $user->allocateCreditsWithExpiry(5, $expiresAt, 'stripe_purchase');
+                    Log::info('5 class pass allocated via webhook', ['user_id' => $user->id]);
+                    break;
+                case 'package_10':
+                    $user->allocateCreditsWithExpiry(10, $expiresAt, 'stripe_purchase');
+                    Log::info('10 class pass allocated via webhook', ['user_id' => $user->id]);
+                    break;
+                case 'unlimited':
+                    $user->activateUnlimitedPass($expiresAt, 'stripe_purchase');
+                    Log::info('Unlimited pass allocated via webhook', ['user_id' => $user->id]);
+                    break;
+                default:
+                    Log::warning('Unknown package type in webhook', ['package_type' => $packageType, 'session_id' => $session->id]);
+                    break;
+            }
+        } catch (\Throwable $e) {
+            Log::error('Failed to allocate class pass via webhook', [
+                'user_id' => $user->id,
+                'package_type' => $packageType,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 

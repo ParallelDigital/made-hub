@@ -28,6 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Send instructor class roster reminders ~1 hour before class start
         $schedule->command('classes:send-instructor-reminders')->everyMinute();
+        
+        // Sync missed Stripe class pass purchases - run daily
+        $schedule->command('stripe:sync-class-passes --days=7')->daily('05:00');
     })
     ->withMiddleware(function (Middleware $middleware) {
         // register global/route middleware here if you need
