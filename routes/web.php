@@ -8,6 +8,51 @@ use App\Http\Controllers\StripeWebhookController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('welcome');
 
+// START: TEMPORARY DEBUG ROUTE FOR CLASS TIMING
+Route::get('/debug-class-time', function () {
+    $output = '';
+    $class = \App\Models\FitnessClass::where('class_date', '>=', now()->subDay())
+        ->orderBy('class_date')
+        ->orderBy('start_time')
+        ->first();
+
+    if (!$class) {
+        return '<h2>No upcoming classes found in the database to test.</h2>';
+    }
+
+    $output .= '<h1>Class Timing Debug</h1>';
+    $output .= '<p><strong>Current Server Time:</strong> ' . now() . '</p>';
+    $output .= '<p><strong>Current London Time:</strong> ' . \Carbon\Carbon::now('Europe/London') . '</p>';
+    $output .= '<hr>';
+
+    $output .= "<h2>Testing Class: {$class->name} (ID: {$class->id})</h2>";
+    $output .= "<p><strong>Stored Date in DB:</strong> {$class->class_date->format('Y-m-d')}</p>";
+    $output .= "<p><strong>Stored Start Time in DB:</strong> {$class->start_time}</p>";
+
+    $output .= '<h3>Old Calculation (Buggy)</h3>';
+    try {
+        $oldClassStart = \Carbon\Carbon::parse($class->class_date->format('Y-m-d') . ' ' . $class->start_time, 'Europe/London');
+        $output .= "<p>Calculated Start: <code>{$oldClassStart}</code></p>";
+        $output .= "<p>Is Past?: <strong>" . ($oldClassStart->lessThan(\Carbon\Carbon::now('Europe/London')) ? 'YES' : 'NO') . '</strong></p>';
+    } catch (\Exception $e) {
+        $output .= "<p>Error: " . $e->getMessage() . "</p>";
+    }
+
+    $output .= '<h3>New Calculation (Corrected)</h3>';
+    try {
+        $tz = 'Europe/London';
+        $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        $newClassStart = \Carbon\Carbon::parse($classDate . ' ' . $class->start_time, $tz);
+        $output .= "<p>Calculated Start: <code>{$newClassStart}</code></p>";
+        $output .= "<p>Is Past?: <strong>" . ($newClassStart->lessThan(\Carbon\Carbon::now($tz)) ? 'YES' : 'NO') . '</strong></p>';
+    } catch (\Exception $e) {
+        $output .= "<p>Error: " . $e->getMessage() . "</p>";
+    }
+
+    return $output;
+});
+// END: TEMPORARY DEBUG ROUTE
+
 // Test email route with detailed debugging
 Route::get('/test-email-send', function () {
     try {
