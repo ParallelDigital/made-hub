@@ -64,8 +64,16 @@ class PurchaseController extends Controller
         }
 
         $autoOpenCredits = $request->boolean('useCredits');
+        
+        // For recurring classes, temporarily override the class_date for display
+        if ($selectedDate && $class->recurring) {
+            $class->class_date = \Carbon\Carbon::parse($selectedDate);
+        }
+        
+        // Pass the selected date to the view for form submission
+        $bookingDate = $classDate;
 
-        return view('checkout.index', compact('class', 'availableCredits', 'autoOpenCredits'));
+        return view('checkout.index', compact('class', 'availableCredits', 'autoOpenCredits', 'bookingDate'));
     }
 
     // New: package checkout
@@ -401,13 +409,24 @@ class PurchaseController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'coupon_code' => 'nullable|string',
+            'selected_date' => 'nullable|date',
         ]);
 
         $class = FitnessClass::findOrFail($class_id);
 
         // Check if the class has already started (use Europe/London timezone)
+        // For recurring classes, use the selected_date from the request if provided
         $tz = 'Europe/London';
-        $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        $selectedDate = $request->input('selected_date');
+        
+        if ($selectedDate && $class->recurring) {
+            // For recurring classes, use the date the user selected
+            $classDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
+        } else {
+            // For regular classes, use the stored class_date
+            $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        }
+        
         $classStart = \Carbon\Carbon::parse($classDate . ' ' . $class->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return back()->with('error', 'This class has already started and cannot be booked.');

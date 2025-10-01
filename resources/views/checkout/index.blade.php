@@ -78,6 +78,9 @@
                 <form action="{{ route('booking.process-checkout', $class->id) }}" method="POST" class="space-y-4">
                     @csrf
                     <input type="hidden" name="coupon_code" id="applied-coupon-code">
+                    @if(isset($bookingDate))
+                    <input type="hidden" name="selected_date" value="{{ $bookingDate }}">
+                    @endif
 
                     <x-checkout-input
                         id="name"
@@ -205,7 +208,11 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({
+                        @if(isset($bookingDate))
+                        selected_date: '{{ $bookingDate }}'
+                        @endif
+                    })
                 })
                 .then(r => r.json())
                 .then(data => {
