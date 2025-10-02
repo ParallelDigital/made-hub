@@ -34,7 +34,6 @@ class InstructorController extends Controller
 
         // Fetch classes for calendar, optionally filtered by instructor
         $classesQuery = \App\Models\FitnessClass::with('instructor')
-            ->where('active', true)
             ->orderBy('start_time');
         if (!empty($selectedInstructor)) {
             $classesQuery->where('instructor_id', $selectedInstructor);
@@ -195,7 +194,6 @@ class InstructorController extends Controller
 
         // Fetch classes only for this instructor
         $classes = \App\Models\FitnessClass::with('instructor')
-            ->where('active', true)
             ->where('instructor_id', $instructor->id)
             ->orderBy('start_time')
             ->get();
