@@ -33,7 +33,7 @@ class InstructorController extends Controller
         $currentWeekStart = now()->startOfWeek(\Carbon\Carbon::SUNDAY)->addWeeks($weekOffset);
 
         // Fetch classes for calendar, optionally filtered by instructor
-        $classesQuery = \App\Models\FitnessClass::with('instructor')
+        $classesQuery = \App\Models\FitnessClass::with(['instructor', 'classType'])
             ->orderBy('start_time');
         if (!empty($selectedInstructor)) {
             $classesQuery->where('instructor_id', $selectedInstructor);
@@ -87,9 +87,23 @@ class InstructorController extends Controller
                     }
                 }
             } else {
-                $classDate = \Carbon\Carbon::parse($class->class_date);
-                if ($classDate->between($weekStart, $weekStart->copy()->addDays(6))) {
-                    $calendarData[$classDate->dayOfWeek]->push($class);
+                // Handle non-recurring classes - check if they have valid dates
+                if (!$class->class_date) {
+                    \Log::warning('Class missing class_date', ['class_id' => $class->id, 'class_name' => $class->name]);
+                    continue;
+                }
+
+                try {
+                    $classDate = \Carbon\Carbon::parse($class->class_date);
+                    if ($classDate->between($weekStart, $weekStart->copy()->addDays(6))) {
+                        $calendarData[$classDate->dayOfWeek]->push($class);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error parsing class date', [
+                        'class_id' => $class->id,
+                        'class_date' => $class->class_date,
+                        'error' => $e->getMessage()
+                    ]);
                 }
             }
         }
@@ -121,10 +135,24 @@ class InstructorController extends Controller
                     }
                 }
             } else {
-                $classDate = \Carbon\Carbon::parse($class->class_date);
-                $daysDiff = $monthStart->diffInDays($classDate, false);
-                if ($daysDiff >= 0 && $daysDiff <= 41) {
-                    $calendarData[$daysDiff]->push($class);
+                // Handle non-recurring classes - check if they have valid dates
+                if (!$class->class_date) {
+                    \Log::warning('Class missing class_date', ['class_id' => $class->id, 'class_name' => $class->name]);
+                    continue;
+                }
+
+                try {
+                    $classDate = \Carbon\Carbon::parse($class->class_date);
+                    $daysDiff = $monthStart->diffInDays($classDate, false);
+                    if ($daysDiff >= 0 && $daysDiff <= 41) {
+                        $calendarData[$daysDiff]->push($class);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error parsing class date in monthly view', [
+                        'class_id' => $class->id,
+                        'class_date' => $class->class_date,
+                        'error' => $e->getMessage()
+                    ]);
                 }
             }
         }
@@ -193,7 +221,7 @@ class InstructorController extends Controller
         $instructor->load('fitnessClasses');
 
         // Fetch classes only for this instructor
-        $classes = \App\Models\FitnessClass::with('instructor')
+        $classes = \App\Models\FitnessClass::with(['instructor', 'classType'])
             ->where('instructor_id', $instructor->id)
             ->orderBy('start_time')
             ->get();

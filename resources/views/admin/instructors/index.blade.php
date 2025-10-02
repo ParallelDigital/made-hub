@@ -90,7 +90,7 @@
                                     <div class="font-medium text-primary">{{ $class->start_time }}</div>
                                     <div class="text-white font-medium">{{ $class->name }}</div>
                                     <div class="text-gray-300">{{ $class->instructor->name ?? 'No Instructor' }}</div>
-                                    <div class="text-gray-400">{{ $class->type }} • {{ $class->duration }}min</div>
+                                    <div class="text-gray-400">{{ $class->classType->name ?? 'No Type' }} • {{ $class->classType->duration ?? 60 }}min</div>
                                     <div class="text-gray-400">£{{ number_format($class->price, 0) }}</div>
                                 </div>
                             @endforeach
@@ -135,7 +135,7 @@
 
         <div class="flex justify-between items-center pt-4 border-top border-gray-700">
             <div class="text-sm text-gray-400">
-                Showing {{ $calendarData->flatten()->count() }} active classes
+                Showing {{ $calendarData->flatten()->count() }} classes
             </div>
             <a href="{{ route('admin.classes.index') }}" class="text-primary hover:text-purple-400 text-sm font-medium">
                 View all classes →
