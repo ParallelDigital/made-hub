@@ -92,7 +92,7 @@
                 @foreach($classes as $group)
                     @php
                         $groupId = 'group-' . str_replace(' ', '-', strtolower($group['name']));
-                        $isFirst = $loop->first; // Default expand first group
+                        $isFirst = false; // Default collapse all groups
                         $nextClass = $group['classes'][0] ?? null;
                         $hasRecurring = collect($group['classes'])->some(fn($c) => $c->recurring_frequency !== 'none');
                     @endphp
