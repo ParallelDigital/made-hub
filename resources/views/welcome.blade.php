@@ -743,9 +743,8 @@
         </div>
                     <div class="hidden lg:flex space-x-6">
                         <a href="{{ route('welcome') }}" class="text-white hover:text-primary transition-colors">SCHEDULE</a>
-                        <a href="{{ route('purchase.index') }}" class="text-white hover:text-primary transition-colors">PURCHASE</a>
-                        <a href="{{ route('admin.memberships.index') }}" class="text-white hover:text-primary transition-colors">MEMBERSHIPS</a>
-                        <a href="#" class="text-white hover:text-primary transition-colors">THE COMMUNITY</a>
+                        <a href="#class-packages" class="text-white hover:text-primary transition-colors">CLASS PASSES</a>
+                        <a href="#membership" class="text-white hover:text-primary transition-colors">MEMBERSHIPS</a>
                     </div>
                 </div>
                 <div class="hidden lg:flex items-center space-x-4">
