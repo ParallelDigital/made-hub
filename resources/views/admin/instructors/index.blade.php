@@ -6,149 +6,17 @@
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-white">Instructors Management</h1>
     <a href="{{ route('admin.instructors.create') }}" class="bg-primary hover:bg-purple-400 text-white px-4 py-2 rounded-md font-medium transition-colors">
-        Add New Instructor
     </a>
 </div>
 
 <div class="bg-gray-800 shadow rounded-lg border border-gray-700">
     <div class="px-4 py-5 sm:p-6">
-        <!-- Calendar Header with Controls -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-            <div>
-                <h3 class="text-lg leading-6 font-medium text-white">
-                    @if($view === 'weekly')
-                        Week of {{ $currentWeekStart->format('M j, Y') }}
-                    @else
-                        {{ $currentWeekStart->format('F Y') }}
-                    @endif
-                </h3>
-            </div>
-
-            <div class="flex items-center space-x-4">
-                <!-- Instructor Filter -->
-                <form method="GET" action="{{ route('admin.instructors.index') }}" class="flex items-center space-x-2">
-                    <input type="hidden" name="view" value="{{ $view }}" />
-                    <input type="hidden" name="week" value="{{ $weekOffset }}" />
-                    <x-custom-select 
-                        name="instructor"
-                        :options="collect($allInstructors)->mapWithKeys(fn($inst) => [$inst->id => $inst->name])->toArray()"
-                        :selected="$selectedInstructor"
-                        placeholder="All Instructors" />
-                    <button type="submit" class="px-3 py-2 text-sm font-medium bg-primary text-white rounded-md">Apply</button>
-                </form>
-
-                <!-- View Toggle -->
-                <div class="flex bg-gray-700 rounded-lg p-1">
-                    <a href="{{ route('admin.instructors.index', ['view' => 'weekly', 'week' => $weekOffset, 'instructor' => $selectedInstructor]) }}" 
-                       class="px-3 py-1 text-sm font-medium rounded-md transition-colors {{ $view === 'weekly' ? 'bg-primary text-white' : 'text-gray-300 hover:text-white' }}">
-                        Weekly
-                    </a>
-                    <a href="{{ route('admin.instructors.index', ['view' => 'monthly', 'week' => $weekOffset, 'instructor' => $selectedInstructor]) }}" 
-                       class="px-3 py-1 text-sm font-medium rounded-md transition-colors {{ $view === 'monthly' ? 'bg-primary text-white' : 'text-gray-300 hover:text-white' }}">
-                        Monthly
-                    </a>
-                </div>
-                
-                <!-- Navigation Controls -->
-                <div class="flex items-center space-x-2">
-                    <a href="{{ route('admin.instructors.index', ['view' => $view, 'week' => $weekOffset - 1, 'instructor' => $selectedInstructor]) }}" 
-                       class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </a>
-                    
-                    <a href="{{ route('admin.instructors.index', ['view' => $view, 'week' => 0, 'instructor' => $selectedInstructor]) }}" 
-                       class="px-3 py-1 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors">
-                        Today
-                    </a>
-                    
-                    <a href="{{ route('admin.instructors.index', ['view' => $view, 'week' => $weekOffset + 1, 'instructor' => $selectedInstructor]) }}" 
-                       class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Calendar Grid -->
-        @if($view === 'weekly')
-            <div class="grid grid-cols-7 gap-1 mb-4">
-                @foreach($calendarDates as $index => $date)
-                <div class="text-center {{ $date->isToday() ? 'bg-primary bg-opacity-10 border-primary border-2' : '' }} rounded-lg">
-                    <div class="text-sm font-medium text-gray-300 py-2 border-b border-gray-600">
-                        <div>{{ $date->format('D') }}</div>
-                        <div class="text-lg {{ $date->isToday() ? 'text-primary font-bold' : '' }}">{{ $date->format('j') }}</div>
-                    </div>
-                    <div class="min-h-[200px] p-2 space-y-1">
-                        @if(isset($calendarData[$index]))
-                            @foreach($calendarData[$index] as $class)
-                                <div class="bg-primary bg-opacity-20 border border-primary rounded p-2 text-xs cursor-pointer hover:bg-opacity-30 transition-colors"
-                                     onclick="window.location='{{ route('admin.classes.show', $class) }}'">
-                                    <div class="font-medium text-primary">{{ $class->start_time }}</div>
-                                    <div class="text-white font-medium">{{ $class->name }}</div>
-                                    <div class="text-gray-300">{{ $class->instructor->name ?? 'No Instructor' }}</div>
-                                    <div class="text-gray-400">{{ $class->classType->name ?? 'No Type' }} • {{ $class->classType->duration ?? 60 }}min</div>
-                                    <div class="text-gray-400">£{{ number_format($class->price, 0) }}</div>
-                                </div>
-                            @endforeach
-                        @endif
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        @else
-            <!-- Monthly View -->
-            <div class="grid grid-cols-7 gap-1 mb-4">
-                @php $dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; @endphp
-                @foreach($dayNames as $dayName)
-                    <div class="text-center text-sm font-medium text-gray-300 py-2 border-b border-gray-600">
-                        {{ $dayName }}
-                    </div>
-                @endforeach
-                
-                @foreach($calendarDates as $index => $date)
-                    <div class="min-h-[120px] border border-gray-700 p-1 {{ $date->isToday() ? 'bg-primary bg-opacity-10 border-primary border-2' : '' }} rounded-lg">
-                        <div class="text-sm {{ $date->isToday() ? 'text-primary font-bold' : ($date->month !== $currentWeekStart->month ? 'text-gray-500' : 'text-gray-300') }}">
-                            {{ $date->format('j') }}
-                        </div>
-                        <div class="space-y-1 mt-1">
-                            @if(isset($calendarData[$index]))
-                                @foreach($calendarData[$index]->take(2) as $class)
-                                    <div class="bg-primary bg-opacity-20 border border-primary rounded p-1 text-xs cursor-pointer hover:bg-opacity-30 transition-colors"
-                                         onclick="window.location='{{ route('admin.classes.show', $class) }}'">
-                                        <div class="font-medium text-primary">{{ $class->start_time }}</div>
-                                        <div class="text-white text-xs truncate">{{ $class->name }}</div>
-                                    </div>
-                                @endforeach
-                                @if(isset($calendarData[$index]) && $calendarData[$index]->count() > 2)
-                                    <div class="text-xs text-gray-400">+{{ $calendarData[$index]->count() - 2 }} more</div>
-                                @endif
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-
-        <div class="flex justify-between items-center pt-4 border-top border-gray-700">
-            <div class="text-sm text-gray-400">
-                Showing {{ $calendarData->flatten()->count() }} classes
-            </div>
-            <a href="{{ route('admin.classes.index') }}" class="text-primary hover:text-purple-400 text-sm font-medium">
-                View all classes →
-            </a>
-        </div>
-
-        @if($instructors->count() > 0)
-            <div class="overflow-x-auto mt-8">
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Instructor</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contact</th>
+@if($instructors->count() > 0)
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-white">Instructors</h2>
+        <a href="{{ route('admin.instructors.create') }}" class="bg-primary hover:bg-purple-400 text-white px-4 py-2 rounded-md font-medium transition-colors">
+            Add New Instructor
+        </a>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Classes</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
