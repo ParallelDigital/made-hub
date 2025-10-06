@@ -34,88 +34,131 @@ class ClassPassController extends Controller
             }]);
 
             // Show users who have passes in either the new system OR old system
-            $query->where(function ($q) use ($filter) {
-                // First, try to find users with new system passes
-                if ($filter !== 'all') {
-                    $q->whereHas('passes', function ($subQ) use ($filter) {
-                        switch ($filter) {
-                            case 'active_unlimited':
-                                $subQ->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString());
-                                break;
-                            case 'expired_unlimited':
-                                $subQ->where('pass_type', 'unlimited')->where('expires_at', '<', now()->toDateString());
-                                break;
-                            case 'active_credits':
-                                $subQ->where('pass_type', 'credits')->where('credits', '>', 0)->where('expires_at', '>=', now()->toDateString());
-                                break;
-                            case 'expired_credits':
-                                $subQ->where('pass_type', 'credits')->where('expires_at', '<', now()->toDateString());
-                                break;
-                            case 'active': // New combined active filter
-                                $subQ->where(function ($activeQ) {
-                                    $activeQ->where(function ($unlimitedQ) {
-                                        $unlimitedQ->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString());
-                                    })->orWhere(function ($creditsQ) {
-                                        $creditsQ->where('pass_type', 'credits')->where('credits', '>', 0)->where('expires_at', '>=', now()->toDateString());
-                                    });
-                                });
-                                break;
-                            case 'expired': // New combined expired filter
-                                $subQ->where(function ($expiredQ) {
-                                    $expiredQ->where(function ($unlimitedQ) {
-                                        $unlimitedQ->where('pass_type', 'unlimited')->where('expires_at', '<', now()->toDateString());
-                                    })->orWhere(function ($creditsQ) {
-                                        $creditsQ->where('pass_type', 'credits')->where('expires_at', '<', now()->toDateString());
-                                    });
-                                });
-                                break;
-                        }
+            if ($filter === 'active') {
+                // For active filter, only show users who currently have active passes
+                $query->where(function ($q) {
+                    // New system: users with active unlimited passes
+                    $q->whereHas('passes', function ($subQ) {
+                        $subQ->where('pass_type', 'unlimited')
+                             ->where('expires_at', '>=', now()->toDateString());
+                    })
+                    // OR new system: users with active credit passes
+                    ->orWhereHas('passes', function ($subQ) {
+                        $subQ->where('pass_type', 'credits')
+                             ->where('expires_at', '>=', now()->toDateString())
+                             ->where('credits', '>', 0);
+                    })
+                    // OR old system: users with active unlimited passes
+                    ->orWhere('unlimited_pass_expires_at', '>=', now()->toDateString())
+                    // OR old system: users with active credits
+                    ->orWhere(function ($oldQ) {
+                        $oldQ->where('credits', '>', 0)
+                             ->where(function ($dateQ) {
+                                 $dateQ->whereNull('credits_expires_at')
+                                       ->orWhere('credits_expires_at', '>=', now()->toDateString());
+                             });
                     });
-                } else {
-                    // For 'all' filter, show users who have any passes in new system
-                    $q->whereHas('passes');
-                }
-            })->orWhere(function ($q) use ($filter) {
-                // Also check old system columns for fallback compatibility
-                switch ($filter) {
-                    case 'active_unlimited':
-                        $q->where('unlimited_pass_expires_at', '>=', now()->toDateString());
-                        break;
-                    case 'expired_unlimited':
-                        $q->where('unlimited_pass_expires_at', '<', now()->toDateString());
-                        break;
-                    case 'active_credits':
-                        $q->where('credits', '>', 0)->where(function ($dateQ) {
-                            $dateQ->whereNull('credits_expires_at')->orWhere('credits_expires_at', '>=', now()->toDateString());
+                });
+            } elseif ($filter === 'expired') {
+                // For expired filter, only show users who have NO active passes but have expired ones
+                $query->where(function ($q) {
+                    // Users with expired unlimited passes (new system)
+                    $q->whereHas('passes', function ($subQ) {
+                        $subQ->where('pass_type', 'unlimited')
+                             ->where('expires_at', '<', now()->toDateString());
+                    })
+                    // OR users with expired credit passes (new system)
+                    ->orWhereHas('passes', function ($subQ) {
+                        $subQ->where('pass_type', 'credits')
+                             ->where('expires_at', '<', now()->toDateString());
+                    })
+                    // OR old system expired passes
+                    ->orWhere(function ($oldQ) {
+                        $oldQ->where('unlimited_pass_expires_at', '<', now()->toDateString())
+                             ->orWhere(function ($creditsQ) {
+                                 $creditsQ->where('credits', '>', 0)
+                                          ->where('credits_expires_at', '<', now()->toDateString());
+                             });
+                    });
+                })
+                // Make sure they don't have any active passes
+                ->where(function ($excludeActiveQ) {
+                    $excludeActiveQ->whereDoesntHave('passes', function ($subQ) {
+                        $subQ->where(function ($activeSubQ) {
+                            $activeSubQ->where(function ($unlimitedQ) {
+                                $unlimitedQ->where('pass_type', 'unlimited')
+                                           ->where('expires_at', '>=', now()->toDateString());
+                            })->orWhere(function ($creditsQ) {
+                                $creditsQ->where('pass_type', 'credits')
+                                         ->where('expires_at', '>=', now()->toDateString())
+                                         ->where('credits', '>', 0);
+                            });
                         });
-                        break;
-                    case 'expired_credits':
-                        $q->where('credits', '>', 0)->where('credits_expires_at', '<', now()->toDateString());
-                        break;
-                    case 'active': // New combined active filter for old system
-                        $q->where(function ($activeQ) {
-                            $activeQ->where('unlimited_pass_expires_at', '>=', now()->toDateString())
-                                    ->orWhere(function ($creditsQ) {
-                                        $creditsQ->where('credits', '>', 0)->where(function ($dateQ) {
-                                            $dateQ->whereNull('credits_expires_at')->orWhere('credits_expires_at', '>=', now()->toDateString());
-                                        });
-                                    });
+                    })
+                    ->where(function ($oldActiveQ) {
+                        $oldActiveQ->where('unlimited_pass_expires_at', '<', now()->toDateString())
+                                   ->orWhere(function ($oldCreditsQ) {
+                                       $oldCreditsQ->where('credits', '<=', 0)
+                                                   ->orWhere('credits_expires_at', '<', now()->toDateString());
+                                   });
+                    });
+                });
+            } elseif ($filter !== 'all') {
+                // Handle other specific filters
+                $query->where(function ($q) use ($filter) {
+                    // First, try to find users with new system passes
+                    if ($filter !== 'all') {
+                        $q->whereHas('passes', function ($subQ) use ($filter) {
+                            switch ($filter) {
+                                case 'active_unlimited':
+                                    $subQ->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString());
+                                    break;
+                                case 'expired_unlimited':
+                                    $subQ->where('pass_type', 'unlimited')->where('expires_at', '<', now()->toDateString());
+                                    break;
+                                case 'active_credits':
+                                    $subQ->where('pass_type', 'credits')->where('credits', '>', 0)->where('expires_at', '>=', now()->toDateString());
+                                    break;
+                                case 'expired_credits':
+                                    $subQ->where('pass_type', 'credits')->where('expires_at', '<', now()->toDateString());
+                                    break;
+                            }
                         });
-                        break;
-                    case 'expired': // New combined expired filter for old system
-                        $q->where(function ($expiredQ) {
-                            $expiredQ->where('unlimited_pass_expires_at', '<', now()->toDateString())
-                                    ->orWhere(function ($creditsQ) {
-                                        $creditsQ->where('credits', '>', 0)->where('credits_expires_at', '<', now()->toDateString());
-                                    });
-                        });
-                        break;
-                    case 'all':
-                    default:
-                        $q->where('credits', '>', 0)->orWhereNotNull('unlimited_pass_expires_at');
-                        break;
-                }
-            });
+                    } else {
+                        // For 'all' filter, show users who have any passes in new system
+                        $q->whereHas('passes');
+                    }
+                })->orWhere(function ($q) use ($filter) {
+                    // Also check old system columns for fallback compatibility
+                    switch ($filter) {
+                        case 'active_unlimited':
+                            $q->where('unlimited_pass_expires_at', '>=', now()->toDateString());
+                            break;
+                        case 'expired_unlimited':
+                            $q->where('unlimited_pass_expires_at', '<', now()->toDateString());
+                            break;
+                        case 'active_credits':
+                            $q->where('credits', '>', 0)->where(function ($dateQ) {
+                                $dateQ->whereNull('credits_expires_at')->orWhere('credits_expires_at', '>=', now()->toDateString());
+                            });
+                            break;
+                        case 'expired_credits':
+                            $q->where('credits', '>', 0)->where('credits_expires_at', '<', now()->toDateString());
+                            break;
+                        case 'all':
+                        default:
+                            $q->where('credits', '>', 0)->orWhereNotNull('unlimited_pass_expires_at');
+                            break;
+                    }
+                });
+            } else {
+                // For 'all' filter
+                $query->where(function ($q) {
+                    $q->whereHas('passes')
+                      ->orWhere('credits', '>', 0)
+                      ->orWhereNotNull('unlimited_pass_expires_at');
+                });
+            }
 
             if ($sortBy === 'name' || $sortBy === 'email') {
                 $query->orderBy($sortBy, $sortOrder);
