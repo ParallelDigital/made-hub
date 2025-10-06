@@ -69,7 +69,7 @@
                 <button type="button" onclick="changeFilter('expired')" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
                     Show Expired Passes
                 </button>
-            @elseif($filter === 'expired')
+            @else
                 <button type="button" onclick="changeFilter('active')" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
                     Show Active Passes
                 </button>
