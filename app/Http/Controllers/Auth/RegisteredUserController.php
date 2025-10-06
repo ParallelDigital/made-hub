@@ -34,32 +34,33 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             // At least 8 characters, one uppercase, one lowercase, one number
             'password' => ['required', 'confirmed', Rules\Password::min(8)->mixedCase()->numbers()],
+            'role' => ['nullable', 'string', 'in:user,instructor'],
         ]);
+
+        $role = $request->input('role', 'user');
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $role,
             'qr_code' => 'QR' . strtoupper(substr(md5(uniqid()), 0, 8)),
         ]);
 
-        event(new Registered($user));
-
-        // Explicitly send verification email (in addition to Registered event)
-        try {
-            if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail) {
-                $user->sendEmailVerificationNotification();
-            }
-        } catch (\Throwable $e) {
-            \Log::error('Failed to send verification email on registration', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
+        if ($role === 'instructor') {
+            // Create instructor record (inactive by default, admin can activate)
+            \App\Models\Instructor::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'active' => false, // Pending admin approval
             ]);
         }
 
-        // Keep user logged in but take them to the verification prompt
+        event(new Registered($user));
+
+        // Keep user logged in and redirect to dashboard (email verification disabled)
         Auth::login($user);
 
-        return redirect()->route('verification.notice');
+        return redirect()->route('dashboard');
     }
 }

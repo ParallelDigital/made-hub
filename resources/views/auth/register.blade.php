@@ -59,6 +59,29 @@
                             <x-input-error :messages="$errors->get('email')" class="mt-1" />
                         </div>
 
+                        <!-- Account Type -->
+                        <div>
+                            <x-input-label for="role" :value="__('Account Type')" class="text-gray-300 text-sm font-medium mb-1" />
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <select 
+                                    id="role" 
+                                    name="role" 
+                                    class="pl-10 w-full h-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg" 
+                                    required
+                                >
+                                    <option value="user" {{ old('role', 'user') == 'user' ? 'selected' : '' }}>Member (Book classes)</option>
+                                    <option value="instructor" {{ old('role') == 'instructor' ? 'selected' : '' }}>Instructor (Teach classes)</option>
+                                </select>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Select your account type. Instructors will need admin approval to teach classes.</p>
+                            <x-input-error :messages="$errors->get('role')" class="mt-1" />
+                        </div>
+
                         <!-- Password -->
                         <div>
                             <x-input-label for="password" :value="__('Password')" class="text-gray-300 text-sm font-medium mb-1" />
