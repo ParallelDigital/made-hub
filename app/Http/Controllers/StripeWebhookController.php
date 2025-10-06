@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MembershipStatusMail;
 use App\Mail\ClassPassConfirmed;
+use App\Mail\AdminClassPassNotification;
 use Stripe\Stripe;
 use Stripe\Webhook as StripeWebhook;
 
@@ -184,18 +185,22 @@ class StripeWebhookController extends Controller
                 case 'package_5':
                     $user->allocateCreditsWithExpiry(5, $expiresAt, 'stripe_purchase');
                     Log::info('5 class pass allocated via webhook', ['user_id' => $user->id]);
-                    // Send confirmation email
+                    // Send confirmation email to user
                     try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 5, $expiresAt, 'Stripe Purchase')); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
+                    // Send notification to all admin users
+                    $this->notifyAdminsOfClassPassPurchase($user, 'credits', 5, $expiresAt, 'Stripe Purchase');
                     break;
                 case 'package_10':
                     $user->allocateCreditsWithExpiry(10, $expiresAt, 'stripe_purchase');
                     Log::info('10 class pass allocated via webhook', ['user_id' => $user->id]);
                     try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 10, $expiresAt, 'Stripe Purchase')); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
+                    $this->notifyAdminsOfClassPassPurchase($user, 'credits', 10, $expiresAt, 'Stripe Purchase');
                     break;
                 case 'unlimited':
                     $user->activateUnlimitedPass($expiresAt, 'stripe_purchase');
                     Log::info('Unlimited pass allocated via webhook', ['user_id' => $user->id]);
                     try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'unlimited', null, $expiresAt, 'Stripe Purchase')); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
+                    $this->notifyAdminsOfClassPassPurchase($user, 'unlimited', null, $expiresAt, 'Stripe Purchase');
                     break;
                 default:
                     Log::warning('Unknown package type in webhook', ['package_type' => $packageType, 'session_id' => $session->id]);
@@ -331,5 +336,46 @@ class StripeWebhookController extends Controller
 
         $user->save();
         Log::info('Subscription updated processed', ['user_id' => $user->id, 'status' => $status]);
+    }
+
+    /**
+     * Notify all admin users of a new class pass purchase
+     */
+    protected function notifyAdminsOfClassPassPurchase(User $user, string $passType, ?int $credits, ?\Carbon\CarbonInterface $expiresAt, string $source): void
+    {
+        try {
+            // Get all admin users
+            $adminUsers = User::whereIn('role', ['admin', 'administrator'])->get();
+
+            if ($adminUsers->isEmpty()) {
+                Log::warning('No admin users found to notify of class pass purchase');
+                return;
+            }
+
+            // Send notification email to each admin
+            foreach ($adminUsers as $admin) {
+                try {
+                    Mail::to($admin->email)->send(new AdminClassPassNotification($user, $passType, $credits, $expiresAt, $source));
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to send admin notification for class pass purchase', [
+                        'admin_id' => $admin->id,
+                        'admin_email' => $admin->email,
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            Log::info('Admin notifications sent for class pass purchase', [
+                'user_id' => $user->id,
+                'pass_type' => $passType,
+                'admin_count' => $adminUsers->count()
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to send admin notifications for class pass purchase', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

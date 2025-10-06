@@ -17,7 +17,7 @@ class ClassPassController extends Controller
         $search = $request->input('search', '');
         $sortBy = $request->input('sort_by', 'expires_at');
         $sortOrder = $request->input('sort_order', 'desc');
-        $filter = $request->input('filter', 'all');
+        $filter = $request->input('filter', 'active'); // Changed default from 'all' to 'active'
 
         try {
             $query = User::query();
@@ -51,6 +51,24 @@ class ClassPassController extends Controller
                             case 'expired_credits':
                                 $subQ->where('pass_type', 'credits')->where('expires_at', '<', now()->toDateString());
                                 break;
+                            case 'active': // New combined active filter
+                                $subQ->where(function ($activeQ) {
+                                    $activeQ->where(function ($unlimitedQ) {
+                                        $unlimitedQ->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString());
+                                    })->orWhere(function ($creditsQ) {
+                                        $creditsQ->where('pass_type', 'credits')->where('credits', '>', 0)->where('expires_at', '>=', now()->toDateString());
+                                    });
+                                });
+                                break;
+                            case 'expired': // New combined expired filter
+                                $subQ->where(function ($expiredQ) {
+                                    $expiredQ->where(function ($unlimitedQ) {
+                                        $unlimitedQ->where('pass_type', 'unlimited')->where('expires_at', '<', now()->toDateString());
+                                    })->orWhere(function ($creditsQ) {
+                                        $creditsQ->where('pass_type', 'credits')->where('expires_at', '<', now()->toDateString());
+                                    });
+                                });
+                                break;
                         }
                     });
                 } else {
@@ -73,6 +91,24 @@ class ClassPassController extends Controller
                         break;
                     case 'expired_credits':
                         $q->where('credits', '>', 0)->where('credits_expires_at', '<', now()->toDateString());
+                        break;
+                    case 'active': // New combined active filter for old system
+                        $q->where(function ($activeQ) {
+                            $activeQ->where('unlimited_pass_expires_at', '>=', now()->toDateString())
+                                    ->orWhere(function ($creditsQ) {
+                                        $creditsQ->where('credits', '>', 0)->where(function ($dateQ) {
+                                            $dateQ->whereNull('credits_expires_at')->orWhere('credits_expires_at', '>=', now()->toDateString());
+                                        });
+                                    });
+                        });
+                        break;
+                    case 'expired': // New combined expired filter for old system
+                        $q->where(function ($expiredQ) {
+                            $expiredQ->where('unlimited_pass_expires_at', '<', now()->toDateString())
+                                    ->orWhere(function ($creditsQ) {
+                                        $creditsQ->where('credits', '>', 0)->where('credits_expires_at', '<', now()->toDateString());
+                                    });
+                        });
                         break;
                     case 'all':
                     default:

@@ -31,6 +31,8 @@
             <div>
                 <label for="filter" class="block text-sm font-medium text-gray-300 mb-1">Filter</label>
                 <select id="filter" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="active" {{ $filter === 'active' ? 'selected' : '' }}>Active Passes</option>
+                    <option value="expired" {{ $filter === 'expired' ? 'selected' : '' }}>Expired Passes</option>
                     <option value="all" {{ $filter === 'all' ? 'selected' : '' }}>All Passes</option>
                     <option value="active_unlimited" {{ $filter === 'active_unlimited' ? 'selected' : '' }}>Active Unlimited</option>
                     <option value="expired_unlimited" {{ $filter === 'expired_unlimited' ? 'selected' : '' }}>Expired Unlimited</option>
@@ -63,6 +65,15 @@
 
         <!-- Filter Actions -->
         <div class="flex gap-2 items-end mt-4">
+            @if($filter === 'active')
+                <button type="button" onclick="changeFilter('expired')" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                    Show Expired Passes
+                </button>
+            @elseif($filter === 'expired')
+                <button type="button" onclick="changeFilter('active')" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                    Show Active Passes
+                </button>
+            @endif
             <button type="button" onclick="applyFilters()" class="bg-primary hover:bg-purple-400 text-black px-4 py-2 rounded-md font-medium transition-colors">
                 Apply Filters
             </button>
@@ -217,11 +228,22 @@ function applyFilters() {
 
 function clearFilters() {
     document.getElementById('search').value = '';
-    document.getElementById('filter').value = 'all';
+    document.getElementById('filter').value = 'active'; // Changed from 'all' to 'active'
     document.getElementById('sort_by').value = 'unlimited_pass_expires_at';
     document.getElementById('sort_order').value = 'desc';
     
     window.location.href = '{{ route("admin.class-passes.index") }}';
+}
+
+function changeFilter(newFilter) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('filter', newFilter);
+    
+    // Preserve search if present
+    const search = document.getElementById('search').value;
+    if (search) params.set('search', search);
+    
+    window.location.href = '{{ route("admin.class-passes.index") }}?' + params.toString();
 }
 
 function sortTable(column) {
