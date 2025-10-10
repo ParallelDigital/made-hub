@@ -145,7 +145,11 @@
                         <div class="upcoming-class-details flex-1">
                             <p class="text-white font-medium text-sm sm:text-base break-words">{{ $booking->fitnessClass->name }}</p>
                             <p class="text-gray-300 text-xs sm:text-sm break-words">
-                                {{ \Carbon\Carbon::parse($booking->fitnessClass->class_date)->format('D, M j, Y') }} ·
+                                @php
+                                    // Use booking_date if available (for recurring classes), otherwise use class_date
+                                    $displayDate = $booking->booking_date ?? $booking->fitnessClass->class_date;
+                                @endphp
+                                {{ \Carbon\Carbon::parse($displayDate)->format('D, M j, Y') }} ·
                                 {{ \Carbon\Carbon::parse($booking->fitnessClass->start_time)->format('g:i A') }}
                             </p>
                             <p class="text-gray-400 text-xs sm:text-sm break-words">Instructor: {{ $booking->fitnessClass->instructor->name ?? 'N/A' }}</p>
@@ -153,7 +157,9 @@
                         <div class="upcoming-class-actions shrink-0 w-full sm:w-auto">
                             <a href="{{ route('booking.confirmation', ['classId' => $booking->fitness_class_id]) }}" class="text-primary hover:underline text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center mr-2">Details</a>
                             @php
-                                $classStart = \Carbon\Carbon::parse($booking->fitnessClass->class_date->toDateString() . ' ' . $booking->fitnessClass->start_time);
+                                // Use booking_date for validation if available
+                                $bookingDateStr = $booking->booking_date ? $booking->booking_date->toDateString() : $booking->fitnessClass->class_date->toDateString();
+                                $classStart = \Carbon\Carbon::parse($bookingDateStr . ' ' . $booking->fitnessClass->start_time);
                                 $canCancel = $booking->status === 'confirmed' && !$classStart->isPast();
                             @endphp
                             @if($canCancel)

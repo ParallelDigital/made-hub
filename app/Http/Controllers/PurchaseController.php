@@ -468,6 +468,7 @@ class PurchaseController extends Controller
                 'metadata' => [
                     'class_id' => $class_id,
                     'name' => $request->name,
+                    'selected_date' => $selectedDate,
                 ],
             ]);
 

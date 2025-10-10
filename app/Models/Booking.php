@@ -9,6 +9,7 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'fitness_class_id',
+        'booking_date',
         'status',
         'booked_at',
         'booking_type',
@@ -21,6 +22,7 @@ class Booking extends Model
     ];
 
     protected $casts = [
+        'booking_date' => 'date',
         'booked_at' => 'datetime',
         'checked_in_at' => 'datetime',
         'cancelled_at' => 'datetime',

@@ -30,7 +30,7 @@
                                         <div>
                                             <h4 class="font-medium text-gray-900">{{ $booking->fitnessClass->name }}</h4>
                                             <p class="text-sm text-gray-600">
-                                                {{ $booking->fitnessClass->class_date->format('M j, Y') }} at {{ $booking->fitnessClass->start_time }}
+                                                {{ ($booking->booking_date ?? $booking->fitnessClass->class_date)->format('M j, Y') }} at {{ $booking->fitnessClass->start_time }}
                                             </p>
                                             <p class="text-sm text-gray-500">
                                                 Instructor: {{ $booking->fitnessClass->instructor->name ?? 'N/A' }}

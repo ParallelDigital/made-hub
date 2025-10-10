@@ -30,15 +30,16 @@ class BookingController extends Controller
         $tz = 'Europe/London';
         $selectedDate = $request->input('selected_date');
         
+        // Determine the actual booking date (for recurring classes use selected_date, otherwise use class_date)
         if ($selectedDate && $class->recurring) {
             // For recurring classes, use the date the user selected
-            $classDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
+            $bookingDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
         } else {
             // For regular classes, use the stored class_date
-            $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+            $bookingDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
         }
         
-        $classStart = \Carbon\Carbon::parse($classDate . ' ' . $class->start_time, $tz);
+        $classStart = \Carbon\Carbon::parse($bookingDate . ' ' . $class->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'This class has already started.'], 400);
         }
@@ -70,6 +71,7 @@ class BookingController extends Controller
             $booking = Booking::create([
                 'user_id' => $user->id,
                 'fitness_class_id' => $classId,
+                'booking_date' => $bookingDate,
                 'status' => 'confirmed',
                 'booked_at' => now(),
             ]);
@@ -128,6 +130,7 @@ class BookingController extends Controller
             $booking = Booking::create([
                 'user_id' => $user->id,
                 'fitness_class_id' => $classId,
+                'booking_date' => $bookingDate,
                 'status' => 'confirmed',
                 'booked_at' => now(),
             ]);
@@ -195,6 +198,7 @@ class BookingController extends Controller
         $booking = Booking::create([
             'user_id' => $user->id,
             'fitness_class_id' => $classId,
+            'booking_date' => $bookingDate,
             'status' => 'confirmed',
             'booked_at' => now(),
         ]);
@@ -346,6 +350,16 @@ class BookingController extends Controller
             return redirect()->route('welcome')->with('error', 'This class is now fully booked.');
         }
 
+        // Determine the booking date (from metadata for recurring classes)
+        $tz = 'Europe/London';
+        $selectedDate = $session->metadata->selected_date ?? null;
+        
+        if ($selectedDate && $class->recurring) {
+            $bookingDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
+        } else {
+            $bookingDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        }
+
         // Find or create user from session/customer_email
         $email = $session->customer_details->email ?? $session->customer_email ?? null;
         $name = $session->metadata->name ?? 'Guest';
@@ -375,6 +389,7 @@ class BookingController extends Controller
             $booking = Booking::create([
                 'user_id' => $user->id,
                 'fitness_class_id' => $classId,
+                'booking_date' => $bookingDate,
                 'stripe_session_id' => $session->id,
                 'status' => 'confirmed',
                 'booked_at' => now(),
@@ -474,7 +489,10 @@ class BookingController extends Controller
 
         // Check if class has already started (use Europe/London timezone)
         $tz = 'Europe/London';
-        $classDate = \Carbon\Carbon::parse($booking->fitnessClass->class_date)->setTimezone($tz)->format('Y-m-d');
+        // Use booking_date if available (for recurring classes), otherwise use class_date
+        $classDate = $booking->booking_date 
+            ? \Carbon\Carbon::parse($booking->booking_date)->setTimezone($tz)->format('Y-m-d')
+            : \Carbon\Carbon::parse($booking->fitnessClass->class_date)->setTimezone($tz)->format('Y-m-d');
         $classStart = \Carbon\Carbon::parse($classDate . ' ' . $booking->fitnessClass->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'You cannot cancel a class that has already started.'], 400);
@@ -523,7 +541,10 @@ class BookingController extends Controller
 
         // Check if class has already started (use Europe/London timezone)
         $tz = 'Europe/London';
-        $classDate = \Carbon\Carbon::parse($booking->fitnessClass->class_date)->setTimezone($tz)->format('Y-m-d');
+        // Use booking_date if available (for recurring classes), otherwise use class_date
+        $classDate = $booking->booking_date 
+            ? \Carbon\Carbon::parse($booking->booking_date)->setTimezone($tz)->format('Y-m-d')
+            : \Carbon\Carbon::parse($booking->fitnessClass->class_date)->setTimezone($tz)->format('Y-m-d');
         $classStart = \Carbon\Carbon::parse($classDate . ' ' . $booking->fitnessClass->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return response()->json(['success' => false, 'message' => 'You cannot delete a booking for a class that has already started.'], 400);
@@ -531,7 +552,8 @@ class BookingController extends Controller
 
         // Store class info for response
         $className = $booking->fitnessClass->name;
-        $classDate = $booking->fitnessClass->class_date->format('M j, Y');
+        $displayDate = $booking->booking_date ?? $booking->fitnessClass->class_date;
+        $classDateFormatted = $displayDate->format('M j, Y');
         $classTime = $booking->fitnessClass->start_time;
 
         // Delete the booking permanently
@@ -539,7 +561,7 @@ class BookingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "Booking for {$className} on {$classDate} at {$classTime} has been permanently deleted."
+            'message' => "Booking for {$className} on {$classDateFormatted} at {$classTime} has been permanently deleted."
         ]);
     }
 

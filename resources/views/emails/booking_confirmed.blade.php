@@ -39,7 +39,7 @@
 
             <div class="booking-details">
                 <p><strong>Class:</strong> {{ $booking->fitnessClass?->name ?? 'N/A' }}</p>
-                <p><strong>Date:</strong> {{ $booking->fitnessClass?->class_date?->format('l, F j, Y') ?? 'N/A' }}</p>
+                <p><strong>Date:</strong> {{ ($booking->booking_date ?? $booking->fitnessClass?->class_date)?->format('l, F j, Y') ?? 'N/A' }}</p>
                 <p><strong>Time:</strong> {{ $booking->fitnessClass?->start_time ? \Carbon\Carbon::parse($booking->fitnessClass->start_time)->format('g:i A') : 'N/A' }}</p>
                 <p><strong>Instructor:</strong> {{ $booking->fitnessClass?->instructor?->name ?? 'N/A' }}</p>
             </div>

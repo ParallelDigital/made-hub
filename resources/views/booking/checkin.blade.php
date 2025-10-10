@@ -41,9 +41,12 @@
                     </div>
                     <div class="space-y-2">
                         <div class="text-base font-medium text-gray-900">{{ optional($booking->fitnessClass)->name ?? 'Class' }}</div>
-                        @if(optional($booking->fitnessClass)->class_date)
+                        @php
+                            $bookingDisplayDate = $booking->booking_date ?? optional($booking->fitnessClass)->class_date;
+                        @endphp
+                        @if($bookingDisplayDate)
                             <div class="text-sm text-gray-500">
-                                {{ \Carbon\Carbon::parse($booking->fitnessClass->class_date)->format('l, F j, Y') }}
+                                {{ \Carbon\Carbon::parse($bookingDisplayDate)->format('l, F j, Y') }}
                                 @if(optional($booking->fitnessClass)->start_time)
                                     <br>{{ \Carbon\Carbon::parse($booking->fitnessClass->start_time)->format('g:i A') }}
                                 @endif
