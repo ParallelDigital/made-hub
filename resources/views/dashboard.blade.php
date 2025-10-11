@@ -230,6 +230,7 @@
         const ucConfirm = document.getElementById('uc-confirm');
         const ucCancel = document.getElementById('uc-cancel');
         let ucClassId = null;
+        let ucClassDate = null;
 
         function parseTimeToMinutes(t){
             if(!t) return null;
@@ -377,6 +378,7 @@
 
         function openUseCreditsModal(info){
             ucClassId = info.id;
+            ucClassDate = info.date || null;
             ucName.textContent = info.name || 'Class';
             ucDT.textContent = `${info.date} • ${formatTime12(info.time)}`;
             ucError.classList.add('hidden');
@@ -413,7 +415,7 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({})
+                body: JSON.stringify({ selected_date: ucClassDate })
             })
             .then(async r => {
                 const data = await r.json().catch(()=>({success:false,message:'Unexpected server response'}));

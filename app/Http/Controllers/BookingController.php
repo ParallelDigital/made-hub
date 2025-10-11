@@ -26,18 +26,27 @@ class BookingController extends Controller
         $class = FitnessClass::findOrFail($classId);
 
         // Check if the class has already started (use Europe/London timezone)
-        // For recurring classes, use the selected_date from the request if provided
+        // Use the selected_date from the request if provided (for any class)
         $tz = 'Europe/London';
         $selectedDate = $request->input('selected_date');
         
-        // Determine the actual booking date (for recurring classes use selected_date, otherwise use class_date)
-        if ($selectedDate && $class->recurring) {
-            // For recurring classes, use the date the user selected
+        // Determine the actual booking date - ALWAYS use selected_date if provided
+        if ($selectedDate) {
+            // Use the date the user selected from the calendar
             $bookingDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
         } else {
-            // For regular classes, use the stored class_date
+            // Fallback to the stored class_date if no selected_date provided
             $bookingDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
         }
+        
+        \Log::info('Booking with credits', [
+            'class_id' => $classId,
+            'class_name' => $class->name,
+            'class_recurring' => $class->recurring,
+            'selected_date_param' => $selectedDate,
+            'booking_date_to_save' => $bookingDate,
+            'class_date' => $class->class_date
+        ]);
         
         $classStart = \Carbon\Carbon::parse($bookingDate . ' ' . $class->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
@@ -350,11 +359,11 @@ class BookingController extends Controller
             return redirect()->route('welcome')->with('error', 'This class is now fully booked.');
         }
 
-        // Determine the booking date (from metadata for recurring classes)
+        // Determine the booking date (from metadata) - ALWAYS use selected_date if provided
         $tz = 'Europe/London';
         $selectedDate = $session->metadata->selected_date ?? null;
         
-        if ($selectedDate && $class->recurring) {
+        if ($selectedDate) {
             $bookingDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
         } else {
             $bookingDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');

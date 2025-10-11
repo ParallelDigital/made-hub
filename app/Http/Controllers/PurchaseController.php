@@ -29,15 +29,14 @@ class PurchaseController extends Controller
         $class = FitnessClass::findOrFail($class_id);
 
         // Check if the class has already started (use Europe/London timezone)
-        // For recurring classes, use the selected_date from the request if provided
+        // Use the selected_date from the request if provided (for any class)
         $tz = 'Europe/London';
         $selectedDate = $request->input('selected_date');
         
-        if ($selectedDate && $class->recurring) {
-            // For recurring classes, use the date the user selected
+        // ALWAYS use selected_date if provided
+        if ($selectedDate) {
             $classDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
         } else {
-            // For regular classes, use the stored class_date
             $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
         }
         
@@ -65,8 +64,8 @@ class PurchaseController extends Controller
 
         $autoOpenCredits = $request->boolean('useCredits');
         
-        // For recurring classes, temporarily override the class_date for display
-        if ($selectedDate && $class->recurring) {
+        // If selected date is provided, override the class_date for display
+        if ($selectedDate) {
             $class->class_date = \Carbon\Carbon::parse($selectedDate);
         }
         
@@ -415,15 +414,14 @@ class PurchaseController extends Controller
         $class = FitnessClass::findOrFail($class_id);
 
         // Check if the class has already started (use Europe/London timezone)
-        // For recurring classes, use the selected_date from the request if provided
+        // Use the selected_date from the request if provided (for any class)
         $tz = 'Europe/London';
         $selectedDate = $request->input('selected_date');
         
-        if ($selectedDate && $class->recurring) {
-            // For recurring classes, use the date the user selected
+        // ALWAYS use selected_date if provided
+        if ($selectedDate) {
             $classDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
         } else {
-            // For regular classes, use the stored class_date
             $classDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
         }
         
