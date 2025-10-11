@@ -1515,6 +1515,19 @@
             let isLoading = false;
             window.SHOW_PAST = {{ ($showPast ?? false) ? 'true' : 'false' }};
 
+            // Force scroll to top on page load/navigation
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+            window.addEventListener('beforeunload', function() {
+                window.scrollTo(0, 0);
+            });
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 0);
+                }, 0);
+            });
+
             // Animate week scroller before loading a new week for a smoother transition
             function onArrowNav(date) {
                 const weekDaysEl = document.getElementById('week-days');
@@ -2198,6 +2211,11 @@
                     closeBookingModal();
                 }
             });
+
+            // Immediate scroll to top (runs right away)
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
         </script>
     </body>
 </html>
