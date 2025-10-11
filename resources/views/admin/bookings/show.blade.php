@@ -52,7 +52,7 @@
                 </div>
                 <div>
                     <span class="font-medium text-gray-700">Class Date:</span>
-                    <span class="text-gray-900">{{ $booking->fitnessClass->class_date->format('M j, Y') }}</span>
+                    <span class="text-gray-900">{{ ($booking->booking_date ?? $booking->fitnessClass->class_date)->format('M j, Y') }}</span>
                 </div>
                 <div>
                     <span class="font-medium text-gray-700">Time:</span>

@@ -191,17 +191,28 @@ class SyncStripeBookings extends Command
 
         $this->info("Creating new booking for Stripe session...");
 
+        // Determine booking date from metadata or use class date
+        $selectedDate = $session->metadata->selected_date ?? null;
+        if ($selectedDate) {
+            $bookingDate = Carbon::parse($selectedDate)->format('Y-m-d');
+            $this->info("Using selected_date from metadata: {$bookingDate}");
+        } else {
+            $bookingDate = Carbon::parse($class->class_date)->format('Y-m-d');
+            $this->info("No selected_date in metadata, using class_date: {$bookingDate}");
+        }
+
         // Create booking
         try {
             $booking = Booking::create([
                 'user_id' => $user->id,
                 'fitness_class_id' => $classId,
+                'booking_date' => $bookingDate,
                 'stripe_session_id' => $session->id,
                 'status' => 'confirmed',
                 'booked_at' => Carbon::createFromTimestamp($session->created),
             ]);
 
-            $this->info("✅ Created booking #{$booking->id} for {$user->email} - {$class->name}");
+            $this->info("✅ Created booking #{$booking->id} for {$user->email} - {$class->name} on {$bookingDate}");
 
             return 'synced';
         } catch (\Exception $e) {

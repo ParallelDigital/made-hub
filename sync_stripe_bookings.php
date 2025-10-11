@@ -78,10 +78,19 @@ try {
                 continue;
             }
 
+            // Determine booking date from metadata or use class date
+            $selectedDate = $session->metadata->selected_date ?? null;
+            if ($selectedDate) {
+                $bookingDate = Carbon::parse($selectedDate)->format('Y-m-d');
+            } else {
+                $bookingDate = Carbon::parse($class->class_date)->format('Y-m-d');
+            }
+
             // Create booking
             $booking = Booking::create([
                 'user_id' => $user->id,
                 'fitness_class_id' => $classId,
+                'booking_date' => $bookingDate,
                 'stripe_session_id' => $session->id,
                 'status' => 'confirmed',
                 'booked_at' => Carbon::createFromTimestamp($session->created),
