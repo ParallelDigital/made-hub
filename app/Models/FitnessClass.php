@@ -25,7 +25,8 @@ class FitnessClass extends Model
         'recurring_until',
         'parent_class_id',
         'location',
-        'instructor_reminder_sent_at'
+        'instructor_reminder_sent_at',
+        'instructor_morning_sent_at'
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class FitnessClass extends Model
         'class_date' => 'date',
         'recurring_until' => 'date',
         'instructor_reminder_sent_at' => 'datetime',
+        'instructor_morning_sent_at' => 'datetime',
     ];
 
     public function instructor()

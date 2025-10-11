@@ -26,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Verify all memberships have proper accounts - run daily
         $schedule->command('members:verify-accounts')->daily('04:00');
 
+        // Send instructor morning reminders at 8 AM for classes happening today
+        $schedule->command('classes:send-instructor-morning-reminders')->dailyAt('08:00');
+        
         // Send instructor class roster reminders ~1 hour before class start
         $schedule->command('classes:send-instructor-reminders')->everyMinute();
         

@@ -31,6 +31,8 @@
             <h1>
                 @if($context === 'reminder')
                     Class Roster (1-hour Reminder)
+                @elseif($context === 'morning_reminder')
+                    Today's Class Roster
                 @else
                     Class Roster Update (New Booking)
                 @endif
@@ -42,6 +44,8 @@
                 Below is the current attendee list for your class.
                 @if($context === 'reminder')
                     This is your one-hour reminder.
+                @elseif($context === 'morning_reminder')
+                    This is your morning reminder for today's class.
                 @else
                     A new booking has been made and your roster has been updated.
                 @endif

@@ -17,7 +17,7 @@ class InstructorClassRoster extends Mailable
     use Queueable, SerializesModels;
 
     /**
-     * @param string $context Either 'booking_update' or 'reminder'
+     * @param string $context Either 'booking_update', 'reminder', or 'morning_reminder'
      */
     public function __construct(public FitnessClass $class, public string $context = 'booking_update')
     {
@@ -35,7 +35,11 @@ class InstructorClassRoster extends Mailable
         $dateStr = optional($this->class->class_date)->format('D j M Y');
         $timeStr = $this->class->start_time ? Carbon::parse($this->class->start_time)->format('H:i') : '';
 
-        $subjectPrefix = $this->context === 'reminder' ? 'Reminder' : 'New Booking';
+        $subjectPrefix = match($this->context) {
+            'reminder' => 'Reminder (1hr)',
+            'morning_reminder' => 'Today\'s Class',
+            default => 'New Booking'
+        };
         $subject = sprintf(
             '%s: %s — %s %s (%d/%d)',
             $subjectPrefix,
