@@ -62,15 +62,18 @@ class BookingController extends Controller
                 ], 403);
             }
 
-            // Check if class is full
-            $currentBookings = Booking::where('fitness_class_id', $classId)->count();
+            // Check if class is full (for recurring classes, check the specific date)
+            $currentBookings = Booking::where('fitness_class_id', $classId)
+                ->where('booking_date', $bookingDate)
+                ->count();
             if ($currentBookings >= $class->max_spots) {
                 return response()->json(['success' => false, 'message' => 'This class is fully booked.'], 400);
             }
 
-            // Check if user already booked this class
+            // Check if user already booked this specific class occurrence
             $existingBooking = Booking::where('user_id', $user->id)
                 ->where('fitness_class_id', $classId)
+                ->where('booking_date', $bookingDate)
                 ->first();
             if ($existingBooking) {
                 return response()->json(['success' => false, 'message' => 'You have already booked this class.'], 400);
@@ -121,15 +124,18 @@ class BookingController extends Controller
 
         // If user has an active unlimited pass, allow booking without deducting credits
         if ($user->hasActiveUnlimitedPass()) {
-            // Check if class is full
-            $currentBookings = Booking::where('fitness_class_id', $classId)->count();
+            // Check if class is full (for recurring classes, check the specific date)
+            $currentBookings = Booking::where('fitness_class_id', $classId)
+                ->where('booking_date', $bookingDate)
+                ->count();
             if ($currentBookings >= $class->max_spots) {
                 return response()->json(['success' => false, 'message' => 'This class is fully booked.'], 400);
             }
 
-            // Check if user already booked this class
+            // Check if user already booked this specific class occurrence
             $existingBooking = Booking::where('user_id', $user->id)
                 ->where('fitness_class_id', $classId)
+                ->where('booking_date', $bookingDate)
                 ->first();
             if ($existingBooking) {
                 return response()->json(['success' => false, 'message' => 'You have already booked this class.'], 400);
@@ -188,15 +194,18 @@ class BookingController extends Controller
             return response()->json(['success' => false, 'message' => $message], 400);
         }
 
-        // Check if class is full
-        $currentBookings = Booking::where('fitness_class_id', $classId)->count();
+        // Check if class is full (for recurring classes, check the specific date)
+        $currentBookings = Booking::where('fitness_class_id', $classId)
+            ->where('booking_date', $bookingDate)
+            ->count();
         if ($currentBookings >= $class->max_spots) {
             return response()->json(['success' => false, 'message' => 'This class is fully booked.'], 400);
         }
 
-        // Check if user already booked this class
+        // Check if user already booked this specific class occurrence
         $existingBooking = Booking::where('user_id', $user->id)
             ->where('fitness_class_id', $classId)
+            ->where('booking_date', $bookingDate)
             ->first();
 
         if ($existingBooking) {
@@ -390,9 +399,10 @@ class BookingController extends Controller
 
         \Log::info('User created/found', ['user_id' => $user->id, 'email' => $user->email]);
 
-        // Avoid duplicate booking if user refreshes
+        // Avoid duplicate booking if user refreshes (check for same date)
         $existing = Booking::where('user_id', $user->id)
             ->where('fitness_class_id', $classId)
+            ->where('booking_date', $bookingDate)
             ->first();
         if (!$existing) {
             $booking = Booking::create([
