@@ -92,6 +92,11 @@
             <!-- Stats Card -->
             <div class="bg-gray-800 shadow rounded-lg border border-gray-700 p-6">
                 <h3 class="text-lg font-semibold text-white mb-4">Statistics</h3>
+                @if($class->recurring)
+                    <div class="mb-3 text-xs text-gray-400 bg-gray-700 rounded px-2 py-1">
+                        <span class="font-medium">Recurring Class:</span> Stats show all bookings across all dates
+                    </div>
+                @endif
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-400">Total Bookings</span>
@@ -101,7 +106,13 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-400">Available Spots</span>
-                        <span class="text-white font-medium">{{ $class->max_spots - $class->bookings->where('status', 'confirmed')->count() }}</span>
+                        <span class="text-white font-medium">
+                            @if($class->recurring)
+                                <span class="text-xs text-gray-400">Varies by date</span>
+                            @else
+                                {{ $class->max_spots - $class->bookings->where('status', 'confirmed')->count() }}
+                            @endif
+                        </span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-400">Confirmed</span>
@@ -135,20 +146,51 @@
         </div>
         <div class="max-h-[60vh] overflow-auto p-5 space-y-3">
             <!-- All bookings -->
-            @forelse($class->bookings->sortByDesc('booked_at') as $booking)
-                <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
-                    <div>
-                        <p class="text-white text-sm font-medium">{{ $booking->user->name ?? 'Unknown' }}</p>
-                        <p class="text-gray-400 text-xs">{{ $booking->user->email ?? '' }}</p>
+            @if($class->recurring)
+                @php
+                    // Group bookings by date for recurring classes
+                    $groupedBookings = $class->bookings->groupBy(function($booking) {
+                        return $booking->booking_date ? $booking->booking_date->format('Y-m-d') : 'unknown';
+                    })->sortKeysDesc();
+                @endphp
+                @forelse($groupedBookings as $date => $dateBookings)
+                    <div class="mb-4">
+                        <div class="text-sm font-semibold text-primary mb-2 border-b border-gray-600 pb-1">
+                            {{ $date !== 'unknown' ? \Carbon\Carbon::parse($date)->format('l, M j, Y') : 'Unknown Date' }}
+                            <span class="text-gray-400 font-normal">({{ $dateBookings->count() }} booking{{ $dateBookings->count() !== 1 ? 's' : '' }})</span>
+                        </div>
+                        @foreach($dateBookings->sortByDesc('booked_at') as $booking)
+                            <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0 ml-2">
+                                <div>
+                                    <p class="text-white text-sm font-medium">{{ $booking->user->name ?? 'Unknown' }}</p>
+                                    <p class="text-gray-400 text-xs">{{ $booking->user->email ?? '' }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-gray-400 text-xs">Booked: {{ optional($booking->booked_at)->format('M j, g:i A') ?? '-' }}</p>
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $booking->status === 'confirmed' ? 'bg-green-800 text-green-100' : ($booking->status === 'cancelled' ? 'bg-red-800 text-red-100' : 'bg-yellow-800 text-yellow-100') }}">{{ ucfirst($booking->status) }}</span>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                    <div class="text-right">
-                        <p class="text-gray-400 text-xs">{{ optional($booking->booked_at)->format('M j, Y g:i A') ?? '-' }}</p>
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $booking->status === 'confirmed' ? 'bg-green-800 text-green-100' : ($booking->status === 'cancelled' ? 'bg-red-800 text-red-100' : 'bg-yellow-800 text-yellow-100') }}">{{ ucfirst($booking->status) }}</span>
+                @empty
+                    <p class="text-gray-400 text-sm">No bookings.</p>
+                @endforelse
+            @else
+                @forelse($class->bookings->sortByDesc('booked_at') as $booking)
+                    <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
+                        <div>
+                            <p class="text-white text-sm font-medium">{{ $booking->user->name ?? 'Unknown' }}</p>
+                            <p class="text-gray-400 text-xs">{{ $booking->user->email ?? '' }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-400 text-xs">{{ optional($booking->booked_at)->format('M j, Y g:i A') ?? '-' }}</p>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $booking->status === 'confirmed' ? 'bg-green-800 text-green-100' : ($booking->status === 'cancelled' ? 'bg-red-800 text-red-100' : 'bg-yellow-800 text-yellow-100') }}">{{ ucfirst($booking->status) }}</span>
+                        </div>
                     </div>
-                </div>
-            @empty
-                <p class="text-gray-400 text-sm">No bookings.</p>
-            @endforelse
+                @empty
+                    <p class="text-gray-400 text-sm">No bookings.</p>
+                @endforelse
+            @endif
         </div>
         <div class="px-5 py-3 border-t border-gray-700 text-right">
             <button class="bg-primary text-black hover:opacity-90 px-4 py-2 rounded-md text-sm font-medium" onclick="closeBookingsModal()">Close</button>
