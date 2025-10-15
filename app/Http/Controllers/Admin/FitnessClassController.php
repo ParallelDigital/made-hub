@@ -180,7 +180,37 @@ class FitnessClassController extends Controller
      */
     public function show(FitnessClass $class)
     {
-        $class->load('instructor', 'bookings.user');
+        if ($class->isRecurring() && !$class->isChildClass()) {
+            $class->load(['instructor', 'bookings.user', 'childClasses.bookings.user']);
+
+            $allBookings = collect($class->bookings ? $class->bookings->all() : []);
+            foreach ($class->childClasses as $child) {
+                if ($child->relationLoaded('bookings')) {
+                    $allBookings = $allBookings->merge($child->bookings);
+                } else {
+                    $allBookings = $allBookings->merge($child->bookings()->with('user')->get());
+                }
+            }
+            $class->setRelation('bookings', $allBookings);
+        } elseif ($class->isChildClass()) {
+            $class->load(['instructor', 'bookings.user', 'parentClass.bookings.user']);
+            $targetDate = $class->class_date ? $class->class_date->toDateString() : null;
+            $parentDateBookings = collect();
+            if ($class->parentClass && $class->parentClass->relationLoaded('bookings')) {
+                $parentDateBookings = $class->parentClass->bookings->filter(function($b) use ($targetDate) {
+                    return $b->booking_date && $b->booking_date->toDateString() === $targetDate;
+                });
+            } elseif ($class->parentClass && $targetDate) {
+                $parentDateBookings = $class->parentClass->bookings()
+                    ->whereDate('booking_date', $targetDate)
+                    ->with('user')
+                    ->get();
+            }
+            $class->setRelation('bookings', $class->bookings->merge($parentDateBookings));
+        } else {
+            $class->load('instructor', 'bookings.user');
+        }
+
         return view('admin.classes.show', compact('class'));
     }
 
@@ -402,6 +432,26 @@ class FitnessClassController extends Controller
         $classes = $this->dedupeCalendarClasses($classes);
 
         $classes = $classes->map(function($class) {
+            $bookedCount = 0;
+            try {
+                if ($class->isChildClass()) {
+                    $bookedCount = $class->bookings()->count();
+                    if ($bookedCount === 0 && $class->parentClass) {
+                        $bookedCount = $class->parentClass->bookings()
+                            ->whereDate('booking_date', $class->class_date->toDateString())
+                            ->count();
+                    }
+                } else {
+                    $bookedCount = $class->bookings()
+                        ->when($class->class_date, function($q) use ($class) {
+                            return $q->whereDate('booking_date', $class->class_date->toDateString());
+                        })
+                        ->count();
+                }
+            } catch (\Throwable $e) {
+                $bookedCount = $class->bookings()->count();
+            }
+
             return [
                 'id' => $class->id,
                 'title' => ($class->classType->name ?? $class->name) . ($class->instructor ? ' - ' . $class->instructor->name : ''),
@@ -415,14 +465,14 @@ class FitnessClassController extends Controller
                     'instructor' => $class->instructor ? $class->instructor->name : 'No Instructor',
                     'location' => $class->location ?? 'N/A',
                     'capacity' => $class->max_spots,
-                    'booked' => $class->bookings()->count(),
+                    'booked' => $bookedCount,
                     'status' => $class->active ? 'Active' : 'Inactive',
                     'description' =>
                         'Type: ' . ($class->classType->name ?? 'N/A') . "\n" .
                         'Instructor: ' . ($class->instructor ? $class->instructor->name : 'N/A') . "\n" .
                         'Location: ' . ($class->location ?? 'N/A') . "\n" .
                         'Time: ' . $class->start_time . ' - ' . $class->end_time . "\n" .
-                        'Capacity: ' . $class->bookings()->count() . '/' . $class->max_spots,
+                        'Capacity: ' . $bookedCount . '/' . $class->max_spots,
                 ],
             ];
         });
