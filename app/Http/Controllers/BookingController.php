@@ -114,6 +114,9 @@ class BookingController extends Controller
                 ]);
             }
 
+            // Store booking date in session for confirmation page display
+            session(['booking_date' => $bookingDate]);
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Class booked successfully. This class is free for members.',
@@ -175,6 +178,9 @@ class BookingController extends Controller
                 ]);
             }
 
+            // Store booking date in session for confirmation page display
+            session(['booking_date' => $bookingDate]);
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Class booked successfully using your unlimited pass! No credits deducted.',
@@ -257,6 +263,9 @@ class BookingController extends Controller
         $remainingCredits = $user->getAvailableCredits();
         $creditType = $user->hasActiveMembership() ? 'monthly credits' : 'credits';
         
+        // Store booking date in session for confirmation page display
+        session(['booking_date' => $bookingDate]);
+        
         return response()->json([
             'success' => true, 
             'message' => "Class booked successfully with {$creditType}! You have {$remainingCredits} {$creditType} remaining. Confirmation email sent.",
@@ -326,6 +335,24 @@ class BookingController extends Controller
     public function confirmation($classId)
     {
         $class = FitnessClass::with('instructor')->findOrFail($classId);
+        
+        // Get the user's most recent booking for this class to show the correct date
+        $booking = null;
+        if (Auth::check()) {
+            $booking = Booking::where('user_id', Auth::id())
+                ->where('fitness_class_id', $classId)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
+        
+        // If we have a booking with a specific booking_date, use that for display
+        if ($booking && $booking->booking_date) {
+            $class->class_date = $booking->booking_date;
+        } elseif (session('booking_date')) {
+            // For guest bookings, use the date from session
+            $class->class_date = session('booking_date');
+        }
+        
         return view('booking.confirmation', compact('class'));
     }
 
@@ -448,8 +475,10 @@ class BookingController extends Controller
             \Log::info('Existing booking found', ['booking_id' => $booking->id]);
         }
 
+        // Pass the booking date for confirmation display
         return redirect()->route('booking.confirmation', ['classId' => $classId])
-            ->with('success', 'Payment successful! Your class has been booked.');
+            ->with('success', 'Payment successful! Your class has been booked.')
+            ->with('booking_date', $bookingDate);
     }
     /**
      * Check-in endpoint (scannable QR target). Future: mark attendance.

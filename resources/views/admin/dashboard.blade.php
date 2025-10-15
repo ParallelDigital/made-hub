@@ -127,7 +127,11 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                 @if($booking->fitnessClass)
-                                    <div>{{ $booking->fitnessClass->class_date ? $booking->fitnessClass->class_date->format('M j, Y') : 'No Date' }}</div>
+                                    @php
+                                        // Use booking_date if available (for recurring classes), otherwise use class_date
+                                        $displayDate = $booking->booking_date ?? $booking->fitnessClass->class_date;
+                                    @endphp
+                                    <div>{{ $displayDate ? $displayDate->format('M j, Y') : 'No Date' }}</div>
                                     <div class="text-gray-400">{{ $booking->fitnessClass->start_time }} - {{ $booking->fitnessClass->end_time }}</div>
                                 @else
                                     <div class="text-gray-400">Class not found</div>
