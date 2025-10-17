@@ -48,12 +48,13 @@ class ReportsController extends Controller
         $totalRevenue = $paidBookingsRevenue;
         
         // Monthly breakdown for the last 6 months
+        // Use SQLite-compatible date formatting
         $monthlyRevenue = Booking::whereNotNull('stripe_session_id')
             ->where('status', 'confirmed')
             ->where('booked_at', '>=', now()->subMonths(6))
             ->join('fitness_classes', 'bookings.fitness_class_id', '=', 'fitness_classes.id')
             ->select(
-                DB::raw('DATE_FORMAT(bookings.booked_at, "%Y-%m") as month'),
+                DB::raw("strftime('%Y-%m', bookings.booked_at) as month"),
                 DB::raw('SUM(fitness_classes.price) as revenue'),
                 DB::raw('COUNT(*) as bookings')
             )
