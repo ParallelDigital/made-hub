@@ -18,21 +18,35 @@ class InstructorClassRoster extends Mailable
 
     /**
      * @param string $context Either 'booking_update', 'reminder', or 'morning_reminder'
+     * @param string|null $bookingDate The specific date for this class occurrence (for recurring classes)
      */
-    public function __construct(public FitnessClass $class, public string $context = 'booking_update')
-    {
+    public function __construct(
+        public FitnessClass $class,
+        public string $context = 'booking_update',
+        public ?string $bookingDate = null
+    ) {
+        // If no specific booking date provided, use the class date
+        if (!$this->bookingDate && $this->class->class_date) {
+            $this->bookingDate = $this->class->class_date->format('Y-m-d');
+        }
     }
 
     public function envelope(): Envelope
     {
         $this->class->loadMissing(['instructor']);
 
-        // Compute attendees count for subject
+        // Compute attendees count for subject - filter by booking_date for recurring classes
         $attendeesCount = Booking::where('fitness_class_id', $this->class->id)
             ->where('status', 'confirmed')
+            ->when($this->bookingDate, function ($query) {
+                $query->where('booking_date', $this->bookingDate);
+            })
             ->count();
 
-        $dateStr = optional($this->class->class_date)->format('D j M Y');
+        // Use the specific booking date if provided, otherwise use class_date
+        $dateStr = $this->bookingDate 
+            ? Carbon::parse($this->bookingDate)->format('D j M Y')
+            : optional($this->class->class_date)->format('D j M Y');
         $timeStr = $this->class->start_time ? Carbon::parse($this->class->start_time)->format('H:i') : '';
 
         $subjectPrefix = match($this->context) {
@@ -58,10 +72,16 @@ class InstructorClassRoster extends Mailable
 
     public function content(): Content
     {
-        // Load roster with users
-        $this->class->loadMissing(['bookings.user', 'instructor']);
-        $attendees = $this->class->bookings
+        // Load roster with users - filter by booking_date for recurring classes
+        $this->class->loadMissing(['instructor']);
+        
+        $attendees = Booking::where('fitness_class_id', $this->class->id)
             ->where('status', 'confirmed')
+            ->when($this->bookingDate, function ($query) {
+                $query->where('booking_date', $this->bookingDate);
+            })
+            ->with('user')
+            ->get()
             ->sortBy('user.name');
 
         return new Content(
@@ -70,6 +90,7 @@ class InstructorClassRoster extends Mailable
                 'class' => $this->class,
                 'attendees' => $attendees,
                 'context' => $this->context,
+                'bookingDate' => $this->bookingDate,
             ],
         );
     }

@@ -38,7 +38,8 @@ class SendInstructorMorningReminders extends Command
             }
 
             try {
-                Mail::to($email)->send(new InstructorClassRoster($class, 'morning_reminder'));
+                $bookingDate = $class->class_date ? $class->class_date->format('Y-m-d') : null;
+                Mail::to($email)->send(new InstructorClassRoster($class, 'morning_reminder', $bookingDate));
                 $class->instructor_morning_sent_at = now();
                 $class->save();
                 $sent++;

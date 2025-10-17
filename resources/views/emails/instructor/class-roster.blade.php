@@ -53,7 +53,7 @@
 
             <div class="meta">
                 <p><strong>Class:</strong> {{ $class->name }}</p>
-                <p><strong>Date:</strong> {{ $class->class_date?->format('l, j F Y') }}</p>
+                <p><strong>Date:</strong> {{ $bookingDate ? \Carbon\Carbon::parse($bookingDate)->format('l, j F Y') : $class->class_date?->format('l, j F Y') }}</p>
                 <p><strong>Time:</strong> {{ $class->start_time ? \Carbon\Carbon::parse($class->start_time)->format('g:i A') : '' }}
                     @if($class->end_time)
                         – {{ \Carbon\Carbon::parse($class->end_time)->format('g:i A') }}

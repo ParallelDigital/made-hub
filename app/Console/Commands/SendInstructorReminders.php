@@ -54,7 +54,8 @@ class SendInstructorReminders extends Command
             }
 
             try {
-                Mail::to($email)->send(new InstructorClassRoster($class, 'reminder'));
+                $bookingDate = $class->class_date ? $class->class_date->format('Y-m-d') : null;
+                Mail::to($email)->send(new InstructorClassRoster($class, 'reminder', $bookingDate));
                 $class->instructor_reminder_sent_at = now();
                 $class->save();
                 $sent++;

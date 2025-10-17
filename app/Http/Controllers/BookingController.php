@@ -104,7 +104,7 @@ class BookingController extends Controller
             try {
                 $class->loadMissing('instructor');
                 if ($class->instructor && $class->instructor->email) {
-                    Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update'));
+                    Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to send instructor roster email', [
@@ -168,7 +168,7 @@ class BookingController extends Controller
             try {
                 $class->loadMissing('instructor');
                 if ($class->instructor && $class->instructor->email) {
-                    Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update'));
+                    Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to send instructor roster email (unlimited pass)', [
@@ -250,7 +250,7 @@ class BookingController extends Controller
         try {
             $class->loadMissing('instructor');
             if ($class->instructor && $class->instructor->email) {
-                Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update'));
+                Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
             }
         } catch (\Exception $e) {
             \Log::error('Failed to send instructor roster email (credits booking)', [
@@ -454,7 +454,7 @@ class BookingController extends Controller
             try {
                 $class->loadMissing('instructor');
                 if ($class->instructor && $class->instructor->email) {
-                    Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update'));
+                    Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to send instructor roster email (paid booking)', [
