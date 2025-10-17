@@ -19,7 +19,7 @@ class ReportsController extends Controller
             ->groupBy('fitness_class_id')
             ->orderBy('booking_count', 'desc')
             ->limit(3)
-            ->with('fitnessClass.instructor')
+            ->with(['fitnessClass.instructor', 'fitnessClass.classType'])
             ->get()
             ->map(function($booking) {
                 return [
@@ -74,8 +74,9 @@ class ReportsController extends Controller
         // Class type distribution
         $classTypeDistribution = Booking::where('status', 'confirmed')
             ->join('fitness_classes', 'bookings.fitness_class_id', '=', 'fitness_classes.id')
-            ->select('fitness_classes.type', DB::raw('count(*) as booking_count'))
-            ->groupBy('fitness_classes.type')
+            ->leftJoin('class_types', 'fitness_classes.class_type_id', '=', 'class_types.id')
+            ->select('class_types.name as type', DB::raw('count(*) as booking_count'))
+            ->groupBy('class_types.name')
             ->orderBy('booking_count', 'desc')
             ->get();
 

@@ -100,7 +100,7 @@
                                 <div class="flex items-center space-x-3 text-sm text-gray-400 mt-1">
                                     <span>Instructor: {{ $class->instructor->name ?? 'N/A' }}</span>
                                     <span>•</span>
-                                    <span>{{ $class->type ?? 'N/A' }}</span>
+                                    <span>{{ $class->classType->name ?? 'Uncategorized' }}</span>
                                     <span>•</span>
                                     <span>£{{ number_format($class->price ?? 0, 2) }}</span>
                                 </div>
@@ -172,16 +172,19 @@
                     @foreach($classTypeDistribution as $typeData)
                         @php
                             $percentage = $totalBookings > 0 ? ($typeData->booking_count / $totalBookings) * 100 : 0;
+                            $typeName = $typeData->type ?? 'Uncategorized';
                         @endphp
+                        @if($typeData->booking_count > 0)
                         <div>
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-sm font-medium text-gray-300">{{ $typeData->type ?? 'Unknown' }}</span>
+                                <span class="text-sm font-medium text-gray-300">{{ $typeName }}</span>
                                 <span class="text-sm text-gray-400">{{ $typeData->booking_count }} ({{ number_format($percentage, 1) }}%)</span>
                             </div>
                             <div class="w-full bg-gray-700 rounded-full h-2">
                                 <div class="bg-primary h-2 rounded-full transition-all duration-300" style="width: {{ $percentage }}%"></div>
                             </div>
                         </div>
+                        @endif
                     @endforeach
                 </div>
             @else
