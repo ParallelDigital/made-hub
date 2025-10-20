@@ -163,6 +163,7 @@ Route::post('/ajax/login', function (\Illuminate\Http\Request $request) {
 
 // Booking Routes
 Route::post('/book-with-credits/{classId}', [App\Http\Controllers\BookingController::class, 'bookWithCredits'])->name('booking.credits');
+Route::post('/book-pay-on-arrival/{classId}', [App\Http\Controllers\BookingController::class, 'bookWithPayOnArrival'])->name('booking.pay-on-arrival');
 Route::get('/checkout/{class_id}', [App\Http\Controllers\PurchaseController::class, 'showCheckoutForm'])->name('checkout.show');
 Route::post('/checkout/{class_id}', [App\Http\Controllers\PurchaseController::class, 'processCheckout'])->name('booking.process-checkout');
 Route::post('/cancel-booking/{bookingId}', [App\Http\Controllers\BookingController::class, 'cancel'])->name('booking.cancel');

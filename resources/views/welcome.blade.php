@@ -1214,6 +1214,42 @@
                         <div class="text-gray-800 font-semibold" id="modalClassPrice">£0</div>
                     </button>
 
+                    @auth
+                    <button onclick="bookWithPayOnArrival(window.selectedClassId)" 
+                            class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <div class="font-medium text-gray-900">Pay on Arrival</div>
+                                <div class="text-sm text-gray-500">Reserve now, pay at the studio</div>
+                            </div>
+                        </div>
+                        <div class="text-blue-600 font-semibold">Book</div>
+                    </button>
+                    @else
+                    <button onclick="openLoginModal()" 
+                            class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <div class="font-medium text-gray-900">Pay on Arrival</div>
+                                <div class="text-sm text-gray-500">Sign in to reserve</div>
+                            </div>
+                        </div>
+                        <div class="text-blue-600 font-semibold">Sign In</div>
+                    </button>
+                    @endauth
+
                     <!-- Members-only specific options -->
                     <div id="membersOnlyOptions" class="hidden space-y-3">
                         <div class="border-t border-gray-200 pt-4">
@@ -2161,6 +2197,43 @@
                 })
                 .catch((err) => {
                     openFeedbackModal('Booking failed', err.message || 'Unable to book with credits.');
+                });
+            }
+
+            // Book with Pay on Arrival
+            function bookWithPayOnArrival(classId) {
+                const cid = classId || window.selectedClassId;
+                closeBookingModal();
+                openConfirmModal('Reserve this class and pay on arrival?', function() {
+                    performPayOnArrivalBooking(cid);
+                });
+            }
+
+            // Perform Pay on Arrival booking (AJAX)
+            function performPayOnArrivalBooking(classId) {
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const payload = {
+                    selected_date: currentDate // Pass the selected date for recurring classes
+                };
+                fetch(`/book-pay-on-arrival/${classId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(async (res) => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
+                    return data;
+                })
+                .then((data) => {
+                    window.location.href = `/booking/confirmation/${classId}`;
+                })
+                .catch((err) => {
+                    openFeedbackModal('Booking failed', err.message || 'Unable to book with pay on arrival.');
                 });
             }
 

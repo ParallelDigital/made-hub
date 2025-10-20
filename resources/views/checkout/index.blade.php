@@ -63,6 +63,7 @@
                     <div class="flex">
                         <button id="tab-btn-card" type="button" class="flex-1 px-4 py-2 rounded-md text-sm font-semibold transition-colors {{ $openCredits ? 'text-gray-700 hover:text-black' : 'bg-black text-white' }}">Pay with Card</button>
                         <button id="tab-btn-credits" type="button" class="flex-1 px-4 py-2 rounded-md text-sm font-semibold transition-colors {{ $openCredits ? 'bg-black text-white' : 'text-gray-700' }}">Use Credits</button>
+                        <button id="tab-btn-arrival" type="button" class="flex-1 px-4 py-2 rounded-md text-sm font-semibold transition-colors text-gray-700">Pay on Arrival</button>
                     </div>
                 </div>
 
@@ -143,6 +144,35 @@
                     <a href="{{ route('login') }}" class="inline-flex px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800">Sign In</a>
                 @endauth
                 </div>
+
+                <!-- Panel: Pay on Arrival -->
+                <div id="tab-panel-arrival" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden">
+                    <h2 class="text-xl font-bold text-black mb-4">Pay on Arrival</h2>
+                @auth
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-700 mb-3">Reserve your spot now and pay when you arrive at the studio.</p>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="text-sm text-blue-800">
+                                    <p class="font-medium">Please note:</p>
+                                    <p>Payment is required upon arrival. We accept cash and card payments at the studio.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="payOnArrivalBtn"
+                            class="w-full mt-3 flex items-center justify-center px-4 py-2 border border-blue-300 rounded-md bg-blue-50 hover:bg-blue-100 text-black font-semibold transition-colors">
+                        <span>Reserve Spot - Pay on Arrival</span>
+                    </button>
+                @else
+                    <p class="text-gray-700 mb-3">Sign in to reserve your spot.</p>
+                    <a href="{{ route('login') }}" class="inline-flex px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800">Sign In</a>
+                @endauth
+                </div>
             </div>
         </div>
     </div>
@@ -159,24 +189,43 @@
         (function() {
             const btnCard = document.getElementById('tab-btn-card');
             const btnCredits = document.getElementById('tab-btn-credits');
+            const btnArrival = document.getElementById('tab-btn-arrival');
             const panelCard = document.getElementById('tab-panel-card');
             const panelCredits = document.getElementById('tab-panel-credits');
-            if (!btnCard || !btnCredits || !panelCard || !panelCredits) return;
+            const panelArrival = document.getElementById('tab-panel-arrival');
+            if (!btnCard || !btnCredits || !btnArrival || !panelCard || !panelCredits || !panelArrival) return;
 
             function activate(tab) {
-                const isCard = tab === 'card';
-                panelCard.classList.toggle('hidden', !isCard);
-                panelCredits.classList.toggle('hidden', isCard);
-                btnCard.classList.toggle('bg-black', isCard);
-                btnCard.classList.toggle('text-white', isCard);
-                btnCard.classList.toggle('text-gray-700', !isCard);
-                btnCredits.classList.toggle('bg-black', !isCard);
-                btnCredits.classList.toggle('text-white', !isCard);
-                btnCredits.classList.toggle('text-gray-700', isCard);
+                // Hide all panels
+                panelCard.classList.add('hidden');
+                panelCredits.classList.add('hidden');
+                panelArrival.classList.add('hidden');
+                
+                // Reset all buttons
+                [btnCard, btnCredits, btnArrival].forEach(btn => {
+                    btn.classList.remove('bg-black', 'text-white');
+                    btn.classList.add('text-gray-700');
+                });
+                
+                // Show active panel and style active button
+                if (tab === 'card') {
+                    panelCard.classList.remove('hidden');
+                    btnCard.classList.add('bg-black', 'text-white');
+                    btnCard.classList.remove('text-gray-700');
+                } else if (tab === 'credits') {
+                    panelCredits.classList.remove('hidden');
+                    btnCredits.classList.add('bg-black', 'text-white');
+                    btnCredits.classList.remove('text-gray-700');
+                } else if (tab === 'arrival') {
+                    panelArrival.classList.remove('hidden');
+                    btnArrival.classList.add('bg-black', 'text-white');
+                    btnArrival.classList.remove('text-gray-700');
+                }
             }
 
             btnCard.addEventListener('click', () => activate('card'));
             btnCredits.addEventListener('click', () => activate('credits'));
+            btnArrival.addEventListener('click', () => activate('arrival'));
         })();
         // Auto-open credits tab if requested (no PIN)
         document.addEventListener('DOMContentLoaded', function() {
@@ -236,6 +285,56 @@
                 });
             });
         })();
+
+        // Pay on Arrival booking
+        (function() {
+            const btn = document.getElementById('payOnArrivalBtn');
+            if (!btn) return;
+            btn.addEventListener('click', function() {
+                // Simple confirmation
+                if (!confirm('Reserve this class and pay on arrival?')) return;
+
+                // Disable button during request
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                btn.textContent = 'Booking...';
+
+                fetch(`/book-pay-on-arrival/{{ $class->id }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        @if(isset($bookingDate))
+                        selected_date: '{{ $bookingDate }}'
+                        @endif
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            window.location.href = `/booking/confirmation/{{ $class->id }}`;
+                        }
+                    } else {
+                        showAlertModal(data.message || 'Booking failed. Please try again.', 'error');
+                    }
+                })
+                .catch(() => {
+                    showAlertModal('An error occurred. Please try again.', 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                    btn.textContent = 'Reserve Spot - Pay on Arrival';
+                });
+            });
+        })();
+
         document.getElementById('coupon-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const couponCode = document.getElementById('coupon-code').value;

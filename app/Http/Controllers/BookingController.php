@@ -275,6 +275,94 @@ class BookingController extends Controller
         ]);
     }
 
+    public function bookWithPayOnArrival(Request $request, $classId)
+    {
+        if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Please log in to book with pay on arrival.'], 401);
+        }
+
+        $user = Auth::user();
+        $class = FitnessClass::findOrFail($classId);
+
+        // Check if the class has already started (use Europe/London timezone)
+        $tz = 'Europe/London';
+        $selectedDate = $request->input('selected_date');
+        
+        // Determine the actual booking date - ALWAYS use selected_date if provided
+        if ($selectedDate) {
+            $bookingDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
+        } else {
+            $bookingDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        }
+        
+        $classStart = \Carbon\Carbon::parse($bookingDate . ' ' . $class->start_time, $tz);
+        if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
+            return response()->json(['success' => false, 'message' => 'This class has already started.'], 400);
+        }
+
+        // Check if class is full (for recurring classes, check the specific date)
+        $currentBookings = Booking::where('fitness_class_id', $classId)
+            ->where('booking_date', $bookingDate)
+            ->count();
+        if ($currentBookings >= $class->max_spots) {
+            return response()->json(['success' => false, 'message' => 'This class is fully booked.'], 400);
+        }
+
+        // Check if user already booked this specific class occurrence
+        $existingBooking = Booking::where('user_id', $user->id)
+            ->where('fitness_class_id', $classId)
+            ->where('booking_date', $bookingDate)
+            ->first();
+        if ($existingBooking) {
+            return response()->json(['success' => false, 'message' => 'You have already booked this class.'], 400);
+        }
+
+        // Create booking with pending payment status
+        $booking = Booking::create([
+            'user_id' => $user->id,
+            'fitness_class_id' => $classId,
+            'booking_date' => $bookingDate,
+            'status' => 'pending_payment',
+            'booking_type' => 'pay_on_arrival',
+            'booked_at' => now(),
+        ]);
+
+        // Send confirmation email
+        try {
+            Mail::to($user->email)->send(new \App\Mail\BookingConfirmed($booking));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send booking confirmation email for pay on arrival', [
+                'user_id' => $user->id,
+                'booking_id' => $booking->id ?? 'unknown',
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Notify instructor with updated roster
+        try {
+            $class->loadMissing('instructor');
+            if ($class->instructor && $class->instructor->email) {
+                Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send instructor roster email (pay on arrival)', [
+                'class_id' => $class->id,
+                'booking_id' => $booking->id ?? 'unknown',
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Store booking date in session for confirmation page display
+        session(['booking_date' => $bookingDate]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Class booked successfully! Please pay on arrival. Confirmation email sent.',
+            'redirect_url' => route('booking.confirmation', ['classId' => $classId]),
+            'booking_id' => $booking->id ?? null,
+        ]);
+    }
+
     public function checkout($classId)
     {
         $class = FitnessClass::with('instructor')->findOrFail($classId);
