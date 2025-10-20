@@ -104,6 +104,23 @@
                                     <span>•</span>
                                     <span>£{{ number_format($class->price ?? 0, 2) }}</span>
                                 </div>
+                                <div class="flex items-center space-x-4 text-xs text-gray-400 mt-2">
+                                    @if($item['paid_bookings'] > 0)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-900 text-green-300">
+                                            💳 {{ $item['paid_bookings'] }} Paid
+                                        </span>
+                                    @endif
+                                    @if($item['credit_bookings'] > 0)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-900 text-blue-300">
+                                            🎫 {{ $item['credit_bookings'] }} Credits
+                                        </span>
+                                    @endif
+                                    @if($item['pay_on_arrival_bookings'] > 0)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full bg-orange-900 text-orange-300">
+                                            🏃 {{ $item['pay_on_arrival_bookings'] }} Pay on Arrival
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                         <div class="text-right">

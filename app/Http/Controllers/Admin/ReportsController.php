@@ -13,8 +13,14 @@ class ReportsController extends Controller
 {
     public function index()
     {
-        // All classes with bookings (ordered by booking count)
-        $topClasses = Booking::select('fitness_class_id', DB::raw('count(*) as booking_count'))
+        // All classes with bookings and payment method breakdown
+        $topClasses = Booking::select(
+                'fitness_class_id', 
+                DB::raw('count(*) as booking_count'),
+                DB::raw('SUM(CASE WHEN stripe_session_id IS NOT NULL THEN 1 ELSE 0 END) as paid_bookings'),
+                DB::raw('SUM(CASE WHEN booking_type = "pay_on_arrival" THEN 1 ELSE 0 END) as pay_on_arrival_bookings'),
+                DB::raw('SUM(CASE WHEN stripe_session_id IS NULL AND (booking_type IS NULL OR booking_type != "pay_on_arrival") THEN 1 ELSE 0 END) as credit_bookings')
+            )
             ->where('status', 'confirmed')
             ->groupBy('fitness_class_id')
             ->orderBy('booking_count', 'desc')
@@ -23,7 +29,10 @@ class ReportsController extends Controller
             ->map(function($booking) {
                 return [
                     'class' => $booking->fitnessClass,
-                    'booking_count' => $booking->booking_count
+                    'booking_count' => $booking->booking_count,
+                    'paid_bookings' => $booking->paid_bookings,
+                    'pay_on_arrival_bookings' => $booking->pay_on_arrival_bookings,
+                    'credit_bookings' => $booking->credit_bookings
                 ];
             });
 
