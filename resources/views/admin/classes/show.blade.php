@@ -161,9 +161,24 @@
                         </div>
                         @foreach($dateBookings->sortByDesc('booked_at') as $booking)
                             <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0 ml-2">
-                                <div>
+                                <div class="flex-1">
                                     <p class="text-white text-sm font-medium">{{ $booking->user->name ?? 'Unknown' }}</p>
                                     <p class="text-gray-400 text-xs">{{ $booking->user->email ?? '' }}</p>
+                                    <div class="flex items-center space-x-2 mt-1">
+                                        @if($booking->stripe_session_id)
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-900 text-green-300 text-xs">
+                                                💳 Paid
+                                            </span>
+                                        @elseif($booking->booking_type === 'pay_on_arrival')
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-orange-900 text-orange-300 text-xs">
+                                                🏃 Pay on Arrival
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-900 text-blue-300 text-xs">
+                                                🎫 Credits
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-gray-400 text-xs">Booked: {{ optional($booking->booked_at)->format('M j, g:i A') ?? '-' }}</p>
@@ -178,9 +193,24 @@
             @else
                 @forelse($class->bookings->sortByDesc('booked_at') as $booking)
                     <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
-                        <div>
+                        <div class="flex-1">
                             <p class="text-white text-sm font-medium">{{ $booking->user->name ?? 'Unknown' }}</p>
                             <p class="text-gray-400 text-xs">{{ $booking->user->email ?? '' }}</p>
+                            <div class="flex items-center space-x-2 mt-1">
+                                @if($booking->stripe_session_id)
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-900 text-green-300 text-xs">
+                                        💳 Paid
+                                    </span>
+                                @elseif($booking->booking_type === 'pay_on_arrival')
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-orange-900 text-orange-300 text-xs">
+                                        🏃 Pay on Arrival
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-900 text-blue-300 text-xs">
+                                        🎫 Credits
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                         <div class="text-right">
                             <p class="text-gray-400 text-xs">{{ optional($booking->booked_at)->format('M j, Y g:i A') ?? '-' }}</p>
