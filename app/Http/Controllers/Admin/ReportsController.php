@@ -13,12 +13,11 @@ class ReportsController extends Controller
 {
     public function index()
     {
-        // Top 3 most booked classes
+        // All classes with bookings (ordered by booking count)
         $topClasses = Booking::select('fitness_class_id', DB::raw('count(*) as booking_count'))
             ->where('status', 'confirmed')
             ->groupBy('fitness_class_id')
             ->orderBy('booking_count', 'desc')
-            ->limit(3)
             ->with(['fitnessClass.instructor', 'fitnessClass.classType'])
             ->get()
             ->map(function($booking) {

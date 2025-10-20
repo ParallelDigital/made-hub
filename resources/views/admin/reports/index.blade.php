@@ -77,7 +77,7 @@
 <!-- Top 3 Most Booked Classes -->
 <div class="bg-gray-800 shadow rounded-lg border border-gray-700 mb-8">
     <div class="px-4 py-5 sm:p-6">
-        <h3 class="text-lg leading-6 font-medium text-white mb-4">Top 3 Most Booked Classes</h3>
+        <h3 class="text-lg leading-6 font-medium text-white mb-4">All Classes by Booking Count</h3>
         
         @if($topClasses->count() > 0)
             <div class="space-y-4">
