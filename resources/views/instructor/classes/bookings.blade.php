@@ -31,59 +31,81 @@
                 <span class="text-sm text-gray-400">Total: {{ $bookings->count() }}</span>
             </div>
 
-            @if($bookings->isEmpty())
-                <div class="text-center py-12">
-                    <div class="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-medium text-white mb-2">No Bookings Yet</h3>
-                    <p class="text-gray-400">No one has booked this class yet.</p>
-                </div>
-            @else
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-700">
-                        <thead class="bg-gray-700/50">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Member</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Booking Date</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Booked At</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-gray-800 divide-y divide-gray-700">
-                            @foreach($bookings as $booking)
-                                <tr class="hover:bg-gray-700/50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                        {{ $booking->user->name }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                                        {{ $booking->user->email }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                                        {{ \Carbon\Carbon::parse($booking->booking_date)->format('D, M j, Y') }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                                        {{ $booking->booked_at ? $booking->booked_at->format('M j, Y g:i A') : 'N/A' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($booking->attended)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
-                                                Checked In
+            <!-- Use EXACT same structure as admin modal -->
+            @if($class->recurring)
+                @php
+                    // Group bookings by date for recurring classes
+                    $groupedBookings = $bookings->groupBy(function($booking) {
+                        return $booking->booking_date ? $booking->booking_date->format('Y-m-d') : 'unknown';
+                    })->sortKeysDesc();
+                @endphp
+                @forelse($groupedBookings as $date => $dateBookings)
+                    <div class="mb-4">
+                        <div class="text-sm font-semibold text-purple-400 mb-2 border-b border-gray-600 pb-1">
+                            {{ $date !== 'unknown' ? \Carbon\Carbon::parse($date)->format('l, M j, Y') : 'Unknown Date' }}
+                            <span class="text-gray-400 font-normal">({{ $dateBookings->count() }} booking{{ $dateBookings->count() !== 1 ? 's' : '' }})</span>
+                        </div>
+                        @foreach($dateBookings->sortByDesc('booked_at') as $booking)
+                            <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0 ml-2">
+                                <div class="flex-1">
+                                    <p class="text-white text-sm font-medium">{{ $booking->user->name ?? 'Unknown' }}</p>
+                                    <p class="text-gray-400 text-xs">{{ $booking->user->email ?? '' }}</p>
+                                    <div class="flex items-center space-x-2 mt-1">
+                                        @if($booking->stripe_session_id)
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-900 text-green-300 text-xs">
+                                                💳 Paid
+                                            </span>
+                                        @elseif($booking->booking_type === 'pay_on_arrival')
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-orange-900 text-orange-300 text-xs">
+                                                🏃 Pay on Arrival
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400">
-                                                Not Checked In
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-900 text-blue-300 text-xs">
+                                                🎫 Credits
                                             </span>
                                         @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-gray-400 text-xs">Booked: {{ optional($booking->booked_at)->format('M j, g:i A') ?? '-' }}</p>
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $booking->status === 'confirmed' ? 'bg-green-800 text-green-100' : ($booking->status === 'cancelled' ? 'bg-red-800 text-red-100' : 'bg-yellow-800 text-yellow-100') }}">{{ ucfirst($booking->status) }}</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @empty
+                    <p class="text-gray-400 text-sm">No bookings.</p>
+                @endforelse
+            @else
+                @forelse($bookings->sortByDesc('booked_at') as $booking)
+                    <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
+                        <div class="flex-1">
+                            <p class="text-white text-sm font-medium">{{ $booking->user->name ?? 'Unknown' }}</p>
+                            <p class="text-gray-400 text-xs">{{ $booking->user->email ?? '' }}</p>
+                            <div class="flex items-center space-x-2 mt-1">
+                                @if($booking->stripe_session_id)
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-900 text-green-300 text-xs">
+                                        💳 Paid
+                                    </span>
+                                @elseif($booking->booking_type === 'pay_on_arrival')
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-orange-900 text-orange-300 text-xs">
+                                        🏃 Pay on Arrival
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-900 text-blue-300 text-xs">
+                                        🎫 Credits
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-400 text-xs">{{ optional($booking->booked_at)->format('M j, Y g:i A') ?? '-' }}</p>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $booking->status === 'confirmed' ? 'bg-green-800 text-green-100' : ($booking->status === 'cancelled' ? 'bg-red-800 text-red-100' : 'bg-yellow-800 text-yellow-100') }}">{{ ucfirst($booking->status) }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-gray-400 text-sm">No bookings.</p>
+                @endforelse
             @endif
         </div>
     </div>
