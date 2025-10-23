@@ -256,25 +256,24 @@ class AdminController extends Controller
         $newPassword = 'Made2025!';
         $hashedPassword = \Illuminate\Support\Facades\Hash::make($newPassword);
 
-        $users = \App\Models\User::whereNotIn('role', ['admin', 'administrator', 'instructor'])
+        // Only get members with active subscriptions (membership_start_date is set)
+        $users = \App\Models\User::whereNotNull('membership_start_date')
+            ->whereNotIn('role', ['admin', 'administrator', 'instructor'])
             ->orderBy('name')
             ->get();
 
         $updatedCount = 0;
-        $skippedAdmins = 0;
-        $skippedInstructors = 0;
         $updatedUsers = [];
 
         foreach ($users as $user) {
             $user->password = $hashedPassword;
             $user->save();
             
-            $memberStatus = $user->membership_start_date ? '✅ Member' : '👤 User';
-            $updatedUsers[] = $user->name . ' (' . $user->email . ') - ' . $memberStatus;
+            $updatedUsers[] = $user->name . ' (' . $user->email . ') - ✅ Member';
             $updatedCount++;
         }
 
-        $message = "Successfully reset passwords for {$updatedCount} members to 'Made2025!'";
+        $message = "Successfully reset passwords for {$updatedCount} members with active subscriptions to 'Made2025!'";
 
         return redirect()->route('admin.dashboard')
             ->with('success', $message)

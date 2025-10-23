@@ -197,7 +197,7 @@ function confirmSendEmails() {
 }
 
 function confirmResetPasswords() {
-    if (confirm('⚠️ WARNING: This will reset ALL member passwords to "Made2025!"\n\nAdmins and instructors will NOT be affected.\n\nContinue?')) {
+    if (confirm('⚠️ WARNING: This will reset passwords for ALL MEMBERS WITH ACTIVE SUBSCRIPTIONS to "Made2025!"\n\nOnly members with monthly subscriptions will be affected.\nAdmins, instructors, and regular users will NOT be affected.\n\nContinue?')) {
         const form = document.getElementById('resetPasswordsForm');
         const button = form.querySelector('button');
         
