@@ -20,24 +20,33 @@ class InstructorDashboardController extends Controller
         }
 
         try {
-            // Get all upcoming classes for this instructor (including those with no bookings)
-            $upcomingClasses = $user->instructor->fitnessClasses()
-                ->where('class_date', '>=', now()->toDateString())
-                ->orderBy('class_date')
+            // Get all instructor's classes (don't filter by date yet, as recurring classes have old template dates)
+            $allClasses = $user->instructor->fitnessClasses()
                 ->orderBy('start_time')
                 ->get();
 
-            // For each class, get ALL bookings (not filtered by date) to show total count
-            $upcomingClasses->each(function ($class) {
+            // For each class, get future bookings only
+            $upcomingClasses = collect();
+            
+            $allClasses->each(function ($class) use ($upcomingClasses) {
                 $bookings = Booking::where('fitness_class_id', $class->id)
+                    ->where('booking_date', '>=', now()->toDateString())
                     ->where('status', 'confirmed')
                     ->with('user')
                     ->get();
                 
-                $class->setRelation('bookings', $bookings);
+                // Only include classes that have future bookings OR have a future class_date
+                if ($bookings->count() > 0 || $class->class_date >= now()->toDateString()) {
+                    $class->setRelation('bookings', $bookings);
+                    $upcomingClasses->push($class);
+                }
             });
 
-            $upcomingOccurrences = $upcomingClasses;
+            // Sort by the earliest booking date or class date
+            $upcomingOccurrences = $upcomingClasses->sortBy(function ($class) {
+                $earliestBooking = $class->bookings->min('booking_date');
+                return $earliestBooking ?? $class->class_date;
+            })->values();
         } catch (\Exception $e) {
             \Log::error('Instructor Dashboard Error', [
                 'instructor_id' => $user->instructor->id,
