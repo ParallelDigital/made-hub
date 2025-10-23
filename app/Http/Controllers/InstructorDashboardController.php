@@ -15,19 +15,21 @@ class InstructorDashboardController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Eager load the instructor and their upcoming classes with bookings
-        $user->load(['instructor.fitnessClasses' => function ($query) {
-            $query->where('class_date', '>=', now()->toDateString())
-                  ->with(['bookings' => function ($bookingQuery) {
-                      // Filter bookings to only those matching the class date
-                      $bookingQuery->whereColumn('booking_date', 'fitness_classes.class_date')
-                                   ->where('status', 'confirmed');
-                  }, 'bookings.user'])
-                  ->orderBy('class_date')
-                  ->orderBy('start_time');
-        }]);
+        // Get the instructor's upcoming classes
+        $upcomingClasses = $user->instructor ? $user->instructor->fitnessClasses()
+            ->where('class_date', '>=', now()->toDateString())
+            ->orderBy('class_date')
+            ->orderBy('start_time')
+            ->get() : collect();
 
-        $upcomingClasses = $user->instructor ? $user->instructor->fitnessClasses : collect();
+        // Manually load confirmed bookings for the specific date of each class
+        $upcomingClasses->each(function ($class) {
+            $class->load(['bookings' => function ($query) use ($class) {
+                $query->where('booking_date', $class->class_date)
+                      ->where('status', 'confirmed')
+                      ->with('user');
+            }]);
+        });
 
         return view('instructor.dashboard', [
             'upcomingClasses' => $upcomingClasses,
