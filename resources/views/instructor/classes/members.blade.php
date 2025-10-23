@@ -5,7 +5,7 @@
         <div class="py-8">
             <div>
                 <h2 class="text-2xl font-semibold leading-tight">Class Members - {{ $class->name }}</h2>
-                <p class="text-sm text-gray-600">{{ $class->class_date->format('D, M j, Y') }} at {{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</p>
+                <p class="text-sm text-gray-400">{{ $bookingDate->format('D, M j, Y') }} at {{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</p>
             </div>
             <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
                 <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">

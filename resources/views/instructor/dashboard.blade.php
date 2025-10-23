@@ -149,7 +149,7 @@
 
                                 <!-- Action Buttons -->
                                 <div class="flex space-x-2">
-                                    <a href="{{ route('instructor.classes.members', $class) }}" 
+                                    <a href="{{ route('instructor.classes.members', ['class' => $class, 'date' => $class->class_date->format('Y-m-d')]) }}" 
                                        class="inline-flex items-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
                                         View Members
                                     </a>
