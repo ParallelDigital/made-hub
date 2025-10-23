@@ -317,9 +317,9 @@ class AdminController extends Controller
                     $existingUser->stripe_subscription_id = $subscription->id;
                     $existingUser->email_verified_at = $existingUser->email_verified_at ?? now();
                     
-                    // Ensure role is 'user' not 'member' (for consistency)
-                    if ($existingUser->role === 'member') {
-                        $existingUser->role = 'user';
+                    // Ensure role is 'subscriber' (convert from 'user' or 'member')
+                    if (in_array($existingUser->role, ['user', 'member'])) {
+                        $existingUser->role = 'subscriber';
                     }
                     
                     $existingUser->save();
@@ -334,7 +334,7 @@ class AdminController extends Controller
                     'name' => $customer->name ?? $customer->email,
                     'email' => $customer->email,
                     'password' => $hashedPassword,
-                    'role' => 'user',
+                    'role' => 'subscriber',
                     'membership_start_date' => \Carbon\Carbon::createFromTimestamp($subscription->current_period_start),
                     'stripe_customer_id' => $customer->id,
                     'stripe_subscription_id' => $subscription->id,
@@ -359,5 +359,33 @@ class AdminController extends Controller
             return redirect()->route('admin.dashboard')
                 ->with('error', 'Failed to sync member accounts: ' . $e->getMessage());
         }
+    }
+
+    public function migrateToSubscriberRole()
+    {
+        // Get all users with 'user' or 'member' role (excluding admins and instructors)
+        $users = \App\Models\User::whereIn('role', ['user', 'member'])
+            ->orderBy('name')
+            ->get();
+
+        $migratedCount = 0;
+        $migratedUsers = [];
+
+        foreach ($users as $user) {
+            $oldRole = $user->role;
+            $user->role = 'subscriber';
+            $user->save();
+            
+            $memberStatus = $user->membership_start_date ? '✅ Member' : '👤 User';
+            $migratedUsers[] = $user->name . ' (' . $user->email . ') - ' . $oldRole . ' → subscriber - ' . $memberStatus;
+            $migratedCount++;
+        }
+
+        $message = "Successfully migrated {$migratedCount} users to 'subscriber' role.";
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', $message)
+            ->with('migrated_users', $migratedUsers)
+            ->with('migrated_count', $migratedCount);
     }
 }

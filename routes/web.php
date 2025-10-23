@@ -301,6 +301,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
     Route::post('send-welcome-emails', [App\Http\Controllers\Admin\AdminController::class, 'sendWelcomeEmails'])->name('send-welcome-emails');
     Route::post('reset-member-passwords', [App\Http\Controllers\Admin\AdminController::class, 'resetMemberPasswords'])->name('reset-member-passwords');
     Route::post('create-member-accounts', [App\Http\Controllers\Admin\AdminController::class, 'createMemberAccounts'])->name('create-member-accounts');
+    Route::post('migrate-to-subscriber-role', [App\Http\Controllers\Admin\AdminController::class, 'migrateToSubscriberRole'])->name('migrate-to-subscriber-role');
     Route::post('members/ensure-login-access', function () {
         \Artisan::call('members:ensure-login-access');
         return back()->with('success', 'Login access check completed. Password reset emails sent to members who need them.');

@@ -102,6 +102,25 @@
                 @endif
             </div>
             @endif
+            
+            @if(session('migrated_count'))
+            <div class="mt-3 text-sm">
+                <p class="font-semibold">📊 Role Migration Summary:</p>
+                <p>✅ Migrated: {{ session('migrated_count') }} users to 'subscriber' role</p>
+                <p class="mt-1 text-xs">All "user" and "member" roles have been converted to "subscriber"</p>
+                
+                @if(session('migrated_users') && count(session('migrated_users')) > 0)
+                <details class="mt-2">
+                    <summary class="cursor-pointer hover:text-green-100">View migrated users ({{ count(session('migrated_users')) }})</summary>
+                    <ul class="mt-2 ml-4 text-xs max-h-40 overflow-y-auto">
+                        @foreach(session('migrated_users') as $user)
+                        <li>• {{ $user }}</li>
+                        @endforeach
+                    </ul>
+                </details>
+                @endif
+            </div>
+            @endif
         </div>
     </div>
 </div>
@@ -226,6 +245,16 @@
                     Sync Stripe Members
                 </button>
             </form>
+            
+            <form action="{{ route('admin.migrate-to-subscriber-role') }}" method="POST" id="migrateRolesForm">
+                @csrf
+                <button type="button" onclick="confirmMigrateRoles()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                    </svg>
+                    Migrate Users to Subscriber Role
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -258,13 +287,26 @@ function confirmResetPasswords() {
 }
 
 function confirmCreateAccounts() {
-    if (confirm('This will sync all active Stripe subscriptions:\n\n✅ Create accounts for new members\n🔄 Update existing members with proper access\n🔑 Fix any role issues (e.g., "member" → "user")\n\nPassword for new accounts: Made2025!\n\nContinue?')) {
+    if (confirm('This will sync all active Stripe subscriptions:\n\n✅ Create accounts for new members\n🔄 Update existing members with proper access\n🔑 Fix any role issues (e.g., "member" → "subscriber")\n\nPassword for new accounts: Made2025!\n\nContinue?')) {
         const form = document.getElementById('createAccountsForm');
         const button = form.querySelector('button');
         
         // Disable button and show loading state
         button.disabled = true;
         button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Syncing...';
+        
+        form.submit();
+    }
+}
+
+function confirmMigrateRoles() {
+    if (confirm('This will change all "user" and "member" roles to "subscriber".\n\nThis affects all members with subscriptions.\nAdmins and instructors will NOT be affected.\n\nContinue?')) {
+        const form = document.getElementById('migrateRolesForm');
+        const button = form.querySelector('button');
+        
+        // Disable button and show loading state
+        button.disabled = true;
+        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Migrating roles...';
         
         form.submit();
     }
