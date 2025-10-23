@@ -112,10 +112,8 @@ class InstructorDashboardController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Get ALL bookings for this class - simple and straightforward
-        $class->load(['bookings' => function($query) {
-            $query->where('status', 'confirmed')->with('user')->orderBy('booking_date');
-        }]);
+        // Get ALL bookings for this class - exactly like admin does (no status filter)
+        $class->load(['bookings.user']);
 
         return view('instructor.classes.bookings', [
             'class' => $class,
