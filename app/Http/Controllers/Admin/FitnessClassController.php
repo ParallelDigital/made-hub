@@ -178,20 +178,38 @@ class FitnessClassController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(FitnessClass $class)
+    public function show(Request $request, FitnessClass $class)
     {
+        // Get the specific date filter from request (for recurring classes)
+        $filterDate = $request->input('date');
+        
         if ($class->isRecurring() && !$class->isChildClass()) {
-            $class->load(['instructor', 'bookings.user', 'childClasses.bookings.user']);
-
-            $allBookings = collect($class->bookings ? $class->bookings->all() : []);
-            foreach ($class->childClasses as $child) {
-                if ($child->relationLoaded('bookings')) {
-                    $allBookings = $allBookings->merge($child->bookings);
-                } else {
-                    $allBookings = $allBookings->merge($child->bookings()->with('user')->get());
+            $class->load(['instructor']);
+            
+            // If a specific date is provided, filter bookings for that date only
+            if ($filterDate) {
+                $targetDate = \Carbon\Carbon::parse($filterDate)->toDateString();
+                $filteredBookings = $class->bookings()
+                    ->whereDate('booking_date', $targetDate)
+                    ->with('user')
+                    ->get();
+                $class->setRelation('bookings', $filteredBookings);
+                
+                // Override the display date to show the filtered date
+                $class->display_date = \Carbon\Carbon::parse($targetDate);
+            } else {
+                // No date filter - show ALL bookings across all dates
+                $class->load(['bookings.user', 'childClasses.bookings.user']);
+                $allBookings = collect($class->bookings ? $class->bookings->all() : []);
+                foreach ($class->childClasses as $child) {
+                    if ($child->relationLoaded('bookings')) {
+                        $allBookings = $allBookings->merge($child->bookings);
+                    } else {
+                        $allBookings = $allBookings->merge($child->bookings()->with('user')->get());
+                    }
                 }
+                $class->setRelation('bookings', $allBookings);
             }
-            $class->setRelation('bookings', $allBookings);
         } elseif ($class->isChildClass()) {
             $class->load(['instructor', 'bookings.user', 'parentClass.bookings.user']);
             $targetDate = $class->class_date ? $class->class_date->toDateString() : null;
@@ -211,7 +229,7 @@ class FitnessClassController extends Controller
             $class->load('instructor', 'bookings.user');
         }
 
-        return view('admin.classes.show', compact('class'));
+        return view('admin.classes.show', compact('class', 'filterDate'));
     }
 
     /**
@@ -452,12 +470,19 @@ class FitnessClassController extends Controller
                 $bookedCount = $class->bookings()->count();
             }
 
+            $classDate = $class->class_date->format('Y-m-d');
+            
+            // For recurring classes, include the date parameter in the URL
+            $showUrl = $class->isRecurring() && !$class->isChildClass()
+                ? route('admin.classes.show', ['class' => $class->id, 'date' => $classDate])
+                : route('admin.classes.show', $class->id);
+            
             return [
                 'id' => $class->id,
                 'title' => ($class->classType->name ?? $class->name) . ($class->instructor ? ' - ' . $class->instructor->name : ''),
-                'start' => $class->class_date->format('Y-m-d') . 'T' . $class->start_time,
-                'end' => $class->class_date->format('Y-m-d') . 'T' . $class->end_time,
-                'url' => route('admin.classes.show', $class->id),
+                'start' => $classDate . 'T' . $class->start_time,
+                'end' => $classDate . 'T' . $class->end_time,
+                'url' => $showUrl,
                 'backgroundColor' => $class->classType->color ?? '#3b82f6',
                 'borderColor' => $class->classType->color ?? '#3b82f6',
                 'textColor' => '#ffffff',

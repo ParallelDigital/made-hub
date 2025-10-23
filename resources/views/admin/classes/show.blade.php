@@ -30,12 +30,39 @@
             <div class="bg-gray-800 shadow rounded-lg border border-gray-700 p-6">
                 <h2 class="text-lg font-semibold text-white mb-4">Class Information</h2>
                 
+                @if($class->recurring && isset($filterDate))
+                    <div class="mb-4 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+                        <p class="text-sm text-blue-200">
+                            <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Viewing bookings for: <strong>{{ \Carbon\Carbon::parse($filterDate)->format('l, F j, Y') }}</strong>
+                        </p>
+                        <a href="{{ route('admin.classes.show', $class) }}" class="text-xs text-blue-300 hover:text-blue-100 underline mt-1 inline-block">
+                            View all dates →
+                        </a>
+                    </div>
+                @endif
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-400">Class Name</label>
                         <p class="mt-1 text-white">{{ $class->name }}</p>
                     </div>
                     
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400">Date</label>
+                        <p class="mt-1 text-white">
+                            @if(isset($filterDate))
+                                {{ \Carbon\Carbon::parse($filterDate)->format('l, F j, Y') }}
+                            @elseif($class->display_date ?? false)
+                                {{ $class->display_date->format('l, F j, Y') }}
+                            @else
+                                {{ $class->class_date->format('l, F j, Y') }}
+                            @endif
+                        </p>
+                    </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-400">Instructor</label>
@@ -92,9 +119,13 @@
             <!-- Stats Card -->
             <div class="bg-gray-800 shadow rounded-lg border border-gray-700 p-6">
                 <h3 class="text-lg font-semibold text-white mb-4">Statistics</h3>
-                @if($class->recurring)
+                @if($class->recurring && !isset($filterDate))
                     <div class="mb-3 text-xs text-gray-400 bg-gray-700 rounded px-2 py-1">
                         <span class="font-medium">Recurring Class:</span> Stats show all bookings across all dates
+                    </div>
+                @elseif($class->recurring && isset($filterDate))
+                    <div class="mb-3 text-xs text-blue-300 bg-blue-900/30 border border-blue-700 rounded px-2 py-1">
+                        <span class="font-medium">Filtered by date:</span> Stats for {{ \Carbon\Carbon::parse($filterDate)->format('M j, Y') }} only
                     </div>
                 @endif
                 <div class="space-y-4">
@@ -107,7 +138,7 @@
                     <div class="flex justify-between">
                         <span class="text-gray-400">Available Spots</span>
                         <span class="text-white font-medium">
-                            @if($class->recurring)
+                            @if($class->recurring && !isset($filterDate))
                                 <span class="text-xs text-gray-400">Varies by date</span>
                             @else
                                 {{ $class->max_spots - $class->bookings->where('status', 'confirmed')->count() }}
@@ -146,18 +177,27 @@
         </div>
         <div class="max-h-[60vh] overflow-auto p-5 space-y-3">
             <!-- All bookings -->
-            @if($class->recurring)
+            @if($class->recurring && !isset($filterDate))
                 @php
-                    // Group bookings by date for recurring classes
+                    // Group bookings by date for recurring classes (only when not filtered)
                     $groupedBookings = $class->bookings->groupBy(function($booking) {
                         return $booking->booking_date ? $booking->booking_date->format('Y-m-d') : 'unknown';
                     })->sortKeysDesc();
                 @endphp
                 @forelse($groupedBookings as $date => $dateBookings)
                     <div class="mb-4">
-                        <div class="text-sm font-semibold text-primary mb-2 border-b border-gray-600 pb-1">
-                            {{ $date !== 'unknown' ? \Carbon\Carbon::parse($date)->format('l, M j, Y') : 'Unknown Date' }}
-                            <span class="text-gray-400 font-normal">({{ $dateBookings->count() }} booking{{ $dateBookings->count() !== 1 ? 's' : '' }})</span>
+                        <div class="text-sm font-semibold mb-2 border-b border-gray-600 pb-1 flex justify-between items-center">
+                            <div>
+                                <span class="text-primary">{{ $date !== 'unknown' ? \Carbon\Carbon::parse($date)->format('l, M j, Y') : 'Unknown Date' }}</span>
+                                <span class="text-gray-400 font-normal">({{ $dateBookings->count() }} booking{{ $dateBookings->count() !== 1 ? 's' : '' }})</span>
+                            </div>
+                            @if($date !== 'unknown')
+                                <a href="{{ route('admin.classes.show', ['class' => $class->id, 'date' => $date]) }}" 
+                                   class="text-xs text-blue-400 hover:text-blue-300 underline"
+                                   onclick="closeBookingsModal()">
+                                    View this date →
+                                </a>
+                            @endif
                         </div>
                         @foreach($dateBookings->sortByDesc('booked_at') as $booking)
                             <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0 ml-2">
@@ -191,6 +231,7 @@
                     <p class="text-gray-400 text-sm">No bookings.</p>
                 @endforelse
             @else
+                {{-- Show simple list when viewing specific date or non-recurring class --}}
                 @forelse($class->bookings->sortByDesc('booked_at') as $booking)
                     <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
                         <div class="flex-1">
