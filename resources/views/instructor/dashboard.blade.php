@@ -71,9 +71,9 @@
     <div>
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-white">Your Upcoming Classes</h2>
-            <div class="text-sm text-gray-400">
-                Next 7 days
-            </div>
+            <a href="{{ route('instructor.classes.previous') }}" class="inline-flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                View Previous Classes
+            </a>
         </div>
 
         @if($upcomingClasses->isEmpty())

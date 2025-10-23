@@ -36,6 +36,22 @@ class InstructorDashboardController extends Controller
         ]);
     }
 
+    public function previousClasses()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $previousClasses = $user->instructor ? $user->instructor->fitnessClasses()
+            ->where('class_date', '<', now()->toDateString())
+            ->orderBy('class_date', 'desc')
+            ->orderBy('start_time', 'desc')
+            ->paginate(15) : collect();
+
+        return view('instructor.classes.previous', [
+            'previousClasses' => $previousClasses,
+        ]);
+    }
+
     public function showMembers(FitnessClass $class)
     {
         // Ensure the logged-in instructor is authorized to see this class's members
