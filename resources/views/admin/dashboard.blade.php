@@ -64,6 +64,39 @@
                 @endif
             </div>
             @endif
+            
+            @if(session('created_count'))
+            <div class="mt-3 text-sm">
+                <p class="font-semibold">📊 Summary:</p>
+                <p>✅ Created: {{ session('created_count') }} new member accounts</p>
+                @if(session('existing_count') > 0)
+                <p>ℹ️ Existing: {{ session('existing_count') }} members already had accounts</p>
+                @endif
+                <p class="mt-1 text-xs">Default password: <strong class="text-green-300">Made2025!</strong></p>
+                
+                @if(session('created_users') && count(session('created_users')) > 0)
+                <details class="mt-2">
+                    <summary class="cursor-pointer hover:text-green-100">View created accounts ({{ count(session('created_users')) }})</summary>
+                    <ul class="mt-2 ml-4 text-xs max-h-40 overflow-y-auto">
+                        @foreach(session('created_users') as $user)
+                        <li>• {{ $user }}</li>
+                        @endforeach
+                    </ul>
+                </details>
+                @endif
+                
+                @if(session('existing_users') && count(session('existing_users')) > 0)
+                <details class="mt-2">
+                    <summary class="cursor-pointer hover:text-green-100">View existing accounts ({{ count(session('existing_users')) }})</summary>
+                    <ul class="mt-2 ml-4 text-xs max-h-40 overflow-y-auto">
+                        @foreach(session('existing_users') as $user)
+                        <li>• {{ $user }}</li>
+                        @endforeach
+                    </ul>
+                </details>
+                @endif
+            </div>
+            @endif
         </div>
     </div>
 </div>
@@ -178,6 +211,16 @@
                     Reset All Member Passwords to Made2025!
                 </button>
             </form>
+            
+            <form action="{{ route('admin.create-member-accounts') }}" method="POST" id="createAccountsForm">
+                @csrf
+                <button type="button" onclick="confirmCreateAccounts()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                    Create Accounts for Stripe Members
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -204,6 +247,19 @@ function confirmResetPasswords() {
         // Disable button and show loading state
         button.disabled = true;
         button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Resetting passwords...';
+        
+        form.submit();
+    }
+}
+
+function confirmCreateAccounts() {
+    if (confirm('This will check Stripe for active monthly subscriptions and create user accounts for any members who don\'t have one yet.\n\nPassword will be set to: Made2025!\n\nContinue?')) {
+        const form = document.getElementById('createAccountsForm');
+        const button = form.querySelector('button');
+        
+        // Disable button and show loading state
+        button.disabled = true;
+        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Creating accounts...';
         
         form.submit();
     }

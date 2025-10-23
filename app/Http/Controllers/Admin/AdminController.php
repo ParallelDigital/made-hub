@@ -280,4 +280,74 @@ class AdminController extends Controller
             ->with('updated_users', $updatedUsers)
             ->with('updated_count', $updatedCount);
     }
+
+    public function createMemberAccounts()
+    {
+        try {
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+            
+            $createdCount = 0;
+            $existingCount = 0;
+            $createdUsers = [];
+            $existingUsers = [];
+            $newPassword = 'Made2025!';
+            $hashedPassword = \Illuminate\Support\Facades\Hash::make($newPassword);
+
+            // Fetch all active subscriptions from Stripe
+            $subscriptions = \Stripe\Subscription::all([
+                'status' => 'active',
+                'limit' => 100,
+            ]);
+
+            foreach ($subscriptions->data as $subscription) {
+                // Get customer details
+                $customer = \Stripe\Customer::retrieve($subscription->customer);
+                
+                if (!$customer->email) {
+                    continue;
+                }
+
+                // Check if user already exists
+                $existingUser = \App\Models\User::where('email', $customer->email)->first();
+                
+                if ($existingUser) {
+                    $existingUsers[] = $customer->name . ' (' . $customer->email . ') - Already has account';
+                    $existingCount++;
+                    continue;
+                }
+
+                // Create new user account
+                $user = \App\Models\User::create([
+                    'name' => $customer->name ?? $customer->email,
+                    'email' => $customer->email,
+                    'password' => $hashedPassword,
+                    'role' => 'user',
+                    'membership_start_date' => \Carbon\Carbon::createFromTimestamp($subscription->current_period_start),
+                    'stripe_customer_id' => $customer->id,
+                    'stripe_subscription_id' => $subscription->id,
+                    'email_verified_at' => now(),
+                ]);
+
+                $createdUsers[] = $user->name . ' (' . $user->email . ') - ✅ Account created';
+                $createdCount++;
+            }
+
+            $message = "Created {$createdCount} new member accounts from Stripe subscriptions.";
+            if ($existingCount > 0) {
+                $message .= " {$existingCount} members already had accounts.";
+            }
+
+            return redirect()->route('admin.dashboard')
+                ->with('success', $message)
+                ->with('created_users', $createdUsers)
+                ->with('existing_users', $existingUsers)
+                ->with('created_count', $createdCount)
+                ->with('existing_count', $existingCount);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to create member accounts from Stripe: ' . $e->getMessage());
+            return redirect()->route('admin.dashboard')
+                ->with('error', 'Failed to create member accounts: ' . $e->getMessage());
+        }
+    }
 }
