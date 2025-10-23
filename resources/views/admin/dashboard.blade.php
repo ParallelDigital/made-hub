@@ -252,7 +252,7 @@
                     <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                     </svg>
-                    Migrate Users to Subscriber Role
+                    Setup Subscriber Role & Member Membership
                 </button>
             </form>
         </div>
@@ -287,7 +287,7 @@ function confirmResetPasswords() {
 }
 
 function confirmCreateAccounts() {
-    if (confirm('This will sync all active Stripe subscriptions:\n\n✅ Create accounts for new members\n🔄 Update existing members with proper access\n🔑 Fix any role issues (e.g., "member" → "subscriber")\n\nPassword for new accounts: Made2025!\n\nContinue?')) {
+    if (confirm('This will sync all active Stripe subscriptions:\n\n✅ Create accounts for new members\n🔄 Update existing members with proper access\n👤 Set role to "subscriber"\n🎫 Assign "member" membership (5 classes/month)\n\nPassword for new accounts: Made2025!\n\nContinue?')) {
         const form = document.getElementById('createAccountsForm');
         const button = form.querySelector('button');
         
@@ -300,13 +300,13 @@ function confirmCreateAccounts() {
 }
 
 function confirmMigrateRoles() {
-    if (confirm('This will change all "user" and "member" roles to "subscriber".\n\nThis affects all members with subscriptions.\nAdmins and instructors will NOT be affected.\n\nContinue?')) {
+    if (confirm('This will setup all monthly paying members:\n\n👤 Change role to "subscriber"\n🎫 Assign "member" membership (5 classes/month)\n\nThis affects all users with subscriptions.\nAdmins and instructors will NOT be affected.\n\nContinue?')) {
         const form = document.getElementById('migrateRolesForm');
         const button = form.querySelector('button');
         
         // Disable button and show loading state
         button.disabled = true;
-        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Migrating roles...';
+        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Setting up...';
         
         form.submit();
     }

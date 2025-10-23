@@ -286,6 +286,22 @@ class AdminController extends Controller
         try {
             \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
             
+            // Find or create "member" membership
+            $memberMembership = \App\Models\Membership::where('name', 'member')->first();
+            
+            if (!$memberMembership) {
+                // Create default member membership if it doesn't exist
+                $memberMembership = \App\Models\Membership::create([
+                    'name' => 'member',
+                    'description' => 'Monthly Member',
+                    'price' => 0,
+                    'duration_days' => 30,
+                    'class_credits' => 5,
+                    'unlimited' => false,
+                    'active' => true,
+                ]);
+            }
+            
             $createdCount = 0;
             $updatedCount = 0;
             $createdUsers = [];
@@ -322,9 +338,12 @@ class AdminController extends Controller
                         $existingUser->role = 'subscriber';
                     }
                     
+                    // Assign member membership
+                    $existingUser->membership_id = $memberMembership->id;
+                    
                     $existingUser->save();
                     
-                    $updatedUsers[] = $existingUser->name . ' (' . $existingUser->email . ') - ✅ Updated with membership access';
+                    $updatedUsers[] = $existingUser->name . ' (' . $existingUser->email . ') - ✅ Updated with subscriber role & member membership';
                     $updatedCount++;
                     continue;
                 }
@@ -335,13 +354,14 @@ class AdminController extends Controller
                     'email' => $customer->email,
                     'password' => $hashedPassword,
                     'role' => 'subscriber',
+                    'membership_id' => $memberMembership->id,
                     'membership_start_date' => \Carbon\Carbon::createFromTimestamp($subscription->current_period_start),
                     'stripe_customer_id' => $customer->id,
                     'stripe_subscription_id' => $subscription->id,
                     'email_verified_at' => now(),
                 ]);
 
-                $createdUsers[] = $user->name . ' (' . $user->email . ') - ✅ Account created';
+                $createdUsers[] = $user->name . ' (' . $user->email . ') - ✅ Account created with subscriber role & member membership';
                 $createdCount++;
             }
 
@@ -363,6 +383,22 @@ class AdminController extends Controller
 
     public function migrateToSubscriberRole()
     {
+        // Find or create "member" membership
+        $memberMembership = \App\Models\Membership::where('name', 'member')->first();
+        
+        if (!$memberMembership) {
+            // Create default member membership if it doesn't exist
+            $memberMembership = \App\Models\Membership::create([
+                'name' => 'member',
+                'description' => 'Monthly Member',
+                'price' => 0,
+                'duration_days' => 30,
+                'class_credits' => 5,
+                'unlimited' => false,
+                'active' => true,
+            ]);
+        }
+
         // Get all users with 'user' or 'member' role (excluding admins and instructors)
         $users = \App\Models\User::whereIn('role', ['user', 'member'])
             ->orderBy('name')
@@ -374,14 +410,20 @@ class AdminController extends Controller
         foreach ($users as $user) {
             $oldRole = $user->role;
             $user->role = 'subscriber';
+            
+            // Assign member membership if they have a subscription
+            if ($user->membership_start_date) {
+                $user->membership_id = $memberMembership->id;
+            }
+            
             $user->save();
             
-            $memberStatus = $user->membership_start_date ? '✅ Member' : '👤 User';
+            $memberStatus = $user->membership_start_date ? '✅ Member with membership' : '👤 User';
             $migratedUsers[] = $user->name . ' (' . $user->email . ') - ' . $oldRole . ' → subscriber - ' . $memberStatus;
             $migratedCount++;
         }
 
-        $message = "Successfully migrated {$migratedCount} users to 'subscriber' role.";
+        $message = "Successfully migrated {$migratedCount} users to 'subscriber' role with 'member' membership.";
 
         return redirect()->route('admin.dashboard')
             ->with('success', $message)
