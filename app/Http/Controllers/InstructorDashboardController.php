@@ -112,15 +112,48 @@ class InstructorDashboardController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Get ALL bookings directly from database for this class ID - simplest approach
-        $allBookings = Booking::where('fitness_class_id', $class->id)
-            ->with('user')
-            ->orderBy('booking_date')
-            ->get();
+        // Mirror Admin\FitnessClassController::show logic for recurring classes
+        if ($class->isRecurring() && !$class->isChildClass()) {
+            // ID-based query across parent + all children to ensure completeness
+            $childIds = $class->childClasses()->pluck('id');
+            $ids = collect([$class->id])->merge($childIds)->values();
+
+            $bookings = Booking::whereIn('fitness_class_id', $ids)
+                ->with('user')
+                ->orderBy('booking_date')
+                ->get();
+        } elseif ($class->isChildClass()) {
+            $class->load(['instructor', 'bookings.user', 'parentClass.bookings.user']);
+            $targetDate = $class->class_date ? $class->class_date->toDateString() : null;
+
+            $parentDateBookings = collect();
+            if ($class->parentClass && $targetDate) {
+                if ($class->parentClass->relationLoaded('bookings')) {
+                    $parentDateBookings = $class->parentClass->bookings->filter(function ($b) use ($targetDate) {
+                        return $b->booking_date && $b->booking_date->toDateString() === $targetDate;
+                    });
+                } else {
+                    $parentDateBookings = $class->parentClass->bookings()
+                        ->whereDate('booking_date', $targetDate)
+                        ->with('user')
+                        ->get();
+                }
+            }
+
+            $bookings = $class->bookings->merge($parentDateBookings);
+        } else {
+            $class->load(['instructor', 'bookings.user']);
+            $bookings = $class->bookings;
+        }
+
+        // Sort similar to admin display (by booking_date desc then booked_at desc when available)
+        $bookings = collect($bookings)->sortByDesc(function ($b) {
+            return [$b->booking_date, $b->booked_at];
+        })->values();
 
         return view('instructor.classes.bookings', [
             'class' => $class,
-            'bookings' => $allBookings,
+            'bookings' => $bookings,
         ]);
     }
 
