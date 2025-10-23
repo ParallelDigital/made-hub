@@ -48,7 +48,7 @@ class InstructorDashboardController extends Controller
         ->values();
 
         return view('instructor.dashboard', [
-            'upcomingClasses' => $upcomingClasses,
+            'upcomingClasses' => $upcomingOccurrences,
         ]);
     }
 
