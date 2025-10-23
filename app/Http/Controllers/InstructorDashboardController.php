@@ -24,8 +24,6 @@ class InstructorDashboardController extends Controller
             ->where('booking_date', '>=', now()->toDateString())
             ->where('status', 'confirmed')
             ->with(['fitnessClass', 'user'])
-            ->orderBy('booking_date')
-            ->orderBy('fitnessClass.start_time')
             ->get();
 
         // Group bookings by class ID and date to create unique "occurrences"
@@ -43,7 +41,11 @@ class InstructorDashboardController extends Controller
             $occurrence->setRelation('bookings', $bookingsForOccurrence); // Attach the bookings for this date
 
             return $occurrence;
-        })->values();
+        })
+        ->sortBy(function ($occurrence) {
+            return [$occurrence->class_date, $occurrence->start_time];
+        })
+        ->values();
 
         return view('instructor.dashboard', [
             'upcomingClasses' => $upcomingClasses,
