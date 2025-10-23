@@ -18,7 +18,11 @@ class InstructorDashboardController extends Controller
         // Eager load the instructor and their upcoming classes with bookings
         $user->load(['instructor.fitnessClasses' => function ($query) {
             $query->where('class_date', '>=', now()->toDateString())
-                  ->with('bookings.user')
+                  ->with(['bookings' => function ($bookingQuery) {
+                      // Filter bookings to only those matching the class date
+                      $bookingQuery->whereColumn('booking_date', 'fitness_classes.class_date')
+                                   ->where('status', 'confirmed');
+                  }, 'bookings.user'])
                   ->orderBy('class_date')
                   ->orderBy('start_time');
         }]);
@@ -38,11 +42,16 @@ class InstructorDashboardController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $class->load('bookings.user');
+        // Filter bookings by the specific class date to show only members for this occurrence
+        $members = Booking::where('fitness_class_id', $class->id)
+            ->where('booking_date', $class->class_date)
+            ->where('status', 'confirmed')
+            ->with('user')
+            ->get();
 
         return view('instructor.classes.members', [
             'class' => $class,
-            'members' => $class->bookings,
+            'members' => $members,
         ]);
     }
 
@@ -147,9 +156,10 @@ class InstructorDashboardController extends Controller
             $user = $matches->first();
         }
 
-        // Check if user has a booking for this class
+        // Check if user has a booking for this class on the specific date
         $booking = Booking::where('user_id', $user->id)
             ->where('fitness_class_id', $class->id)
+            ->where('booking_date', $class->class_date)
             ->where('status', 'confirmed')
             ->first();
 
