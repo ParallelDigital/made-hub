@@ -5,23 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Credits Added</title>
     <style>
-        body { background: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        body { background: #f5f5f5; color: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
         .container { max-width: 640px; margin: 0 auto; padding: 24px; }
-        .card { background: #111827; border: 1px solid #334155; border-radius: 12px; padding: 24px; }
+        .card { background: #ffffff; border: 2px solid #8b5cf6; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
         .logo { text-align: center; margin-bottom: 12px; }
         .logo img { max-width: 180px; height: auto; display: inline-block; background: #ffffff; border-radius: 8px; padding: 4px; }
-        .brand { color: #c084fc; font-weight: 700; letter-spacing: 0.4px; text-align: center; }
-        .title { font-size: 22px; margin: 0 0 8px; color: #fff; }
-        .subtitle { margin: 0 0 20px; color: #94a3b8; font-size: 14px; }
+        .brand { color: #8b5cf6; font-weight: 700; letter-spacing: 0.4px; text-align: center; }
+        .title { font-size: 22px; margin: 0 0 8px; color: #1a1a1a; }
+        .subtitle { margin: 0 0 20px; color: #6b7280; font-size: 14px; }
         .list { margin: 0; padding: 0; list-style: none; }
         .list li { margin: 10px 0; }
-        .label { color: #94a3b8; font-size: 12px; display: block; }
-        .value { color: #e2e8f0; font-size: 16px; font-weight: 600; }
-        .hr { border: 0; border-top: 1px solid #334155; margin: 20px 0; }
-        .note { background: #0b1220; border: 1px solid #334155; padding: 12px; border-radius: 8px; color: #cbd5e1; font-size: 14px; }
-        .footer { color: #64748b; font-size: 12px; margin-top: 20px; text-align: center; }
-        .cta { display: inline-block; background: #8b5cf6; color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
-        .text { color: #ffffff;}
+        .label { color: #6b7280; font-size: 12px; display: block; }
+        .value { color: #1a1a1a; font-size: 16px; font-weight: 600; }
+        .hr { border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+        .note { background: #f3f0ff; border: 2px solid #8b5cf6; padding: 12px; border-radius: 8px; color: #1a1a1a; font-size: 14px; }
+        .footer { color: #6b7280; font-size: 12px; margin-top: 20px; text-align: center; }
+        .cta { display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3); }
+        .text { color: #1a1a1a;}
     </style>
 </head>
 <body>

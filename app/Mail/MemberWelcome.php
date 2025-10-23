@@ -27,7 +27,7 @@ class MemberWelcome extends Mailable
      */
     public function build()
     {
-        return $this->subject('Welcome to Made Hub!')
+        return $this->subject('Welcome to Made Running — Your Member Benefits & Next Steps')
                     ->view('emails.member-welcome')
                     ->with([
                         'member' => $this->member,
