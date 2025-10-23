@@ -16,36 +16,44 @@ class InstructorDashboardController extends Controller
         $user = Auth::user();
 
         if (!$user->instructor) {
-            return view('instructor.dashboard', ['upcomingOccurrences' => collect()]);
+            return view('instructor.dashboard', ['upcomingClasses' => collect()]);
         }
 
-        // Fetch all upcoming bookings for this instructor's classes
-        $upcomingBookings = Booking::whereIn('fitness_class_id', $user->instructor->fitnessClasses()->pluck('id'))
-            ->where('booking_date', '>=', now()->toDateString())
-            ->where('status', 'confirmed')
-            ->with(['fitnessClass', 'user'])
-            ->get();
+        try {
+            // Get all upcoming classes for this instructor
+            $upcomingClasses = $user->instructor->fitnessClasses()
+                ->where('class_date', '>=', now()->toDateString())
+                ->orderBy('class_date')
+                ->orderBy('start_time')
+                ->get();
 
-        // Group bookings by class ID and date to create unique "occurrences"
-        $upcomingOccurrences = $upcomingBookings->groupBy(function ($booking) {
-            return $booking->fitness_class_id . '_' . $booking->booking_date->format('Y-m-d');
-        })->map(function ($bookingsForOccurrence) {
-            // Use the first booking to get the class and date info
-            $firstBooking = $bookingsForOccurrence->first();
-            $class = $firstBooking->fitnessClass;
+            // For each class, load the bookings for that specific date
+            $upcomingClasses->each(function ($class) {
+                $bookings = Booking::where('fitness_class_id', $class->id)
+                    ->where('booking_date', $class->class_date)
+                    ->where('status', 'confirmed')
+                    ->with('user')
+                    ->get();
+                
+                $class->setRelation('bookings', $bookings);
+            });
 
-            // Clone the class model and override its date for this specific occurrence
-            $occurrence = $class->replicate();
-            $occurrence->id = $class->id; // Keep original ID for routing
-            $occurrence->class_date = $firstBooking->booking_date; // Set the correct date
-            $occurrence->setRelation('bookings', $bookingsForOccurrence); // Attach the bookings for this date
+            $upcomingOccurrences = $upcomingClasses;
+        } catch (\Exception $e) {
+            \Log::error('Instructor Dashboard Error', [
+                'instructor_id' => $user->instructor->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            $upcomingOccurrences = collect();
+        }
 
-            return $occurrence;
-        })
-        ->sortBy(function ($occurrence) {
-            return [$occurrence->class_date, $occurrence->start_time];
-        })
-        ->values();
+        // Debug: Log the results to help troubleshoot
+        \Log::info('Instructor Dashboard Debug', [
+            'instructor_id' => $user->instructor->id,
+            'classes_count' => $upcomingOccurrences->count(),
+            'total_bookings' => $upcomingOccurrences->sum(function($class) { return $class->bookings->count(); }),
+        ]);
 
         return view('instructor.dashboard', [
             'upcomingClasses' => $upcomingOccurrences,
