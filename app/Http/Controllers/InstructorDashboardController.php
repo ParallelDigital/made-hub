@@ -20,32 +20,52 @@ class InstructorDashboardController extends Controller
         }
 
         try {
-            // Get all instructor's classes (don't filter by date yet, as recurring classes have old template dates)
+            // Get all instructor's classes
             $allClasses = $user->instructor->fitnessClasses()
                 ->orderBy('start_time')
                 ->get();
 
-            // For each class, get future bookings only
-            $upcomingClasses = collect();
+            // Build a list of upcoming class occurrences
+            $upcomingOccurrences = collect();
             
-            $allClasses->each(function ($class) use ($upcomingClasses) {
-                $bookings = Booking::where('fitness_class_id', $class->id)
+            foreach ($allClasses as $class) {
+                // Get all future booking dates for this class
+                $bookingDates = Booking::where('fitness_class_id', $class->id)
                     ->where('booking_date', '>=', now()->toDateString())
                     ->where('status', 'confirmed')
-                    ->with('user')
-                    ->get();
+                    ->select('booking_date')
+                    ->distinct()
+                    ->orderBy('booking_date')
+                    ->pluck('booking_date');
                 
-                // Only include classes that have future bookings OR have a future class_date
-                if ($bookings->count() > 0 || $class->class_date >= now()->toDateString()) {
-                    $class->setRelation('bookings', $bookings);
-                    $upcomingClasses->push($class);
+                // Create a separate occurrence for each booking date
+                foreach ($bookingDates as $date) {
+                    $occurrence = $class->replicate();
+                    $occurrence->id = $class->id;
+                    $occurrence->class_date = $date;
+                    
+                    // Load bookings for this specific date
+                    $bookings = Booking::where('fitness_class_id', $class->id)
+                        ->where('booking_date', $date)
+                        ->where('status', 'confirmed')
+                        ->with('user')
+                        ->get();
+                    
+                    $occurrence->setRelation('bookings', $bookings);
+                    $upcomingOccurrences->push($occurrence);
                 }
-            });
+                
+                // Also include if the class itself has a future date with no bookings yet
+                if ($class->class_date >= now()->toDateString() && !$bookingDates->contains($class->class_date)) {
+                    $occurrence = $class->replicate();
+                    $occurrence->id = $class->id;
+                    $occurrence->setRelation('bookings', collect());
+                    $upcomingOccurrences->push($occurrence);
+                }
+            }
 
-            // Sort by the earliest booking date or class date
-            $upcomingOccurrences = $upcomingClasses->sortBy(function ($class) {
-                $earliestBooking = $class->bookings->min('booking_date');
-                return $earliestBooking ?? $class->class_date;
+            $upcomingOccurrences = $upcomingOccurrences->sortBy(function ($occurrence) {
+                return [$occurrence->class_date, $occurrence->start_time];
             })->values();
         } catch (\Exception $e) {
             \Log::error('Instructor Dashboard Error', [
