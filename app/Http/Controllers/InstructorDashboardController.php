@@ -112,14 +112,15 @@ class InstructorDashboardController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $bookingDate = $date ? \Carbon\Carbon::parse($date) : $class->class_date;
-
-        // Filter bookings by the specific class date to show only members for this occurrence
+        // Show ALL bookings for this class (across all dates), just like admin panel
         $members = Booking::where('fitness_class_id', $class->id)
-            ->where('booking_date', $bookingDate->toDateString())
             ->where('status', 'confirmed')
             ->with('user')
+            ->orderBy('booking_date')
             ->get();
+
+        // Use the passed date or class date for display purposes
+        $bookingDate = $date ? \Carbon\Carbon::parse($date) : $class->class_date;
 
         return view('instructor.classes.members', [
             'class' => $class,
