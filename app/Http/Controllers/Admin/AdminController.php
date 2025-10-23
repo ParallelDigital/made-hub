@@ -287,9 +287,9 @@ class AdminController extends Controller
             \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
             
             $createdCount = 0;
-            $existingCount = 0;
+            $updatedCount = 0;
             $createdUsers = [];
-            $existingUsers = [];
+            $updatedUsers = [];
             $newPassword = 'Made2025!';
             $hashedPassword = \Illuminate\Support\Facades\Hash::make($newPassword);
 
@@ -311,8 +311,21 @@ class AdminController extends Controller
                 $existingUser = \App\Models\User::where('email', $customer->email)->first();
                 
                 if ($existingUser) {
-                    $existingUsers[] = $customer->name . ' (' . $customer->email . ') - Already has account';
-                    $existingCount++;
+                    // Update existing user to ensure they have proper membership access
+                    $existingUser->membership_start_date = $existingUser->membership_start_date ?? \Carbon\Carbon::createFromTimestamp($subscription->current_period_start);
+                    $existingUser->stripe_customer_id = $customer->id;
+                    $existingUser->stripe_subscription_id = $subscription->id;
+                    $existingUser->email_verified_at = $existingUser->email_verified_at ?? now();
+                    
+                    // Ensure role is 'user' not 'member' (for consistency)
+                    if ($existingUser->role === 'member') {
+                        $existingUser->role = 'user';
+                    }
+                    
+                    $existingUser->save();
+                    
+                    $updatedUsers[] = $existingUser->name . ' (' . $existingUser->email . ') - ✅ Updated with membership access';
+                    $updatedCount++;
                     continue;
                 }
 
@@ -332,22 +345,19 @@ class AdminController extends Controller
                 $createdCount++;
             }
 
-            $message = "Created {$createdCount} new member accounts from Stripe subscriptions.";
-            if ($existingCount > 0) {
-                $message .= " {$existingCount} members already had accounts.";
-            }
+            $message = "Synced Stripe subscriptions: Created {$createdCount} new accounts, updated {$updatedCount} existing accounts.";
 
             return redirect()->route('admin.dashboard')
                 ->with('success', $message)
                 ->with('created_users', $createdUsers)
-                ->with('existing_users', $existingUsers)
+                ->with('updated_users', $updatedUsers)
                 ->with('created_count', $createdCount)
-                ->with('existing_count', $existingCount);
+                ->with('updated_count', $updatedCount);
 
         } catch (\Exception $e) {
-            \Log::error('Failed to create member accounts from Stripe: ' . $e->getMessage());
+            \Log::error('Failed to sync member accounts from Stripe: ' . $e->getMessage());
             return redirect()->route('admin.dashboard')
-                ->with('error', 'Failed to create member accounts: ' . $e->getMessage());
+                ->with('error', 'Failed to sync member accounts: ' . $e->getMessage());
         }
     }
 }

@@ -65,14 +65,19 @@
             </div>
             @endif
             
-            @if(session('created_count'))
+            @if(session('created_count') !== null)
             <div class="mt-3 text-sm">
-                <p class="font-semibold">📊 Summary:</p>
+                <p class="font-semibold">📊 Stripe Sync Summary:</p>
+                @if(session('created_count') > 0)
                 <p>✅ Created: {{ session('created_count') }} new member accounts</p>
-                @if(session('existing_count') > 0)
-                <p>ℹ️ Existing: {{ session('existing_count') }} members already had accounts</p>
                 @endif
-                <p class="mt-1 text-xs">Default password: <strong class="text-green-300">Made2025!</strong></p>
+                @if(session('updated_count') > 0)
+                <p>🔄 Updated: {{ session('updated_count') }} existing accounts with membership access</p>
+                @endif
+                @if(session('created_count') == 0 && session('updated_count') == 0)
+                <p>ℹ️ All Stripe members already have accounts with proper access</p>
+                @endif
+                <p class="mt-1 text-xs">Default password for new accounts: <strong class="text-green-300">Made2025!</strong></p>
                 
                 @if(session('created_users') && count(session('created_users')) > 0)
                 <details class="mt-2">
@@ -85,11 +90,11 @@
                 </details>
                 @endif
                 
-                @if(session('existing_users') && count(session('existing_users')) > 0)
+                @if(session('updated_users') && count(session('updated_users')) > 0)
                 <details class="mt-2">
-                    <summary class="cursor-pointer hover:text-green-100">View existing accounts ({{ count(session('existing_users')) }})</summary>
+                    <summary class="cursor-pointer hover:text-green-100">View updated accounts ({{ count(session('updated_users')) }})</summary>
                     <ul class="mt-2 ml-4 text-xs max-h-40 overflow-y-auto">
-                        @foreach(session('existing_users') as $user)
+                        @foreach(session('updated_users') as $user)
                         <li>• {{ $user }}</li>
                         @endforeach
                     </ul>
@@ -216,9 +221,9 @@
                 @csrf
                 <button type="button" onclick="confirmCreateAccounts()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
                     <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
-                    Create Accounts for Stripe Members
+                    Sync Stripe Members
                 </button>
             </form>
         </div>
@@ -253,13 +258,13 @@ function confirmResetPasswords() {
 }
 
 function confirmCreateAccounts() {
-    if (confirm('This will check Stripe for active monthly subscriptions and create user accounts for any members who don\'t have one yet.\n\nPassword will be set to: Made2025!\n\nContinue?')) {
+    if (confirm('This will sync all active Stripe subscriptions:\n\n✅ Create accounts for new members\n🔄 Update existing members with proper access\n🔑 Fix any role issues (e.g., "member" → "user")\n\nPassword for new accounts: Made2025!\n\nContinue?')) {
         const form = document.getElementById('createAccountsForm');
         const button = form.querySelector('button');
         
         // Disable button and show loading state
         button.disabled = true;
-        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Creating accounts...';
+        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Syncing...';
         
         form.submit();
     }
