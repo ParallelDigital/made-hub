@@ -45,6 +45,25 @@
                 @endif
             </div>
             @endif
+            
+            @if(session('updated_count'))
+            <div class="mt-3 text-sm">
+                <p class="font-semibold">📊 Summary:</p>
+                <p>✅ Updated: {{ session('updated_count') }} member passwords</p>
+                <p class="mt-1 text-xs">New password: <strong class="text-amber-300">Made2025!</strong></p>
+                
+                @if(session('updated_users') && count(session('updated_users')) > 0)
+                <details class="mt-2">
+                    <summary class="cursor-pointer hover:text-green-100">View updated members ({{ count(session('updated_users')) }})</summary>
+                    <ul class="mt-2 ml-4 text-xs max-h-40 overflow-y-auto">
+                        @foreach(session('updated_users') as $user)
+                        <li>• {{ $user }}</li>
+                        @endforeach
+                    </ul>
+                </details>
+                @endif
+            </div>
+            @endif
         </div>
     </div>
 </div>
@@ -149,6 +168,16 @@
                     Send Welcome Emails to All Members
                 </button>
             </form>
+            
+            <form action="{{ route('admin.reset-member-passwords') }}" method="POST" id="resetPasswordsForm">
+                @csrf
+                <button type="button" onclick="confirmResetPasswords()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                    </svg>
+                    Reset All Member Passwords to Made2025!
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -162,6 +191,19 @@ function confirmSendEmails() {
         // Disable button and show loading state
         button.disabled = true;
         button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Sending emails...';
+        
+        form.submit();
+    }
+}
+
+function confirmResetPasswords() {
+    if (confirm('⚠️ WARNING: This will reset ALL member passwords to "Made2025!"\n\nAdmins and instructors will NOT be affected.\n\nContinue?')) {
+        const form = document.getElementById('resetPasswordsForm');
+        const button = form.querySelector('button');
+        
+        // Disable button and show loading state
+        button.disabled = true;
+        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Resetting passwords...';
         
         form.submit();
     }

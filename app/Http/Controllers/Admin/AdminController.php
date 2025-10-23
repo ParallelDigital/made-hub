@@ -250,4 +250,35 @@ class AdminController extends Controller
             ->with('sent_count', $sentCount)
             ->with('failed_count', $failedCount);
     }
+
+    public function resetMemberPasswords()
+    {
+        $newPassword = 'Made2025!';
+        $hashedPassword = \Illuminate\Support\Facades\Hash::make($newPassword);
+
+        $users = \App\Models\User::whereNotIn('role', ['admin', 'administrator', 'instructor'])
+            ->orderBy('name')
+            ->get();
+
+        $updatedCount = 0;
+        $skippedAdmins = 0;
+        $skippedInstructors = 0;
+        $updatedUsers = [];
+
+        foreach ($users as $user) {
+            $user->password = $hashedPassword;
+            $user->save();
+            
+            $memberStatus = $user->membership_start_date ? '✅ Member' : '👤 User';
+            $updatedUsers[] = $user->name . ' (' . $user->email . ') - ' . $memberStatus;
+            $updatedCount++;
+        }
+
+        $message = "Successfully reset passwords for {$updatedCount} members to 'Made2025!'";
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', $message)
+            ->with('updated_users', $updatedUsers)
+            ->with('updated_count', $updatedCount);
+    }
 }

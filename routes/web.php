@@ -299,6 +299,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
     Route::post('users/{user}/credits/add', [App\Http\Controllers\Admin\UserController::class, 'addCredits'])->name('users.credits.add');
     Route::get('reports', [App\Http\Controllers\Admin\ReportsController::class, 'index'])->name('reports');
     Route::post('send-welcome-emails', [App\Http\Controllers\Admin\AdminController::class, 'sendWelcomeEmails'])->name('send-welcome-emails');
+    Route::post('reset-member-passwords', [App\Http\Controllers\Admin\AdminController::class, 'resetMemberPasswords'])->name('reset-member-passwords');
     Route::post('members/ensure-login-access', function () {
         \Artisan::call('members:ensure-login-access');
         return back()->with('success', 'Login access check completed. Password reset emails sent to members who need them.');
