@@ -205,4 +205,49 @@ class AdminController extends Controller
 
         return view('admin.reports', compact('monthlyBookings'));
     }
+
+    public function sendWelcomeEmails()
+    {
+        $users = \App\Models\User::whereNotNull('membership_start_date')
+            ->whereNotIn('role', ['admin', 'administrator', 'instructor'])
+            ->orderBy('name')
+            ->get();
+
+        $sentCount = 0;
+        $failedCount = 0;
+        $sentEmails = [];
+        $failedEmails = [];
+
+        foreach ($users as $user) {
+            if (empty($user->email)) {
+                continue;
+            }
+
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)
+                    ->send(new \App\Mail\MemberWelcome($user, 5));
+                $sentEmails[] = $user->email;
+                $sentCount++;
+                
+                // Small delay to avoid overwhelming mail server
+                usleep(500000); // 0.5 second delay
+            } catch (\Exception $e) {
+                $failedEmails[] = $user->email;
+                $failedCount++;
+                \Log::error('Failed to send welcome email to ' . $user->email . ': ' . $e->getMessage());
+            }
+        }
+
+        $message = "Successfully sent {$sentCount} welcome emails to members.";
+        if ($failedCount > 0) {
+            $message .= " {$failedCount} emails failed to send.";
+        }
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', $message)
+            ->with('sent_emails', $sentEmails)
+            ->with('failed_emails', $failedEmails)
+            ->with('sent_count', $sentCount)
+            ->with('failed_count', $failedCount);
+    }
 }

@@ -3,6 +3,60 @@
 @section('title', 'Dashboard')
 
 @section('content')
+
+@if(session('success'))
+<div class="mb-6 bg-green-900/50 border border-green-700 text-green-200 px-4 py-3 rounded-lg relative" role="alert">
+    <div class="flex items-start">
+        <svg class="h-5 w-5 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <div class="flex-1">
+            <strong class="font-bold">Success!</strong>
+            <span class="block sm:inline">{{ session('success') }}</span>
+            
+            @if(session('sent_count'))
+            <div class="mt-3 text-sm">
+                <p class="font-semibold">📊 Summary:</p>
+                <p>✅ Sent: {{ session('sent_count') }} emails</p>
+                @if(session('failed_count') > 0)
+                <p class="text-red-300">❌ Failed: {{ session('failed_count') }} emails</p>
+                @endif
+                
+                @if(session('sent_emails') && count(session('sent_emails')) > 0)
+                <details class="mt-2">
+                    <summary class="cursor-pointer hover:text-green-100">View sent emails ({{ count(session('sent_emails')) }})</summary>
+                    <ul class="mt-2 ml-4 text-xs max-h-40 overflow-y-auto">
+                        @foreach(session('sent_emails') as $email)
+                        <li>• {{ $email }}</li>
+                        @endforeach
+                    </ul>
+                </details>
+                @endif
+                
+                @if(session('failed_emails') && count(session('failed_emails')) > 0)
+                <details class="mt-2">
+                    <summary class="cursor-pointer hover:text-red-200 text-red-300">View failed emails ({{ count(session('failed_emails')) }})</summary>
+                    <ul class="mt-2 ml-4 text-xs max-h-40 overflow-y-auto">
+                        @foreach(session('failed_emails') as $email)
+                        <li>• {{ $email }}</li>
+                        @endforeach
+                    </ul>
+                </details>
+                @endif
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+@endif
+
+@if(session('error'))
+<div class="mb-6 bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-lg relative" role="alert">
+    <strong class="font-bold">Error!</strong>
+    <span class="block sm:inline">{{ session('error') }}</span>
+</div>
+@endif
+
 <div class="admin-stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
     <!-- Stats Cards -->
     <div class="bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-700">
@@ -80,6 +134,39 @@
         </div>
     </div>
 </div>
+
+<!-- Quick Actions -->
+<div class="bg-gray-800 shadow rounded-lg border border-gray-700 mb-8">
+    <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-white mb-4">Quick Actions</h3>
+        <div class="flex flex-wrap gap-3">
+            <form action="{{ route('admin.send-welcome-emails') }}" method="POST" id="sendWelcomeEmailsForm">
+                @csrf
+                <button type="button" onclick="confirmSendEmails()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Send Welcome Emails to All Members
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmSendEmails() {
+    if (confirm('This will send welcome emails to all members with active subscriptions. Continue?')) {
+        const form = document.getElementById('sendWelcomeEmailsForm');
+        const button = form.querySelector('button');
+        
+        // Disable button and show loading state
+        button.disabled = true;
+        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Sending emails...';
+        
+        form.submit();
+    }
+}
+</script>
 
 <!-- Recent Bookings -->
 <div class="bg-gray-800 shadow rounded-lg border border-gray-700 mb-8">
