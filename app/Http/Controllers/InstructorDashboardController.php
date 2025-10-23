@@ -112,27 +112,15 @@ class InstructorDashboardController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Use EXACT same logic as admin controller
-        if ($class->isRecurring() && !$class->isChildClass()) {
-            $class->load(['instructor', 'bookings.user', 'childClasses.bookings.user']);
-
-            $allBookings = collect($class->bookings ? $class->bookings->all() : []);
-            foreach ($class->childClasses as $child) {
-                if ($child->relationLoaded('bookings')) {
-                    $allBookings = $allBookings->merge($child->bookings);
-                } else {
-                    $allBookings = $allBookings->merge($child->bookings()->with('user')->get());
-                }
-            }
-            $class->setRelation('bookings', $allBookings);
-        } elseif ($class->isChildClass()) {
-            $class->load(['instructor', 'bookings.user', 'parentClass']);
-        } else {
-            $class->load(['instructor', 'bookings.user']);
-        }
+        // Get ALL bookings directly from database for this class ID - simplest approach
+        $allBookings = Booking::where('fitness_class_id', $class->id)
+            ->with('user')
+            ->orderBy('booking_date')
+            ->get();
 
         return view('instructor.classes.bookings', [
             'class' => $class,
+            'bookings' => $allBookings,
         ]);
     }
 

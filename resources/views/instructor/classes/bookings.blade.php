@@ -28,10 +28,10 @@
         <div class="p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-white">All Bookings</h2>
-                <span class="text-sm text-gray-400">Total: {{ $class->bookings->count() }}</span>
+                <span class="text-sm text-gray-400">Total: {{ $bookings->count() }}</span>
             </div>
 
-            @if($class->bookings->isEmpty())
+            @if($bookings->isEmpty())
                 <div class="text-center py-12">
                     <div class="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
                         <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +54,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-gray-800 divide-y divide-gray-700">
-                            @foreach($class->bookings as $booking)
+                            @foreach($bookings as $booking)
                                 <tr class="hover:bg-gray-700/50">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                                         {{ $booking->user->name }}
