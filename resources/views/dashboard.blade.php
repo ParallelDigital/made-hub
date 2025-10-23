@@ -155,7 +155,7 @@
                             <p class="text-gray-400 text-xs sm:text-sm break-words">Instructor: {{ $booking->fitnessClass->instructor->name ?? 'N/A' }}</p>
                         </div>
                         <div class="upcoming-class-actions shrink-0 w-full sm:w-auto">
-                            <a href="{{ route('booking.confirmation', ['classId' => $booking->fitness_class_id]) }}" class="text-primary hover:underline text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center mr-2">Details</a>
+                            <a href="{{ route('booking.confirmation', ['classId' => $booking->fitness_class_id, 'bookingId' => $booking->id]) }}" class="text-primary hover:underline text-sm inline-flex items-center justify-center min-h-[44px] w-full sm:w-auto text-center mr-2">Details</a>
                             @php
                                 // Use booking_date for validation if available
                                 $bookingDateStr = $booking->booking_date ? $booking->booking_date->toDateString() : $booking->fitnessClass->class_date->toDateString();

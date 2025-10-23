@@ -420,26 +420,39 @@ class BookingController extends Controller
         return redirect()->away($session->url);
     }
 
-    public function confirmation($classId)
+    public function confirmation(Request $request, $classId)
     {
         $class = FitnessClass::with('instructor')->findOrFail($classId);
         
-        // Get the user's most recent booking for this class to show the correct date
-        $booking = null;
-        if (Auth::check()) {
+        // Priority 1: If bookingId is provided, get that specific booking
+        if ($request->has('bookingId') && Auth::check()) {
+            $booking = Booking::where('id', $request->bookingId)
+                ->where('user_id', Auth::id())
+                ->where('fitness_class_id', $classId)
+                ->first();
+            
+            if ($booking && $booking->booking_date) {
+                $class->class_date = $booking->booking_date;
+            }
+        }
+        // Priority 2: Use the booking_date from session (most reliable for just-completed bookings)
+        elseif (session('booking_date')) {
+            $class->class_date = \Carbon\Carbon::parse(session('booking_date'));
+        } 
+        // Priority 3: Get the user's most recent booking for this class
+        elseif (Auth::check()) {
             $booking = Booking::where('user_id', Auth::id())
                 ->where('fitness_class_id', $classId)
                 ->orderBy('created_at', 'desc')
                 ->first();
+            
+            // Use the booking_date from the most recent booking
+            if ($booking && $booking->booking_date) {
+                $class->class_date = $booking->booking_date;
+            }
         }
-        
-        // If we have a booking with a specific booking_date, use that for display
-        if ($booking && $booking->booking_date) {
-            $class->class_date = $booking->booking_date;
-        } elseif (session('booking_date')) {
-            // For guest bookings, use the date from session
-            $class->class_date = session('booking_date');
-        }
+        // Priority 4: Fall back to the class's stored date (for non-recurring or old bookings)
+        // (class_date already has the value from database)
         
         return view('booking.confirmation', compact('class'));
     }
