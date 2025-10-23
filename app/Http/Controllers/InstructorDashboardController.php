@@ -112,8 +112,24 @@ class InstructorDashboardController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Get ALL bookings for this class - exactly like admin does (no status filter)
-        $class->load(['bookings.user']);
+        // Use EXACT same logic as admin controller
+        if ($class->isRecurring() && !$class->isChildClass()) {
+            $class->load(['instructor', 'bookings.user', 'childClasses.bookings.user']);
+
+            $allBookings = collect($class->bookings ? $class->bookings->all() : []);
+            foreach ($class->childClasses as $child) {
+                if ($child->relationLoaded('bookings')) {
+                    $allBookings = $allBookings->merge($child->bookings);
+                } else {
+                    $allBookings = $allBookings->merge($child->bookings()->with('user')->get());
+                }
+            }
+            $class->setRelation('bookings', $allBookings);
+        } elseif ($class->isChildClass()) {
+            $class->load(['instructor', 'bookings.user', 'parentClass']);
+        } else {
+            $class->load(['instructor', 'bookings.user']);
+        }
 
         return view('instructor.classes.bookings', [
             'class' => $class,
