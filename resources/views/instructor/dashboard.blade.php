@@ -33,7 +33,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-400">Today's Classes</p>
-                    <p class="text-2xl font-semibold text-white">{{ $upcomingClasses->where('class_date', now()->toDateString())->count() }}</p>
+                    <p class="text-2xl font-semibold text-white">{{ $upcomingClasses->filter(function($class) { return \Carbon\Carbon::parse($class->class_date)->isToday(); })->count() }}</p>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-400">This Week</p>
-                    <p class="text-2xl font-semibold text-white">{{ $upcomingClasses->whereBetween('class_date', [now()->startOfWeek(), now()->endOfWeek()])->count() }}</p>
+                    <p class="text-2xl font-semibold text-white">{{ $upcomingClasses->filter(function($class) { return \Carbon\Carbon::parse($class->class_date)->isBetween(now()->startOfWeek(), now()->endOfWeek()); })->count() }}</p>
                 </div>
             </div>
         </div>
