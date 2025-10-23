@@ -119,6 +119,20 @@ class InstructorDashboardController extends Controller
             ->orderBy('booking_date')
             ->get();
 
+        // Debug logging
+        \Log::info('Instructor showMembers - All bookings', [
+            'class_id' => $class->id,
+            'class_name' => $class->name,
+            'members_count' => $members->count(),
+            'members_data' => $members->map(function($b) {
+                return [
+                    'user' => $b->user->name ?? 'N/A',
+                    'booking_date' => $b->booking_date,
+                    'status' => $b->status
+                ];
+            })->toArray()
+        ]);
+
         // Use the passed date or class date for display purposes
         $bookingDate = $date ? \Carbon\Carbon::parse($date) : $class->class_date;
 
