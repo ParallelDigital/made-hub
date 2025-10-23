@@ -104,6 +104,24 @@ class InstructorDashboardController extends Controller
         ]);
     }
 
+    public function showBookings(FitnessClass $class)
+    {
+        // Ensure the logged-in instructor is authorized
+        $instructorId = Auth::user()->instructor->id;
+        if ($class->instructor_id !== $instructorId) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Get ALL bookings for this class - simple and straightforward
+        $class->load(['bookings' => function($query) {
+            $query->where('status', 'confirmed')->with('user')->orderBy('booking_date');
+        }]);
+
+        return view('instructor.classes.bookings', [
+            'class' => $class,
+        ]);
+    }
+
     public function showMembers(FitnessClass $class, $date = null)
     {
         // Ensure the logged-in instructor is authorized to see this class's members

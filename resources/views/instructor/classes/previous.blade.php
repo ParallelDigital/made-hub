@@ -43,7 +43,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{{ \Carbon\Carbon::parse($class->class_date)->format('D, M j, Y') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{{ \Carbon\Carbon::parse($class->start_time)->format('g:i A') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{{ route('instructor.classes.members', ['class' => $class, 'date' => $class->class_date->format('Y-m-d')]) }}" class="text-indigo-400 hover:text-indigo-300">View Members</a>
+                                        <a href="{{ route('instructor.classes.bookings', $class) }}" class="text-indigo-400 hover:text-indigo-300">View Bookings</a>
                                     </td>
                                 </tr>
                             @endforeach

@@ -428,6 +428,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsInstructor::class])->prefix('i
     Route::get('dashboard', [App\Http\Controllers\InstructorDashboardController::class, 'index'])->name('dashboard');
     Route::get('classes/previous', [App\Http\Controllers\InstructorDashboardController::class, 'previousClasses'])->name('classes.previous');
     Route::get('classes/{class}/members/{date?}', [App\Http\Controllers\InstructorDashboardController::class, 'showMembers'])->name('classes.members');
+    Route::get('classes/{class}/bookings', [App\Http\Controllers\InstructorDashboardController::class, 'showBookings'])->name('classes.bookings');
     Route::get('classes/{class}/scanner', [App\Http\Controllers\InstructorDashboardController::class, 'showScanner'])->name('classes.scanner');
     Route::post('classes/{class}/scan', [App\Http\Controllers\InstructorDashboardController::class, 'processQrScan'])->name('classes.scan');
 });
