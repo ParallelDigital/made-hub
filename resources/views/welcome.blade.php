@@ -1067,12 +1067,17 @@
                                         $duration = $class->duration ?? 60;
                                     }
                                     // Compute booking state for data attributes and reuse below
-                                    $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)->count();
+                                    $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)
+                                        ->where('booking_date', $selectedDate->toDateString())
+                                        ->count();
                                     $availableSpots = max(0, $class->max_spots - $currentBookings);
                                     $isFull = $availableSpots <= 0;
                                     $startDateTime = \Carbon\Carbon::parse($selectedDate->toDateString() . ' ' . ($class->start_time ?? '00:00'));
                                     $isPast = $startDateTime->lt(now());
-                                    $isBookedByMe = auth()->check() ? $class->bookings->contains('user_id', auth()->id()) : false;
+                                    $isBookedByMe = auth()->check() ? App\Models\Booking::where('fitness_class_id', $class->id)
+                                        ->where('booking_date', $selectedDate->toDateString())
+                                        ->where('user_id', auth()->id())
+                                        ->exists() : false;
                                     $isMembersOnly = (bool) ($class->members_only ?? false);
                                 @endphp
                                 <div class="class-card" data-class-id="{{ $class->id }}" data-price="{{ $class->price ?? 0 }}" data-is-past="{{ $isPast ? '1' : '0' }}" data-is-full="{{ $isFull ? '1' : '0' }}" data-is-booked="{{ $isBookedByMe ? '1' : '0' }}" data-members-only="{{ $isMembersOnly ? '1' : '0' }}" data-description="{{ $class->description }}">

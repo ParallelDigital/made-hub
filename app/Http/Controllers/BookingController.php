@@ -363,62 +363,6 @@ class BookingController extends Controller
         ]);
     }
 
-    public function checkout($classId)
-    {
-        $class = FitnessClass::with('instructor')->findOrFail($classId);
-        
-        // Check if class is full
-        $currentBookings = Booking::where('fitness_class_id', $classId)->count();
-        if ($currentBookings >= $class->max_spots) {
-            return redirect()->back()->with('error', 'This class is fully booked.');
-        }
-
-        return view('checkout.index', compact('class'));
-    }
-
-    public function processCheckout(Request $request, $classId)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-        ]);
-
-        $class = FitnessClass::findOrFail($classId);
-
-        // Check if class is still available
-        $currentBookings = Booking::where('fitness_class_id', $classId)->count();
-        if ($currentBookings >= $class->max_spots) {
-            return redirect()->back()->with('error', 'This class is now fully booked.');
-        }
-
-        // Create Stripe Checkout Session
-        $stripe = new StripeClient($this->stripeSecret());
-
-        $session = $stripe->checkout->sessions->create([
-            'mode' => 'payment',
-            'payment_method_types' => ['card'],
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => 'gbp',
-                    'product_data' => [
-                        'name' => $class->name,
-                    ],
-                    'unit_amount' => (int) round($class->price * 100),
-                ],
-                'quantity' => 1,
-            ]],
-            'customer_email' => $request->email,
-            'metadata' => [
-                'class_id' => (string) $classId,
-                'name' => $request->name,
-                'email' => $request->email,
-            ],
-            'success_url' => route('booking.success', ['classId' => $classId]) . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('booking.checkout', ['classId' => $classId]),
-        ]);
-
-        return redirect()->away($session->url);
-    }
 
     public function confirmation(Request $request, $classId)
     {

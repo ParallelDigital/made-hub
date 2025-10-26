@@ -45,6 +45,15 @@ class PurchaseController extends Controller
             return redirect()->route('welcome')->with('error', 'This class has already started and cannot be booked.');
         }
 
+        // Check if class is full for the specific date
+        $currentBookings = \App\Models\Booking::where('fitness_class_id', $class_id)
+            ->where('booking_date', $classDate)
+            ->where('status', 'confirmed')
+            ->count();
+        if ($currentBookings >= $class->max_spots) {
+            return redirect()->route('welcome')->with('error', 'This class is fully booked.');
+        }
+
         $user = $request->user();
 
         // Block checkout for members-only classes; guide user appropriately
@@ -428,6 +437,15 @@ class PurchaseController extends Controller
         $classStart = \Carbon\Carbon::parse($classDate . ' ' . $class->start_time, $tz);
         if ($classStart->lessThan(\Carbon\Carbon::now($tz))) {
             return back()->with('error', 'This class has already started and cannot be booked.');
+        }
+
+        // Check if class is still available for the specific date
+        $currentBookings = \App\Models\Booking::where('fitness_class_id', $class_id)
+            ->where('booking_date', $classDate)
+            ->where('status', 'confirmed')
+            ->count();
+        if ($currentBookings >= $class->max_spots) {
+            return back()->with('error', 'This class is now fully booked.');
         }
 
         $price = $class->price;
