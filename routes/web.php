@@ -300,6 +300,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
     Route::get('reports', [App\Http\Controllers\Admin\ReportsController::class, 'index'])->name('reports');
     Route::post('send-welcome-emails', [App\Http\Controllers\Admin\AdminController::class, 'sendWelcomeEmails'])->name('send-welcome-emails');
     Route::post('reset-member-passwords', [App\Http\Controllers\Admin\AdminController::class, 'resetMemberPasswords'])->name('reset-member-passwords');
+    Route::post('reset-user-password', [App\Http\Controllers\Admin\AdminController::class, 'resetUserPassword'])->name('reset-user-password');
     Route::post('create-member-accounts', [App\Http\Controllers\Admin\AdminController::class, 'createMemberAccounts'])->name('create-member-accounts');
     Route::post('migrate-to-subscriber-role', [App\Http\Controllers\Admin\AdminController::class, 'migrateToSubscriberRole'])->name('migrate-to-subscriber-role');
     Route::post('members/ensure-login-access', function () {

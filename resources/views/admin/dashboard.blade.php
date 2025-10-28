@@ -259,6 +259,44 @@
     </div>
 </div>
 
+<!-- Reset Individual User Password -->
+<div class="bg-gray-800 shadow rounded-lg border border-gray-700 mb-8">
+    <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-white mb-4">Reset Individual User Password</h3>
+        <p class="text-sm text-gray-400 mb-4">Enter a user's email address to reset their password to <strong class="text-amber-300">Made2025!</strong></p>
+        
+        <form action="{{ route('admin.reset-user-password') }}" method="POST" class="flex gap-3 items-start">
+            @csrf
+            <div class="flex-1">
+                <label for="user_email" class="block text-sm font-medium text-gray-300 mb-2">User Email Address</label>
+                <input 
+                    type="email" 
+                    name="email" 
+                    id="user_email" 
+                    required 
+                    placeholder="user@example.com"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                @error('email')
+                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+            
+            <div class="pt-7">
+                <button 
+                    type="submit" 
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                >
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                    </svg>
+                    Reset Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function confirmSendEmails() {
     if (confirm('This will send welcome emails to all members with active subscriptions. Continue?')) {

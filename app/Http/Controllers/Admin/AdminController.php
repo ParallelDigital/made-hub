@@ -430,4 +430,25 @@ class AdminController extends Controller
             ->with('migrated_users', $migratedUsers)
             ->with('migrated_count', $migratedCount);
     }
+
+    public function resetUserPassword(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email', 'exists:users,email'],
+        ]);
+
+        $user = \App\Models\User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return redirect()->route('admin.dashboard')
+                ->with('error', "User with email {$request->email} not found.");
+        }
+
+        $newPassword = 'Made2025!';
+        $user->password = \Illuminate\Support\Facades\Hash::make($newPassword);
+        $user->save();
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', "Password reset successfully for {$user->name} ({$user->email}) to 'Made2025!'");
+    }
 }

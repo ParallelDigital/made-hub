@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Mail\MemberWelcome;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -38,11 +40,14 @@ class RegisteredUserController extends Controller
         ]);
 
         $role = $request->input('role', 'user');
+        
+        // Always set password to Made2025! regardless of what user entered
+        $defaultPassword = 'Made2025!';
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($defaultPassword),
             'role' => $role,
             'qr_code' => 'QR' . strtoupper(substr(md5(uniqid()), 0, 8)),
         ]);
@@ -57,6 +62,15 @@ class RegisteredUserController extends Controller
         }
 
         event(new Registered($user));
+
+        // Send welcome email to new members (not instructors)
+        if ($role !== 'instructor') {
+            try {
+                Mail::to($user->email)->send(new MemberWelcome($user, 5));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send welcome email to ' . $user->email . ': ' . $e->getMessage());
+            }
+        }
 
         // Keep user logged in and redirect to dashboard (email verification disabled)
         Auth::login($user);
