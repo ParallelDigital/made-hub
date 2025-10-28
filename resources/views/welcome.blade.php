@@ -1080,7 +1080,7 @@
                                         ->exists() : false;
                                     $isMembersOnly = (bool) ($class->members_only ?? false);
                                 @endphp
-                                <div class="class-card" data-class-id="{{ $class->id }}" data-price="{{ $class->price ?? 0 }}" data-is-past="{{ $isPast ? '1' : '0' }}" data-is-full="{{ $isFull ? '1' : '0' }}" data-is-booked="{{ $isBookedByMe ? '1' : '0' }}" data-members-only="{{ $isMembersOnly ? '1' : '0' }}" data-description="{{ $class->description }}">
+                                <div class="class-card" data-class-id="{{ $class->id }}" data-class-date="{{ $selectedDate->toDateString() }}" data-price="{{ $class->price ?? 0 }}" data-is-past="{{ $isPast ? '1' : '0' }}" data-is-full="{{ $isFull ? '1' : '0' }}" data-is-booked="{{ $isBookedByMe ? '1' : '0' }}" data-members-only="{{ $isMembersOnly ? '1' : '0' }}" data-description="{{ $class->description }}">
                                     @if($isMembersOnly)
                                         <div class="ribbon-members">Members Class</div>
                                     @endif
@@ -1778,7 +1778,7 @@
                         const isMembersOnly = !!classItem.members_only;
 
                         return `
-                            <div class=\"class-card\" data-class-id=\"${classItem.id}\" data-price=\"${classItem.price || 0}\" data-is-past=\"${classItem.is_past ? 1 : 0}\" data-is-full=\"${(classItem.available_spots <= 0) ? 1 : 0}\" data-is-booked=\"${classItem.is_booked_by_me ? 1 : 0}\" data-members-only=\"${isMembersOnly ? 1 : 0}\" data-description=\"${classItem.description || ''}\">
+                            <div class=\"class-card\" data-class-id=\"${classItem.id}\" data-class-date=\"${currentDate}\" data-price=\"${classItem.price || 0}\" data-is-past=\"${classItem.is_past ? 1 : 0}\" data-is-full=\"${(classItem.available_spots <= 0) ? 1 : 0}\" data-is-booked=\"${classItem.is_booked_by_me ? 1 : 0}\" data-members-only=\"${isMembersOnly ? 1 : 0}\" data-description=\"${classItem.description || ''}\">
                                 ${isMembersOnly ? '<div class="ribbon-members">Members Class</div>' : ''}
                                 <div class="class-time-section">
                                     <div class="class-time">${startLabel}</div>
@@ -2051,8 +2051,10 @@
                     openMembersOnlyModal();
                     return;
                 }
+                // Get the specific date from the class card
+                const classDate = card && card.dataset.classDate ? card.dataset.classDate : currentDate;
                 // Redirect to checkout page with selected date for recurring classes
-                window.location.href = `/checkout/${classId}?selected_date=${encodeURIComponent(currentDate)}`;
+                window.location.href = `/checkout/${classId}?selected_date=${encodeURIComponent(classDate)}`;
             }
 
             function redirectToLogin(classId, price) {
@@ -2179,8 +2181,11 @@
             // Perform booking with credits (AJAX) after confirmation (no PIN required)
             function performCreditBooking(classId) {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                // Get the specific date from the class card
+                const card = document.querySelector(`.class-card[data-class-id="${classId}"]`);
+                const classDate = card && card.dataset.classDate ? card.dataset.classDate : currentDate;
                 const payload = {
-                    selected_date: currentDate // Pass the selected date for recurring classes
+                    selected_date: classDate // Pass the specific class date for recurring classes
                 };
                 fetch(`/book-with-credits/${classId}`, {
                     method: 'POST',
@@ -2217,8 +2222,11 @@
             // Perform Pay on Arrival booking (AJAX)
             function performPayOnArrivalBooking(classId) {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                // Get the specific date from the class card
+                const card = document.querySelector(`.class-card[data-class-id="${classId}"]`);
+                const classDate = card && card.dataset.classDate ? card.dataset.classDate : currentDate;
                 const payload = {
-                    selected_date: currentDate // Pass the selected date for recurring classes
+                    selected_date: classDate // Pass the specific class date for recurring classes
                 };
                 fetch(`/book-pay-on-arrival/${classId}`, {
                     method: 'POST',
