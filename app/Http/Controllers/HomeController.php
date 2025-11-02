@@ -124,7 +124,10 @@ class HomeController extends Controller
 
         return response()->json([
             'classes' => $selectedDateClasses->map(function($class) use ($selectedDate, $request) {
-                $bookedCount = $class->bookings()->count();
+                $bookedCount = $class->bookings()
+                    ->where('booking_date', $selectedDate->toDateString())
+                    ->where('status', 'confirmed')
+                    ->count();
                 $availableSpots = $class->max_spots - $bookedCount;
                 
                 // Calculate duration properly handling overnight classes
@@ -155,7 +158,11 @@ class HomeController extends Controller
                 $isPast = $selectedStart ? $selectedStart->lessThan(\Carbon\Carbon::now('Europe/London')) : false;
                 
                 $user = $request->user();
-                $isBookedByMe = $user ? ($class->relationLoaded('bookings') ? $class->bookings->contains('user_id', $user->id) : $class->bookings()->where('user_id', $user->id)->exists()) : false;
+                $isBookedByMe = $user ? $class->bookings()
+                    ->where('user_id', $user->id)
+                    ->where('booking_date', $selectedDate->toDateString())
+                    ->where('status', 'confirmed')
+                    ->exists() : false;
 
                 return [
                     'id' => $class->id,
