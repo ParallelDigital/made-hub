@@ -104,6 +104,15 @@ class BookingController extends Controller
             try {
                 $class->loadMissing('instructor');
                 if ($class->instructor && $class->instructor->email) {
+                    // Log class state before sending email
+                    \Log::info('Sending instructor roster email (members-only booking)', [
+                        'class_id' => $class->id,
+                        'class_name' => $class->name,
+                        'max_spots' => $class->max_spots,
+                        'booking_id' => $booking->id,
+                        'booking_date' => $bookingDate,
+                        'instructor_email' => $class->instructor->email,
+                    ]);
                     Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
                 }
             } catch (\Exception $e) {
@@ -168,6 +177,13 @@ class BookingController extends Controller
             try {
                 $class->loadMissing('instructor');
                 if ($class->instructor && $class->instructor->email) {
+                    \Log::info('Sending instructor roster email (unlimited pass booking)', [
+                        'class_id' => $class->id,
+                        'class_name' => $class->name,
+                        'max_spots' => $class->max_spots,
+                        'booking_id' => $booking->id,
+                        'booking_date' => $bookingDate,
+                    ]);
                     Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
                 }
             } catch (\Exception $e) {
@@ -250,6 +266,13 @@ class BookingController extends Controller
         try {
             $class->loadMissing('instructor');
             if ($class->instructor && $class->instructor->email) {
+                \Log::info('Sending instructor roster email (credits booking)', [
+                    'class_id' => $class->id,
+                    'class_name' => $class->name,
+                    'max_spots' => $class->max_spots,
+                    'booking_id' => $booking->id,
+                    'booking_date' => $bookingDate,
+                ]);
                 Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
             }
         } catch (\Exception $e) {
@@ -342,6 +365,13 @@ class BookingController extends Controller
         try {
             $class->loadMissing('instructor');
             if ($class->instructor && $class->instructor->email) {
+                \Log::info('Sending instructor roster email (pay on arrival booking)', [
+                    'class_id' => $class->id,
+                    'class_name' => $class->name,
+                    'max_spots' => $class->max_spots,
+                    'booking_id' => $booking->id,
+                    'booking_date' => $bookingDate,
+                ]);
                 Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
             }
         } catch (\Exception $e) {
@@ -499,6 +529,13 @@ class BookingController extends Controller
             try {
                 $class->loadMissing('instructor');
                 if ($class->instructor && $class->instructor->email) {
+                    \Log::info('Sending instructor roster email (paid booking)', [
+                        'class_id' => $class->id,
+                        'class_name' => $class->name,
+                        'max_spots' => $class->max_spots,
+                        'booking_id' => $booking->id,
+                        'booking_date' => $bookingDate,
+                    ]);
                     Mail::to($class->instructor->email)->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
                 }
             } catch (\Exception $e) {

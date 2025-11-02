@@ -1069,6 +1069,7 @@
                                     // Compute booking state for data attributes and reuse below
                                     $currentBookings = App\Models\Booking::where('fitness_class_id', $class->id)
                                         ->where('booking_date', $selectedDate->toDateString())
+                                        ->where('status', 'confirmed')
                                         ->count();
                                     $availableSpots = max(0, $class->max_spots - $currentBookings);
                                     $isFull = $availableSpots <= 0;
@@ -1077,6 +1078,7 @@
                                     $isBookedByMe = auth()->check() ? App\Models\Booking::where('fitness_class_id', $class->id)
                                         ->where('booking_date', $selectedDate->toDateString())
                                         ->where('user_id', auth()->id())
+                                        ->where('status', 'confirmed')
                                         ->exists() : false;
                                     $isMembersOnly = (bool) ($class->members_only ?? false);
                                 @endphp

@@ -33,6 +33,8 @@ class InstructorClassRoster extends Mailable
 
     public function envelope(): Envelope
     {
+        // Refresh the class from database to ensure we have latest data
+        $this->class->refresh();
         $this->class->loadMissing(['instructor']);
 
         // Compute attendees count for subject - filter by booking_date for recurring classes
@@ -72,9 +74,11 @@ class InstructorClassRoster extends Mailable
 
     public function content(): Content
     {
-        // Load roster with users - filter by booking_date for recurring classes
+        // Refresh the class from database to ensure we have latest data
+        $this->class->refresh();
         $this->class->loadMissing(['instructor']);
         
+        // Load roster with users - filter by booking_date for recurring classes
         $attendees = Booking::where('fitness_class_id', $this->class->id)
             ->where('status', 'confirmed')
             ->when($this->bookingDate, function ($query) {
@@ -83,6 +87,15 @@ class InstructorClassRoster extends Mailable
             ->with('user')
             ->get()
             ->sortBy('user.name');
+
+        \Log::info('InstructorClassRoster email data', [
+            'class_id' => $this->class->id,
+            'class_name' => $this->class->name,
+            'max_spots' => $this->class->max_spots,
+            'booking_date' => $this->bookingDate,
+            'attendees_count' => $attendees->count(),
+            'context' => $this->context,
+        ]);
 
         return new Content(
             view: 'emails.instructor.class-roster',
