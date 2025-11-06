@@ -232,11 +232,18 @@ class PurchaseController extends Controller
             ['email' => $recipientEmail],
             [
                 'name' => ($session && ($session->metadata->name ?? null)) ? $session->metadata->name : 'Guest',
-                // Create a secure random password for new users; they can set their own later
-                'password' => Hash::make(bin2hex(random_bytes(16))),
+                'password' => Hash::make('Made2025!'),
+                'role' => 'subscriber',
                 'email_verified_at' => now(), // Consider the email verified since they made a purchase
             ]
         );
+
+        // Track if this is a new account
+        $isNewAccount = $user->wasRecentlyCreated;
+        $password = $isNewAccount ? 'Made2025!' : null;
+
+        // Check if user is a member
+        $isMember = $user->hasActiveMembership();
 
         // Login only if they checked out as account (signed in); keep guest otherwise (security)
         if ($checkoutMode === 'account' || $request->user()) {
@@ -244,33 +251,6 @@ class PurchaseController extends Controller
                 Auth::login($user);
             } catch (\Throwable $e) {
                 \Log::warning('Auto login after package purchase failed: '.$e->getMessage());
-            }
-        }
-
-        // If the account was just created, email them a password setup link
-        if ($user->wasRecentlyCreated) {
-            try {
-                $status = Password::sendResetLink(['email' => $user->email]);
-                
-                if ($status === Password::RESET_LINK_SENT) {
-                    \Log::info('Password setup link sent successfully to: ' . $user->email);
-                } else {
-                    \Log::warning('Failed to send password setup link to: ' . $user->email . ', Status: ' . $status);
-                }
-            } catch (\Throwable $e) {
-                \Log::error('Exception sending password setup link to: ' . $user->email . ', Error: ' . $e->getMessage());
-                
-                // Try to trigger the password reset more explicitly
-                try {
-                    $token = app('auth.password.broker')->createToken($user);
-                    \Log::info('Manual password reset token created for: ' . $user->email);
-                    
-                    // You could send a custom email here if needed
-                    // Mail::to($user)->send(new CustomPasswordSetupMail($token));
-                    
-                } catch (\Throwable $e2) {
-                    \Log::error('Failed to create manual password reset token: ' . $e2->getMessage());
-                }
             }
         }
 
@@ -285,20 +265,22 @@ class PurchaseController extends Controller
                 $allocatedMessage = '5 credits added (valid for 1 month).';
                 // Notify user
                 try {
-                    Mail::to($user->email)->send(new \App\Mail\CreditsAllocated($user, 5, 'credits', $user->getNonMemberAvailableCredits(), 'Valid for 1 month', 'Package Purchase'));
+                    Mail::to($user->email)->send(new \App\Mail\ClassPassConfirmed($user, 'credits', 5, $expiresAt, 'Package Purchase', $isNewAccount, $password, $isMember));
                 } catch (\Throwable $e) { \Log::warning('Credits email failed: '.$e->getMessage()); }
             } elseif ($type === 'package_10') {
                 $user->allocateCreditsWithExpiry(10, $expiresAt, 'package_purchase');
                 $allocated = true;
                 $allocatedMessage = '10 credits added (valid for 1 month).';
                 try {
-                    Mail::to($user->email)->send(new \App\Mail\CreditsAllocated($user, 10, 'credits', $user->getNonMemberAvailableCredits(), 'Valid for 1 month', 'Package Purchase'));
+                    Mail::to($user->email)->send(new \App\Mail\ClassPassConfirmed($user, 'credits', 10, $expiresAt, 'Package Purchase', $isNewAccount, $password, $isMember));
                 } catch (\Throwable $e) { \Log::warning('Credits email failed: '.$e->getMessage()); }
             } elseif ($type === 'unlimited') {
                 $user->activateUnlimitedPass($expiresAt, 'package_purchase');
                 $allocated = true;
                 $allocatedMessage = 'Unlimited pass activated for 1 month.';
-                // Optional: email notification could be added here
+                try {
+                    Mail::to($user->email)->send(new \App\Mail\ClassPassConfirmed($user, 'unlimited', null, $expiresAt, 'Package Purchase', $isNewAccount, $password, $isMember));
+                } catch (\Throwable $e) { \Log::warning('Unlimited pass email failed: '.$e->getMessage()); }
             } elseif ($type === 'membership') {
                 // For membership subscription, allocation is handled by Stripe webhooks/subscription logic.
                 $allocatedMessage = 'Membership purchase successful.';

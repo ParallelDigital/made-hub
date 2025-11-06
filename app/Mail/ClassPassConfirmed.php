@@ -16,14 +16,20 @@ class ClassPassConfirmed extends Mailable
     public ?int $credits;    // number of credits when passType='credits'
     public ?\Carbon\CarbonInterface $expiresAt;
     public string $source;
+    public bool $isNewAccount;
+    public ?string $password;
+    public bool $isMember;
 
-    public function __construct(User $user, string $passType, ?int $credits, ?\Carbon\CarbonInterface $expiresAt, string $source = 'Stripe Purchase')
+    public function __construct(User $user, string $passType, ?int $credits, ?\Carbon\CarbonInterface $expiresAt, string $source = 'Stripe Purchase', bool $isNewAccount = false, ?string $password = null, bool $isMember = false)
     {
         $this->user = $user;
         $this->passType = $passType;
         $this->credits = $credits;
         $this->expiresAt = $expiresAt;
         $this->source = $source;
+        $this->isNewAccount = $isNewAccount;
+        $this->password = $password;
+        $this->isMember = $isMember;
     }
 
     public function build(): self
@@ -41,6 +47,9 @@ class ClassPassConfirmed extends Mailable
                 'credits' => $this->credits,
                 'expiresAt' => $this->expiresAt,
                 'source' => $this->source,
+                'isNewAccount' => $this->isNewAccount,
+                'password' => $this->password,
+                'isMember' => $this->isMember,
             ]);
     }
 }

@@ -65,6 +65,7 @@ class BookingController extends Controller
             // Check if class is full (for recurring classes, check the specific date)
             $currentBookings = Booking::where('fitness_class_id', $classId)
                 ->where('booking_date', $bookingDate)
+                ->where('status', 'confirmed')
                 ->count();
             if ($currentBookings >= $class->max_spots) {
                 return response()->json(['success' => false, 'message' => 'This class is fully booked.'], 400);
@@ -139,6 +140,7 @@ class BookingController extends Controller
             // Check if class is full (for recurring classes, check the specific date)
             $currentBookings = Booking::where('fitness_class_id', $classId)
                 ->where('booking_date', $bookingDate)
+                ->where('status', 'confirmed')
                 ->count();
             if ($currentBookings >= $class->max_spots) {
                 return response()->json(['success' => false, 'message' => 'This class is fully booked.'], 400);
@@ -219,6 +221,7 @@ class BookingController extends Controller
         // Check if class is full (for recurring classes, check the specific date)
         $currentBookings = Booking::where('fitness_class_id', $classId)
             ->where('booking_date', $bookingDate)
+            ->where('status', 'confirmed')
             ->count();
         if ($currentBookings >= $class->max_spots) {
             return response()->json(['success' => false, 'message' => 'This class is fully booked.'], 400);
@@ -326,6 +329,7 @@ class BookingController extends Controller
         // Check if class is full (for recurring classes, check the specific date)
         $currentBookings = Booking::where('fitness_class_id', $classId)
             ->where('booking_date', $bookingDate)
+            ->where('status', 'confirmed')
             ->count();
         if ($currentBookings >= $class->max_spots) {
             return response()->json(['success' => false, 'message' => 'This class is fully booked.'], 400);
@@ -462,13 +466,8 @@ class BookingController extends Controller
             return redirect()->route('welcome')->with('error', 'Payment not completed.');
         }
 
-        // Ensure class still exists and not overbooked
+        // Ensure class still exists
         $class = FitnessClass::findOrFail($classId);
-        $currentBookings = Booking::where('fitness_class_id', $classId)->count();
-        if ($currentBookings >= $class->max_spots) {
-            \Log::warning('Class is fully booked', ['classId' => $classId, 'currentBookings' => $currentBookings, 'maxSpots' => $class->max_spots]);
-            return redirect()->route('welcome')->with('error', 'This class is now fully booked.');
-        }
 
         // Determine the booking date (from metadata) - ALWAYS use selected_date if provided
         $tz = 'Europe/London';
@@ -478,6 +477,21 @@ class BookingController extends Controller
             $bookingDate = \Carbon\Carbon::parse($selectedDate)->setTimezone($tz)->format('Y-m-d');
         } else {
             $bookingDate = \Carbon\Carbon::parse($class->class_date)->setTimezone($tz)->format('Y-m-d');
+        }
+
+        // Check if class is full for the specific date (after determining booking date)
+        $currentBookings = Booking::where('fitness_class_id', $classId)
+            ->where('booking_date', $bookingDate)
+            ->where('status', 'confirmed')
+            ->count();
+        if ($currentBookings >= $class->max_spots) {
+            \Log::warning('Class is fully booked', [
+                'classId' => $classId, 
+                'bookingDate' => $bookingDate,
+                'currentBookings' => $currentBookings, 
+                'maxSpots' => $class->max_spots
+            ]);
+            return redirect()->route('welcome')->with('error', 'This class is now fully booked.');
         }
 
         // Find or create user from session/customer_email

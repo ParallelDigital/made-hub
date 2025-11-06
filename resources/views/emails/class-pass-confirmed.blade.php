@@ -47,6 +47,19 @@
                     <p class="p">Pass expiry: <strong>{{ $expiryText }}</strong></p>
                 @endif
 
+                @if($isNewAccount && $password)
+                    <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:8px;padding:16px;margin:16px 0">
+                        <p style="margin:0 0 8px;color:#92400e;font-weight:600">🔐 Your Account Has Been Created</p>
+                        <p style="margin:0 0 8px;color:#78350f;line-height:1.6">We've created an account for you so you can access your dashboard and book classes.</p>
+                        <p style="margin:0 0 4px;color:#78350f"><strong>Email:</strong> {{ $user->email }}</p>
+                        <p style="margin:0;color:#78350f"><strong>Password:</strong> <code style="background:#fde68a;padding:2px 6px;border-radius:4px;font-size:14px">{{ $password }}</code></p>
+                    </div>
+                @endif
+
+                @if($isMember)
+                    <p class="p" style="color:#a78bfa">✨ You are a member! These credits are in addition to your monthly membership credits.</p>
+                @endif
+
                 <p class="p muted">Source: {{ $source }}</p>
 
                 <div style="margin:18px 0">

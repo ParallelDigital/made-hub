@@ -72,12 +72,15 @@ class SyncStripeClassPasses extends Command
                         ['email' => $email],
                         [
                             'name' => $session->metadata->name ?? 'Guest',
-                            'password' => bcrypt('temporary_password_' . time()),
+                            'password' => bcrypt('Made2025!'),
+                            'role' => 'subscriber',
                             'email_verified_at' => now(),
                         ]
                     );
 
-                    $wasNewUser = $user->wasRecentlyCreated;
+                    $isNewAccount = $user->wasRecentlyCreated;
+                    $password = $isNewAccount ? 'Made2025!' : null;
+                    $isMember = $user->hasActiveMembership();
 
                     // Check if they already have this type of pass from this time period
                     $sessionDate = Carbon::createFromTimestamp($session->created);
@@ -101,35 +104,30 @@ class SyncStripeClassPasses extends Command
                             $this->info("  → Allocated 5 class pass");
                             // Send confirmation email
                             try {
-                                Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 5, $expiresAt, 'Stripe Purchase'));
+                                Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 5, $expiresAt, 'Stripe Purchase', $isNewAccount, $password, $isMember));
                             } catch (\Throwable $e) { $this->warn("  → Failed to send pass email: " . $e->getMessage()); }
                             break;
                         case 'package_10':
                             $user->allocateCreditsWithExpiry(10, $expiresAt, 'stripe_purchase');
                             $this->info("  → Allocated 10 class pass");
                             try {
-                                Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 10, $expiresAt, 'Stripe Purchase'));
+                                Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 10, $expiresAt, 'Stripe Purchase', $isNewAccount, $password, $isMember));
                             } catch (\Throwable $e) { $this->warn("  → Failed to send pass email: " . $e->getMessage()); }
                             break;
                         case 'unlimited':
                             $user->activateUnlimitedPass($expiresAt, 'stripe_purchase');
                             $this->info("  → Allocated unlimited pass");
                             try {
-                                Mail::to($user->email)->send(new ClassPassConfirmed($user, 'unlimited', null, $expiresAt, 'Stripe Purchase'));
+                                Mail::to($user->email)->send(new ClassPassConfirmed($user, 'unlimited', null, $expiresAt, 'Stripe Purchase', $isNewAccount, $password, $isMember));
                             } catch (\Throwable $e) { $this->warn("  → Failed to send pass email: " . $e->getMessage()); }
                             break;
                     }
 
                     $created++;
 
-                    // Send password reset for newly created users
-                    if ($wasNewUser) {
-                        try {
-                            \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
-                            $this->line("  → Password reset link sent to new user");
-                        } catch (\Throwable $e) {
-                            $this->warn("  → Failed to send password reset: " . $e->getMessage());
-                        }
+                    // Log if this was a new account
+                    if ($isNewAccount) {
+                        $this->line("  → New account created with password: Made2025!");
                     }
 
                 } catch (\Exception $e) {

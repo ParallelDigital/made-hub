@@ -164,19 +164,18 @@ class StripeWebhookController extends Controller
             ['email' => $email],
             [
                 'name' => $session->metadata->name ?? 'Guest',
-                'password' => bcrypt('temporary_password_' . time()),
+                'password' => bcrypt('Made2025!'),
+                'role' => 'subscriber',
                 'email_verified_at' => now(),
             ]
         );
 
-        // Send password reset for new users
-        if ($user->wasRecentlyCreated) {
-            try {
-                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
-            } catch (\Throwable $e) {
-                Log::warning('Failed to send password reset for webhook-created user', ['user_id' => $user->id, 'error' => $e->getMessage()]);
-            }
-        }
+        // Track if this is a new account
+        $isNewAccount = $user->wasRecentlyCreated;
+        $password = $isNewAccount ? 'Made2025!' : null;
+
+        // Check if user is a member
+        $isMember = $user->hasActiveMembership();
 
         // Allocate the pass based on package type
         $expiresAt = now()->addMonth();
@@ -186,20 +185,20 @@ class StripeWebhookController extends Controller
                     $user->allocateCreditsWithExpiry(5, $expiresAt, 'stripe_purchase');
                     Log::info('5 class pass allocated via webhook', ['user_id' => $user->id]);
                     // Send confirmation email to user
-                    try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 5, $expiresAt, 'Stripe Purchase')); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
+                    try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 5, $expiresAt, 'Stripe Purchase', $isNewAccount, $password, $isMember)); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
                     // Send notification to all admin users
                     $this->notifyAdminsOfClassPassPurchase($user, 'credits', 5, $expiresAt, 'Stripe Purchase');
                     break;
                 case 'package_10':
                     $user->allocateCreditsWithExpiry(10, $expiresAt, 'stripe_purchase');
                     Log::info('10 class pass allocated via webhook', ['user_id' => $user->id]);
-                    try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 10, $expiresAt, 'Stripe Purchase')); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
+                    try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'credits', 10, $expiresAt, 'Stripe Purchase', $isNewAccount, $password, $isMember)); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
                     $this->notifyAdminsOfClassPassPurchase($user, 'credits', 10, $expiresAt, 'Stripe Purchase');
                     break;
                 case 'unlimited':
                     $user->activateUnlimitedPass($expiresAt, 'stripe_purchase');
                     Log::info('Unlimited pass allocated via webhook', ['user_id' => $user->id]);
-                    try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'unlimited', null, $expiresAt, 'Stripe Purchase')); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
+                    try { Mail::to($user->email)->send(new ClassPassConfirmed($user, 'unlimited', null, $expiresAt, 'Stripe Purchase', $isNewAccount, $password, $isMember)); } catch (\Throwable $e) { Log::warning('Failed to send class pass email', ['user_id' => $user->id, 'error' => $e->getMessage()]); }
                     $this->notifyAdminsOfClassPassPurchase($user, 'unlimited', null, $expiresAt, 'Stripe Purchase');
                     break;
                 default:
