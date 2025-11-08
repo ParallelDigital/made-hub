@@ -36,8 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('stripe:sync-class-passes --days=7')->daily('05:00');
     })
     ->withMiddleware(function (Middleware $middleware) {
-        // register global/route middleware here if you need
-        // e.g. $middleware->alias(['role' => \App\Http\Middleware\RoleMiddleware::class]);
+        // Register route middleware aliases
+        $middleware->alias([
+            'require.phone' => \App\Http\Middleware\RequirePhoneNumber::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Redirect to homepage on errors when enabled, for non-JSON requests

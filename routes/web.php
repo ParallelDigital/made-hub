@@ -179,7 +179,7 @@ Route::get('/user/checkin/{user}/{qr_code}', [App\Http\Controllers\BookingContro
     ->middleware('signed');
 Route::get('/qr-code/{user}', [App\Http\Controllers\UserController::class, 'generateQrCode'])
     ->name('user.qr-code')
-    ->middleware('auth');
+    ->middleware(['auth', 'require.phone']);
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
@@ -263,16 +263,22 @@ Route::get('/dashboard', function () {
         'quarter' => $quarter,
         'year' => $year,
     ]);
-})->middleware(['auth'])->name('dashboard');
+})->middleware(['auth', 'require.phone'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'require.phone'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Phone number completion (required for all users)
+Route::middleware('auth')->group(function () {
+    Route::get('/complete-phone', [App\Http\Controllers\Auth\CompletePhoneController::class, 'show'])->name('complete-phone.show');
+    Route::post('/complete-phone', [App\Http\Controllers\Auth\CompletePhoneController::class, 'store'])->name('complete-phone.store');
+});
+
 // Admin Routes
-Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'require.phone', \App\Http\Middleware\IsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
     Route::get('members', [App\Http\Controllers\Admin\UserController::class, 'members'])->name('members.index');
     Route::resource('instructors', App\Http\Controllers\Admin\InstructorController::class);
@@ -430,7 +436,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
 });
 
 // Instructor Routes
-Route::middleware(['auth', \App\Http\Middleware\IsInstructor::class])->prefix('instructor')->name('instructor.')->group(function () {
+Route::middleware(['auth', 'require.phone', \App\Http\Middleware\IsInstructor::class])->prefix('instructor')->name('instructor.')->group(function () {
     Route::get('dashboard', [App\Http\Controllers\InstructorDashboardController::class, 'index'])->name('dashboard');
     Route::get('classes/previous', [App\Http\Controllers\InstructorDashboardController::class, 'previousClasses'])->name('classes.previous');
     Route::get('classes/{class}/members/{date?}', [App\Http\Controllers\InstructorDashboardController::class, 'showMembers'])->name('classes.members');
