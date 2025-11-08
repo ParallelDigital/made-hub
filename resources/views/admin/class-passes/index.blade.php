@@ -170,27 +170,32 @@
                         $firstCreditPass = null;
                         $passSource = 'Unknown';
                         $passExpiry = null;
+                        $isActive = false;
                         
                         try {
                             $activeUnlimitedPass = $user->passes()->where('pass_type', 'unlimited')->where('expires_at', '>=', now()->toDateString())->orderBy('expires_at', 'desc')->first();
-                            $firstCreditPass = $user->passes()->where('pass_type', 'credits')->where('expires_at', '>=', now()->toDateString())->orderBy('expires_at', 'asc')->first();
+                            $firstCreditPass = $user->passes()->where('pass_type', 'credits')->where('expires_at', '>=', now()->toDateString())->where('credits', '>', 0)->orderBy('expires_at', 'asc')->first();
                         } catch (\Exception $e) {
                             // Fallback to old system
                         }
                         
-                        // Determine source and expiry
+                        // Determine source, expiry, and active status
                         if ($activeUnlimitedPass) {
                             $passSource = $activeUnlimitedPass->source;
                             $passExpiry = $activeUnlimitedPass->expires_at;
-                        } elseif ($firstCreditPass) {
+                            $isActive = true;
+                        } elseif ($firstCreditPass && $firstCreditPass->credits > 0) {
                             $passSource = $firstCreditPass->source;
                             $passExpiry = $firstCreditPass->expires_at;
-                        } else {
+                            $isActive = true;
+                        } elseif ($totalCredits > 0) {
+                            // Has credits from other passes or old system
+                            $isActive = true;
                             // Check old system for fallback display
                             if ($hasActiveUnlimited && $user->unlimited_pass_expires_at) {
                                 $passSource = 'legacy_system';
                                 $passExpiry = $user->unlimited_pass_expires_at;
-                            } elseif ($totalCredits > 0 && $user->credits_expires_at) {
+                            } elseif ($user->credits_expires_at && $user->credits_expires_at >= now()) {
                                 $passSource = 'legacy_system';
                                 $passExpiry = $user->credits_expires_at;
                             }
@@ -204,12 +209,27 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            @if($hasActiveUnlimited && $activeUnlimitedPass)
-                                <span class="font-semibold text-purple-300">Unlimited Pass</span>
+                            @if($activeUnlimitedPass || ($hasActiveUnlimited && !$totalCredits))
+                                <span class="inline-flex items-center font-semibold text-purple-300">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                    </svg>
+                                    Unlimited Pass
+                                </span>
                             @elseif($totalCredits > 0)
-                                <span class="font-semibold text-blue-300">{{ $totalCredits }} Credits</span>
+                                <span class="inline-flex items-center font-semibold text-blue-300">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    {{ $totalCredits }} Credit{{ $totalCredits !== 1 ? 's' : '' }}
+                                </span>
                             @else
-                                <span class="text-gray-500">No Active Pass</span>
+                                <span class="text-gray-500">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                    </svg>
+                                    No Active Pass
+                                </span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -223,12 +243,20 @@
                             {{ Str::title(str_replace('_', ' ', $passSource)) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                             @if($hasActiveUnlimited)
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-800 text-green-100">Active</span>
-                            @elseif($totalCredits > 0)
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-800 text-green-100">Active</span>
+                             @if($isActive)
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-800 text-green-100">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Active
+                                </span>
                             @else
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-800 text-red-100">Expired</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-800 text-red-100">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Expired
+                                </span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
