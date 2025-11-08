@@ -119,17 +119,24 @@ class UserController extends Controller
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => [
+                'nullable',
+                'string',
+                'regex:/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/',
+                'min:10',
+                'max:20'
+            ],
             'role' => 'required|string|max:255',
             'user_login' => 'nullable|string|max:255|unique:users,user_login,' . $user->id,
             'nickname' => 'nullable|string|max:255',
         ]);
 
         $user->update($request->only([
-            'name', 'first_name', 'last_name', 'email', 'role', 'user_login', 'nickname'
+            'name', 'first_name', 'last_name', 'email', 'phone', 'role', 'user_login', 'nickname'
         ]));
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User created successfully.');
+            ->with('success', 'User updated successfully.');
     }
 
     /**

@@ -62,6 +62,29 @@
 
                     <!-- Email verification disabled: removed unverified banner and resend button -->
                 </div>
+
+                <div>
+                    <x-input-label for="phone" :value="__('Phone Number')" class="text-gray-300 text-sm font-medium mb-1" />
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                            </svg>
+                        </div>
+                        <x-text-input 
+                            id="phone" 
+                            name="phone" 
+                            type="tel" 
+                            class="pl-10 w-full h-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg" 
+                            :value="old('phone', $user->phone)" 
+                            pattern="[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}"
+                            placeholder="e.g., +1 (555) 123-4567"
+                            autocomplete="tel" 
+                        />
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Accepted formats: +1234567890, (123) 456-7890, 123-456-7890</p>
+                    <x-input-error class="mt-1" :messages="$errors->get('phone')" />
+                </div>
             </div>
         </div>
 

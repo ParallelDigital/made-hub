@@ -41,6 +41,19 @@
                     @enderror
                 </div>
 
+                <!-- Phone -->
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-400">Phone Number</label>
+                    <input type="tel" name="phone" id="phone" value="{{ old('phone', $user->phone) }}"
+                           pattern="[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}"
+                           placeholder="e.g., +1 (555) 123-4567"
+                           class="mt-1 block w-full bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm h-10 px-3">
+                    <p class="mt-1 text-xs text-gray-500">Accepts: +1234567890, (123) 456-7890, 123-456-7890</p>
+                    @error('phone')
+                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- First Name -->
                 <div>
                     <label for="first_name" class="block text-sm font-medium text-gray-400">First Name</label>
