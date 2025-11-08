@@ -20,8 +20,9 @@ class InstructorDashboardController extends Controller
         }
 
         try {
-            // Get all instructor's classes
+            // Get all instructor's classes (only parent classes, not child instances)
             $allClasses = $user->instructor->fitnessClasses()
+                ->whereNull('parent_class_id')
                 ->orderBy('start_time')
                 ->get();
 
@@ -64,7 +65,35 @@ class InstructorDashboardController extends Controller
                 }
             }
 
-            $upcomingOccurrences = $upcomingOccurrences->sortBy(function ($occurrence) {
+            // Deduplicate occurrences by (name, date, start_time) and combine their bookings
+            $deduplicated = collect();
+            $grouped = $upcomingOccurrences->groupBy(function ($occurrence) {
+                $date = $occurrence->class_date instanceof \Carbon\Carbon 
+                    ? $occurrence->class_date->toDateString() 
+                    : (string) $occurrence->class_date;
+                return $occurrence->name . '|' . $date . '|' . $occurrence->start_time;
+            });
+            
+            foreach ($grouped as $key => $group) {
+                // Use the first occurrence as the base
+                $base = $group->first();
+                
+                // Combine all bookings from duplicate classes
+                $allBookings = collect();
+                foreach ($group as $occurrence) {
+                    $allBookings = $allBookings->merge($occurrence->bookings);
+                }
+                
+                // Remove duplicate bookings by user_id
+                $uniqueBookings = $allBookings->unique(function ($booking) {
+                    return $booking->user_id . '|' . $booking->booking_date;
+                });
+                
+                $base->setRelation('bookings', $uniqueBookings);
+                $deduplicated->push($base);
+            }
+            
+            $upcomingOccurrences = $deduplicated->sortBy(function ($occurrence) {
                 return [$occurrence->class_date, $occurrence->start_time];
             })->values();
         } catch (\Exception $e) {
