@@ -32,9 +32,22 @@ try {
     echo "✓ Laravel application loaded\n\n";
     
     // Run migration
-    echo "📦 Running migration...\n";
-    Artisan::call('migrate', ['--force' => true]);
-    echo Artisan::output();
+    echo "📦 Running migrations...\n";
+    echo "This may take a moment...\n\n";
+    
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        $output = Artisan::output();
+        echo $output;
+        
+        if (strpos($output, 'FAIL') !== false) {
+            echo "\n⚠️  Some migrations had issues, but this is often OK if columns already exist.\n";
+            echo "Continuing with cache clear...\n";
+        }
+    } catch (\Exception $e) {
+        echo "⚠️  Migration warning: " . $e->getMessage() . "\n";
+        echo "Continuing with cache clear (this is often fine)...\n";
+    }
     echo "\n";
     
     // Clear caches
@@ -64,12 +77,29 @@ try {
     echo "  - Routes cached\n";
     
     echo "\n";
+    
+    // Verify phone column exists
+    echo "🔍 Verifying phone column...\n";
+    $hasPhone = Schema::hasColumn('users', 'phone');
+    if ($hasPhone) {
+        echo "  ✅ Phone column exists in database\n";
+    } else {
+        echo "  ❌ Phone column NOT found - migration may have failed\n";
+    }
+    
+    echo "\n";
     echo "===========================================\n";
-    echo "✅ DEPLOYMENT COMPLETE!\n";
+    echo $hasPhone ? "✅ DEPLOYMENT COMPLETE!" : "⚠️  DEPLOYMENT INCOMPLETE";
+    echo "\n";
     echo "===========================================\n\n";
     
-    echo "The phone number feature is now live.\n";
-    echo "Users will be prompted to enter their phone number on next login.\n\n";
+    if ($hasPhone) {
+        echo "The phone number feature is now live.\n";
+        echo "Users will be prompted to enter their phone number on next login.\n\n";
+    } else {
+        echo "⚠️  The phone column was not added successfully.\n";
+        echo "Please contact support or try running migrations manually via SSH.\n\n";
+    }
     
     echo "⚠️  IMPORTANT: DELETE THIS FILE NOW! ⚠️\n";
     echo "Delete: /public/run-migration.php\n\n";

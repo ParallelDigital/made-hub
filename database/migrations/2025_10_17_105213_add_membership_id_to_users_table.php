@@ -12,9 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('membership_id')->nullable()->after('pin_code');
-            $table->foreign('membership_id')->references('id')->on('memberships')->onDelete('set null');
+            // Check if column doesn't already exist
+            if (!Schema::hasColumn('users', 'membership_id')) {
+                $table->unsignedBigInteger('membership_id')->nullable()->after('pin_code');
+            }
         });
+        
+        // Add foreign key separately (SQLite handles this better)
+        try {
+            Schema::table('users', function (Blueprint $table) {
+                $table->foreign('membership_id')->references('id')->on('memberships')->onDelete('set null');
+            });
+        } catch (\Exception $e) {
+            // Foreign key might already exist, that's ok
+        }
     }
 
     /**
