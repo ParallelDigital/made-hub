@@ -285,6 +285,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
     Route::get('memberships/export', [App\Http\Controllers\Admin\MembershipController::class, 'export'])->name('memberships.export');
     Route::resource('memberships', App\Http\Controllers\Admin\MembershipController::class);
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);
+    Route::get('class-passes/export', [App\Http\Controllers\Admin\ClassPassController::class, 'export'])->name('class-passes.export');
     Route::resource('class-passes', App\Http\Controllers\Admin\ClassPassController::class, ['parameters' => ['class-passes' => 'user']]);
     Route::get('class-passes/users/suggest', [App\Http\Controllers\Admin\ClassPassController::class, 'getUserSuggestions'])->name('class-passes.users.suggest');
     // Admin bookings list
