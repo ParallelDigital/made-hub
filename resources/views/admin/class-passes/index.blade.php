@@ -64,28 +64,85 @@
         </div>
 
         <!-- Filter Actions -->
-        <div class="flex gap-2 items-end mt-4">
-            @if($filter === 'active')
-                <button type="button" onclick="changeFilter('expired')" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
-                    Show Expired Passes
+        <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-end mt-4">
+            <!-- Toggle Buttons Group -->
+            <div class="flex gap-2 border border-gray-600 rounded-md overflow-hidden">
+                <button type="button" onclick="changeFilter('active')" 
+                        class="{{ $filter === 'active' ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }} px-4 py-2 font-medium transition-colors">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Active Passes
                 </button>
-            @else
-                <button type="button" onclick="changeFilter('active')" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
-                    Show Active Passes
+                <button type="button" onclick="changeFilter('all')" 
+                        class="{{ $filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }} px-4 py-2 font-medium transition-colors border-l border-gray-600">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                    </svg>
+                    All Passes
                 </button>
-            @endif
-            <button type="button" onclick="applyFilters()" class="bg-primary hover:bg-purple-400 text-black px-4 py-2 rounded-md font-medium transition-colors">
-                Apply Filters
-            </button>
-            <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
-                Clear
-            </button>
-            <button type="button" onclick="refreshPasses()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
-                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                Refresh
-            </button>
+                <button type="button" onclick="changeFilter('expired')" 
+                        class="{{ $filter === 'expired' ? 'bg-orange-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }} px-4 py-2 font-medium transition-colors border-l border-gray-600">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Expired
+                </button>
+            </div>
+            
+            <!-- Other Action Buttons -->
+            <div class="flex gap-2">
+                <button type="button" onclick="applyFilters()" class="bg-primary hover:bg-purple-400 text-black px-4 py-2 rounded-md font-medium transition-colors">
+                    Apply Filters
+                </button>
+                <button type="button" onclick="clearFilters()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                    Clear
+                </button>
+                <button type="button" onclick="refreshPasses()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Indicator -->
+    <div class="px-6 py-3 bg-gray-800/30 border-b border-gray-700">
+        <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-gray-400">Showing:</span>
+                @if($filter === 'active')
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-800/50 text-green-200 border border-green-600">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Active Passes (with credits)
+                    </span>
+                @elseif($filter === 'all')
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-800/50 text-blue-200 border border-blue-600">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                        </svg>
+                        All Passes
+                    </span>
+                @elseif($filter === 'expired')
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-800/50 text-orange-200 border border-orange-600">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Expired Passes
+                    </span>
+                @else
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-700 text-gray-300 border border-gray-600">
+                        {{ Str::title(str_replace('_', ' ', $filter)) }}
+                    </span>
+                @endif
+            </div>
+            <div class="text-gray-400">
+                <span class="font-medium text-white">{{ $users->total() }}</span> {{ Str::plural('result', $users->total()) }}
+            </div>
         </div>
     </div>
 
