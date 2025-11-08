@@ -33,25 +33,32 @@ class ClassPassController extends Controller
                 $q->orderBy('expires_at', 'desc');
             }]);
             if ($filter === 'active') {
-                // For active filter, show only users with active passes
+                // For active filter, show only users with TRULY ACTIVE passes (with remaining credits or valid unlimited)
                 $query->where(function ($q) {
+                    // New system: Check for active passes in user_passes table
                     $q->whereHas('passes', function ($subQ) {
                         $subQ->where(function ($passQ) {
+                            // Unlimited pass that hasn't expired
                             $passQ->where('pass_type', 'unlimited')
-                                  ->where('expires_at', '>=', now()->toDateString())
-                                  ->orWhere(function ($creditQ) {
-                                      $creditQ->where('pass_type', 'credits')
-                                              ->where('expires_at', '>=', now()->toDateString())
-                                              ->where('credits', '>', 0);
-                                  });
+                                  ->where('expires_at', '>=', now()->toDateString());
+                        })->orWhere(function ($creditQ) {
+                            // Credit pass with credits > 0 AND not expired
+                            $creditQ->where('pass_type', 'credits')
+                                    ->where('expires_at', '>=', now()->toDateString())
+                                    ->where('credits', '>', 0);
                         });
                     })
-                    ->orWhere('unlimited_pass_expires_at', '>=', now()->toDateString())
+                    // Old system: Only show if they have credits AND valid expiry (or no expiry set)
                     ->orWhere(function ($oldQ) {
                         $oldQ->where('credits', '>', 0)
                              ->where(function ($dateQ) {
                                  $dateQ->whereNull('credits_expires_at')
                                        ->orWhere('credits_expires_at', '>=', now()->toDateString());
+                             })
+                             // Ensure they don't have an expired unlimited pass taking precedence
+                             ->where(function ($unlimitedQ) {
+                                 $unlimitedQ->whereNull('unlimited_pass_expires_at')
+                                            ->orWhere('unlimited_pass_expires_at', '>=', now()->toDateString());
                              });
                     });
                 });
