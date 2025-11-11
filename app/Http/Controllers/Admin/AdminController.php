@@ -451,4 +451,71 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard')
             ->with('success', "Password reset successfully for {$user->name} ({$user->email}) to 'Made2025!'");
     }
+
+    public function refreshMemberCredits()
+    {
+        try {
+            // Find or create "member" membership
+            $memberMembership = \App\Models\Membership::where('name', 'member')->first();
+            
+            if (!$memberMembership) {
+                $memberMembership = \App\Models\Membership::create([
+                    'name' => 'member',
+                    'description' => 'Monthly Member',
+                    'price' => 0,
+                    'duration_days' => 30,
+                    'class_credits' => 5,
+                    'unlimited' => false,
+                    'active' => true,
+                ]);
+            }
+
+            // Get all users with active Stripe subscriptions
+            $members = \App\Models\User::whereNotNull('stripe_subscription_id')
+                ->whereIn('subscription_status', ['active', 'trialing'])
+                ->whereNotIn('role', ['admin', 'administrator', 'instructor'])
+                ->get();
+
+            $refreshedCount = 0;
+            $refreshedUsers = [];
+            $firstOfMonth = now()->startOfMonth()->toDateString();
+
+            foreach ($members as $user) {
+                // Ensure they have the member membership
+                if (!$user->membership_id) {
+                    $user->membership_id = $memberMembership->id;
+                    $user->membership_start_date = $user->membership_start_date ?? now()->toDateString();
+                    $user->membership_end_date = null;
+                }
+
+                // Ensure role is subscriber
+                if ($user->role !== 'subscriber') {
+                    $user->role = 'subscriber';
+                }
+
+                // Check if credits need refresh for this month
+                if (!$user->credits_last_refreshed || $user->credits_last_refreshed < $firstOfMonth) {
+                    $user->monthly_credits = 5;
+                    $user->credits_last_refreshed = $firstOfMonth;
+                    
+                    $refreshedUsers[] = $user->name . ' (' . $user->email . ') - ✅ Refreshed to 5 credits';
+                    $refreshedCount++;
+                }
+
+                $user->save();
+            }
+
+            $message = "Successfully refreshed credits for {$refreshedCount} members. Each member now has 5 monthly credits.";
+
+            return redirect()->route('admin.dashboard')
+                ->with('success', $message)
+                ->with('updated_users', $refreshedUsers)
+                ->with('updated_count', $refreshedCount);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to refresh member credits: ' . $e->getMessage());
+            return redirect()->route('admin.dashboard')
+                ->with('error', 'Failed to refresh member credits: ' . $e->getMessage());
+        }
+    }
 }

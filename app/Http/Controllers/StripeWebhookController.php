@@ -92,25 +92,21 @@ class StripeWebhookController extends Controller
             ['email' => $email],
             [
                 'name' => $session->metadata->name ?? 'Member',
-                'password' => bcrypt('temporary_password_' . time()),
+                'password' => bcrypt('Made2025!'),
+                'role' => 'subscriber',
+                'email_verified_at' => now(),
             ]
         );
 
-        // If user was created with temporary password, send password reset email
-        if ($user->wasRecentlyCreated) {
-            try {
-                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
-            } catch (\Throwable $e) {
-                Log::warning('Failed to send password reset for webhook-created user', ['user_id' => $user->id, 'error' => $e->getMessage()]);
-            }
-        }
+        // Track if this is a new account
+        $isNewAccount = $user->wasRecentlyCreated;
 
-        // Ensure we have a default membership (5 classes per calendar month)
+        // Ensure we have a "member" membership (5 classes per calendar month)
         $membership = Membership::firstOrCreate(
-            ['name' => 'MEMBERSHIP'],
+            ['name' => 'member'],
             [
-                'description' => 'Monthly membership with 5 class credits per month',
-                'price' => 30.00,
+                'description' => 'Monthly Member',
+                'price' => 0,
                 'duration_days' => 30,
                 'class_credits' => 5,
                 'unlimited' => false,
@@ -118,7 +114,8 @@ class StripeWebhookController extends Controller
             ]
         );
 
-        // Mark user as member
+        // Set role to subscriber and assign member membership
+        $user->role = 'subscriber';
         $user->membership_id = $membership->id;
         $user->membership_start_date = now()->toDateString();
         $user->membership_end_date = null; // open-ended until canceled
@@ -132,12 +129,18 @@ class StripeWebhookController extends Controller
             $user->subscription_status = 'active';
         }
 
-        // Grant immediate monthly credits (calendar month model)
+        // Grant immediate monthly credits (5 credits)
         $user->monthly_credits = 5;
         $user->credits_last_refreshed = now()->startOfMonth()->toDateString();
         $user->save();
 
-        Log::info('Membership activated via checkout.session.completed', ['user_id' => $user->id]);
+        Log::info('Membership activated via checkout.session.completed', [
+            'user_id' => $user->id,
+            'role' => 'subscriber',
+            'membership' => 'member',
+            'credits' => 5,
+            'is_new_account' => $isNewAccount
+        ]);
 
         // Send activation email
         try {
@@ -232,16 +235,17 @@ class StripeWebhookController extends Controller
         $membership = null;
         if ($user->stripe_subscription_id && !$user->membership_id) {
             $membership = Membership::firstOrCreate(
-                ['name' => 'MEMBERSHIP'],
+                ['name' => 'member'],
                 [
-                    'description' => 'Monthly membership with 5 class credits per month',
-                    'price' => 30.00,
+                    'description' => 'Monthly Member',
+                    'price' => 0,
                     'duration_days' => 30,
                     'class_credits' => 5,
                     'unlimited' => false,
                     'active' => true,
                 ]
             );
+            $user->role = 'subscriber';
             $user->membership_id = $membership->id;
             $user->membership_start_date = $user->membership_start_date ?: now()->toDateString();
             $user->membership_end_date = null;
@@ -255,10 +259,10 @@ class StripeWebhookController extends Controller
         if (!$user->hasActiveMembership()) {
             if (!$membership) {
                 $membership = Membership::firstOrCreate(
-                    ['name' => 'MEMBERSHIP'],
+                    ['name' => 'member'],
                     [
-                        'description' => 'Monthly membership with 5 class credits per month',
-                        'price' => 30.00,
+                        'description' => 'Monthly Member',
+                        'price' => 0,
                         'duration_days' => 30,
                         'class_credits' => 5,
                         'unlimited' => false,
@@ -266,6 +270,7 @@ class StripeWebhookController extends Controller
                     ]
                 );
             }
+            $user->role = 'subscriber';
             $user->membership_id = $membership->id;
             $user->membership_start_date = $user->membership_start_date ?: now()->toDateString();
             $user->membership_end_date = null;
@@ -314,16 +319,17 @@ class StripeWebhookController extends Controller
             $user->subscription_status = 'active';
             if (!$user->hasActiveMembership()) {
                 $membership = Membership::firstOrCreate(
-                    ['name' => 'MEMBERSHIP'],
+                    ['name' => 'member'],
                     [
-                        'description' => 'Monthly membership with 5 class credits per month',
-                        'price' => 30.00,
+                        'description' => 'Monthly Member',
+                        'price' => 0,
                         'duration_days' => 30,
                         'class_credits' => 5,
                         'unlimited' => false,
                         'active' => true,
                     ]
                 );
+                $user->role = 'subscriber';
                 $user->membership_id = $membership->id;
                 $user->membership_start_date = now()->toDateString();
                 $user->membership_end_date = null;

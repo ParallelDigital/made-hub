@@ -255,6 +255,16 @@
                     Setup Subscriber Role & Member Membership
                 </button>
             </form>
+            
+            <form action="{{ route('admin.refresh-member-credits') }}" method="POST" id="refreshCreditsForm">
+                @csrf
+                <button type="button" onclick="confirmRefreshCredits()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Refresh Member Credits (5 per month)
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -345,6 +355,19 @@ function confirmMigrateRoles() {
         // Disable button and show loading state
         button.disabled = true;
         button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Setting up...';
+        
+        form.submit();
+    }
+}
+
+function confirmRefreshCredits() {
+    if (confirm('This will refresh monthly credits for all active members:\n\n💳 Give 5 credits to members who haven\'t used credits this month\n🔄 Reset credits to 5 for the current month\n\nOnly affects users with active Stripe subscriptions.\n\nContinue?')) {
+        const form = document.getElementById('refreshCreditsForm');
+        const button = form.querySelector('button');
+        
+        // Disable button and show loading state
+        button.disabled = true;
+        button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Refreshing...';
         
         form.submit();
     }

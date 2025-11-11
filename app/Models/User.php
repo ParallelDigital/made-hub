@@ -189,17 +189,12 @@ class User extends Authenticatable
             return;
         }
 
-        // If user is on a Stripe subscription, rely on Stripe webhooks to top up credits
-        if (!empty($this->stripe_subscription_id)) {
-            return;
-        }
-
         $firstOfMonth = now()->startOfMonth()->toDateString();
         
         // If credits haven't been refreshed this month, refresh them
         if (!$this->credits_last_refreshed || $this->credits_last_refreshed < $firstOfMonth) {
-            // Only assign credits if membership explicitly defines class_credits; otherwise 0
-            $this->monthly_credits = $this->membership->class_credits ?? 0;
+            // Assign credits based on membership (5 for "member" membership)
+            $this->monthly_credits = $this->membership->class_credits ?? 5;
             $this->credits_last_refreshed = $firstOfMonth;
             $this->save();
         }
