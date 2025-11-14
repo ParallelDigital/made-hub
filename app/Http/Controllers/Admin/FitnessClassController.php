@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\FitnessClass;
 use App\Models\Instructor;
+use App\Mail\InstructorClassRoster;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class FitnessClassController extends Controller
 {
@@ -652,12 +655,25 @@ class FitnessClassController extends Controller
             ->where('status', 'confirmed')
             ->count();
 
+        Log::info('Attempting to send roster email', [
+            'class_id' => $class->id,
+            'class_name' => $class->name,
+            'booking_date' => $bookingDate,
+            'recipient_email' => $recipientEmail,
+            'booking_count' => $bookingCount,
+        ]);
+
         try {
             // Send the roster email to the specified address
-            \Illuminate\Support\Facades\Mail::to($recipientEmail)
-                ->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
+            Mail::to($recipientEmail)->send(new InstructorClassRoster($class, 'booking_update', $bookingDate));
 
-            $dateFormatted = \Carbon\Carbon::parse($bookingDate)->format('l, F j, Y');
+            $dateFormatted = Carbon::parse($bookingDate)->format('l, F j, Y');
+            
+            Log::info('Roster email sent successfully', [
+                'recipient_email' => $recipientEmail,
+                'class_name' => $class->name,
+                'booking_date' => $bookingDate,
+            ]);
             
             return back()->with('success', sprintf(
                 'Roster email sent to %s for %s on %s (%d booking%s)',
@@ -668,11 +684,12 @@ class FitnessClassController extends Controller
                 $bookingCount === 1 ? '' : 's'
             ));
         } catch (\Exception $e) {
-            \Log::error('Failed to send roster email', [
+            Log::error('Failed to send roster email', [
                 'class_id' => $class->id,
                 'booking_date' => $bookingDate,
                 'recipient_email' => $recipientEmail,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return back()->with('error', 'Failed to send roster email: ' . $e->getMessage());
