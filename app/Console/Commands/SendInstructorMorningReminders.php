@@ -20,30 +20,49 @@ class SendInstructorMorningReminders extends Command
         
         $this->info('Scanning for classes happening today: ' . $today);
 
-        // Find all classes happening today that haven't received a morning reminder yet
-        $classes = FitnessClass::with(['instructor', 'bookings.user'])
-            ->whereNull('instructor_morning_sent_at')
-            ->whereNotNull('class_date')
+        // Get all active classes with instructors
+        $allClasses = FitnessClass::with(['instructor'])
             ->whereNotNull('start_time')
-            ->whereDate('class_date', $today)
+            ->where('active', true)
             ->get();
 
         $sent = 0;
+        $processed = []; // Track which class+date combinations we've sent
 
-        foreach ($classes as $class) {
+        foreach ($allClasses as $class) {
             $email = $class->instructor?->email;
             if (!$email) {
-                $this->warn('No instructor email for class ID ' . $class->id);
                 continue;
             }
 
             try {
-                $bookingDate = $class->class_date ? $class->class_date->format('Y-m-d') : null;
-                Mail::to($email)->send(new InstructorClassRoster($class, 'morning_reminder', $bookingDate));
-                $class->instructor_morning_sent_at = now();
-                $class->save();
-                $sent++;
-                $this->info('Sent morning reminder for class ID ' . $class->id . ' (' . $class->name . ') to ' . $email);
+                // Check if we've already sent a morning reminder for this class+date
+                $key = $class->id . '|' . $today;
+                if (in_array($key, $processed)) {
+                    continue;
+                }
+
+                // Check if there are any bookings for this class today
+                $bookingCount = \App\Models\Booking::where('fitness_class_id', $class->id)
+                    ->where('booking_date', $today)
+                    ->where('status', 'confirmed')
+                    ->count();
+
+                // Only send if there are bookings today
+                if ($bookingCount > 0) {
+                    Mail::to($email)->send(new InstructorClassRoster($class, 'morning_reminder', $today));
+                    $processed[] = $key;
+                    $sent++;
+                    
+                    $this->info(sprintf(
+                        'Sent morning reminder for class ID %d (%s) on %s to %s - %d bookings',
+                        $class->id,
+                        $class->name,
+                        $today,
+                        $email,
+                        $bookingCount
+                    ));
+                }
             } catch (\Throwable $e) {
                 $this->error('Failed to send morning reminder for class ID ' . $class->id . ': ' . $e->getMessage());
             }

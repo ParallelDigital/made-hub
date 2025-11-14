@@ -19,47 +19,62 @@ class SendInstructorReminders extends Command
         // Target window: classes starting about 60 minutes from now, within a 2-minute window
         $start = $now->copy()->addHour()->subMinutes(1)->startOfMinute();
         $end = $now->copy()->addHour()->addMinutes(1)->endOfMinute();
+        $targetDate = $start->toDateString();
 
         $this->info('Scanning for classes starting between ' . $start . ' and ' . $end);
 
-        $classes = FitnessClass::with(['instructor', 'bookings.user'])
-            ->whereNull('instructor_reminder_sent_at')
-            ->whereNotNull('class_date')
+        // Get all active classes with instructors
+        $allClasses = FitnessClass::with(['instructor'])
             ->whereNotNull('start_time')
-            ->get()
-            ->filter(function ($class) use ($start, $end) {
-                try {
-                    // Parse start_time as Carbon regardless of whether it includes a date
-                    $parsed = Carbon::parse($class->start_time);
-                    if ($class->class_date) {
-                        // Combine the stored date with the parsed time portion
-                        $timeStr = $parsed->format('H:i:s');
-                        $classStart = Carbon::parse($class->class_date->toDateString() . ' ' . $timeStr);
-                    } else {
-                        $classStart = $parsed;
-                    }
-                } catch (\Throwable $e) {
-                    return false;
-                }
-                return $classStart->betweenIncluded($start, $end);
-            });
+            ->where('active', true)
+            ->get();
 
         $sent = 0;
+        $processed = []; // Track which class+date combinations we've sent
 
-        foreach ($classes as $class) {
-            $email = $class->instructor?->email;
-            if (!$email) {
-                $this->warn('No instructor email for class ID ' . $class->id);
-                continue;
-            }
-
+        foreach ($allClasses as $class) {
             try {
-                $bookingDate = $class->class_date ? $class->class_date->format('Y-m-d') : null;
-                Mail::to($email)->send(new InstructorClassRoster($class, 'reminder', $bookingDate));
-                $class->instructor_reminder_sent_at = now();
-                $class->save();
+                // Parse start_time
+                $parsed = Carbon::parse($class->start_time);
+                $timeStr = $parsed->format('H:i:s');
+                $classStart = Carbon::parse($targetDate . ' ' . $timeStr);
+
+                // Check if this class starts in our target window
+                if (!$classStart->betweenIncluded($start, $end)) {
+                    continue;
+                }
+
+                // Check if we've already sent a reminder for this class+date
+                $key = $class->id . '|' . $targetDate;
+                if (in_array($key, $processed)) {
+                    continue;
+                }
+
+                $email = $class->instructor?->email;
+                if (!$email) {
+                    $this->warn('No instructor email for class ID ' . $class->id);
+                    continue;
+                }
+
+                // Check if there are any bookings for this class on this date
+                $bookingCount = \App\Models\Booking::where('fitness_class_id', $class->id)
+                    ->where('booking_date', $targetDate)
+                    ->where('status', 'confirmed')
+                    ->count();
+
+                // Send reminder even if no bookings (instructor should know)
+                Mail::to($email)->send(new InstructorClassRoster($class, 'reminder', $targetDate));
+                $processed[] = $key;
                 $sent++;
-                $this->info('Sent reminder for class ID ' . $class->id . ' to ' . $email);
+                
+                $this->info(sprintf(
+                    'Sent reminder for class ID %d (%s) on %s to %s - %d bookings',
+                    $class->id,
+                    $class->name,
+                    $targetDate,
+                    $email,
+                    $bookingCount
+                ));
             } catch (\Throwable $e) {
                 $this->error('Failed to send reminder for class ID ' . $class->id . ': ' . $e->getMessage());
             }
