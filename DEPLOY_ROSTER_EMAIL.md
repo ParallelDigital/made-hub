@@ -18,10 +18,15 @@ The following files need to be uploaded to your live server:
 3. **routes/web.php**
    - Added route: `admin.classes.send-roster`
 
-## IMPORTANT: What Was Fixed
+## IMPORTANT: What Was Fixed (FINAL VERSION)
 - **Email input was not being submitted with the form** - Now uses hidden input and onsubmit handler
 - **Email sending matches the working pattern** used in BookingController
 - Form validation added to ensure email is not empty
+- **DATE CONTEXT FIXED**: Button automatically uses the date you're viewing
+  - If you click on Nov 18 from calendar → Button sends roster for Nov 18
+  - If you click on Nov 25 from calendar → Button sends roster for Nov 25
+  - No manual date selection needed - it works like the admin view!
+- This ensures the email shows the correct booking count (e.g., 3/10 instead of 0/10)
 
 ## Deployment Steps
 

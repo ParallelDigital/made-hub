@@ -655,12 +655,24 @@ class FitnessClassController extends Controller
             ->where('status', 'confirmed')
             ->count();
 
+        // Get all bookings for debugging
+        $allBookings = \App\Models\Booking::where('fitness_class_id', $class->id)
+            ->where('status', 'confirmed')
+            ->get(['id', 'booking_date', 'status'])
+            ->groupBy('booking_date')
+            ->map(function($group) {
+                return $group->count();
+            });
+
         Log::info('Attempting to send roster email', [
             'class_id' => $class->id,
             'class_name' => $class->name,
-            'booking_date' => $bookingDate,
+            'class_date_from_db' => $class->class_date ? $class->class_date->format('Y-m-d') : null,
+            'booking_date_requested' => $bookingDate,
             'recipient_email' => $recipientEmail,
-            'booking_count' => $bookingCount,
+            'booking_count_for_date' => $bookingCount,
+            'all_bookings_by_date' => $allBookings->toArray(),
+            'is_recurring' => $class->isRecurring(),
         ]);
 
         try {

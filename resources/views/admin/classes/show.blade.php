@@ -339,25 +339,40 @@
         <div class="p-5">
             <div class="mb-4">
                 <h4 class="text-white font-medium mb-2">{{ $class->name }}</h4>
-                <p class="text-gray-400 text-sm mb-3">
+                <p class="text-gray-400 text-sm mb-1">
+                    <strong>Date:</strong> 
                     @if(isset($filterDate))
-                        {{ \Carbon\Carbon::parse($filterDate)->format('l, F j, Y') }} at {{ $class->start_time }}
+                        {{ \Carbon\Carbon::parse($filterDate)->format('l, F j, Y') }}
                     @elseif($class->display_date ?? false)
-                        {{ $class->display_date->format('l, F j, Y') }} at {{ $class->start_time }}
+                        {{ $class->display_date->format('l, F j, Y') }}
                     @else
-                        {{ $class->class_date->format('l, F j, Y') }} at {{ $class->start_time }}
+                        {{ $class->class_date->format('l, F j, Y') }}
                     @endif
+                </p>
+                <p class="text-gray-400 text-sm mb-1">
+                    <strong>Time:</strong> {{ $class->start_time }}
                 </p>
                 @if($class->instructor)
                     <p class="text-gray-400 text-sm">
-                        Instructor: <span class="text-white">{{ $class->instructor->name }}</span> ({{ $class->instructor->email }})
+                        <strong>Instructor:</strong> <span class="text-white">{{ $class->instructor->name }}</span> ({{ $class->instructor->email }})
                     </p>
                 @endif
             </div>
 
+            @if($class->isRecurring() && !isset($filterDate))
+                <div class="mb-4 p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg">
+                    <p class="text-sm text-yellow-200">
+                        <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <strong>Note:</strong> This is a recurring class. To send a roster for a specific date, click on that date from the calendar or class list first, then use this button.
+                    </p>
+                </div>
+            @endif
+
             <div class="mb-4">
                 <label for="roster_email" class="block text-sm font-medium text-gray-300 mb-2">
-                    Send to Email Address
+                    Send to Email Address <span class="text-red-400">*</span>
                 </label>
                 <input 
                     type="email" 
@@ -391,7 +406,7 @@
                 <button type="button" onclick="closeSendRosterModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
                     Cancel
                 </button>
-                <form id="send-roster-form" action="{{ route('admin.classes.send-roster', $class) }}" method="POST" class="inline" onsubmit="return addEmailToForm()">
+                <form id="send-roster-form" action="{{ route('admin.classes.send-roster', $class) }}" method="POST" class="inline" onsubmit="return prepareRosterForm()">
                     @csrf
                     <input type="hidden" name="date" value="@if(isset($filterDate)){{ $filterDate }}@elseif($class->display_date ?? false){{ $class->display_date->format('Y-m-d') }}@else{{ $class->class_date->format('Y-m-d') }}@endif">
                     <input type="hidden" name="email" id="hidden_roster_email" value="">
@@ -447,7 +462,7 @@ function closeSendRosterModal() {
     document.getElementById('sendRosterModal').style.display = 'none';
 }
 
-function addEmailToForm() {
+function prepareRosterForm() {
     const email = document.getElementById('roster_email').value;
     
     // Validate email is not empty
@@ -456,7 +471,7 @@ function addEmailToForm() {
         return false;
     }
     
-    // Set the hidden input value
+    // Set the hidden email input value
     document.getElementById('hidden_roster_email').value = email;
     
     // Allow form to submit
