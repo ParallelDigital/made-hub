@@ -649,15 +649,15 @@ class FitnessClassController extends Controller
         $bookingDate = $request->input('date');
         $recipientEmail = $request->input('email');
 
-        // Count bookings for this date
+        // Count bookings for this date (include both confirmed and pending_payment)
         $bookingCount = \App\Models\Booking::where('fitness_class_id', $class->id)
             ->where('booking_date', $bookingDate)
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['confirmed', 'pending_payment'])
             ->count();
 
         // Get all bookings for debugging
         $allBookings = \App\Models\Booking::where('fitness_class_id', $class->id)
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['confirmed', 'pending_payment'])
             ->get(['id', 'booking_date', 'status'])
             ->groupBy('booking_date')
             ->map(function($group) {

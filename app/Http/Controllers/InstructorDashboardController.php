@@ -33,9 +33,10 @@ class InstructorDashboardController extends Controller
             foreach ($allClasses as $class) {
                 if ($class->isRecurring()) {
                     // For recurring classes, get all future booking dates
+                    // Include both confirmed and pending_payment (pay on arrival) bookings
                     $bookingDates = Booking::where('fitness_class_id', $class->id)
                         ->where('booking_date', '>=', now()->toDateString())
-                        ->where('status', 'confirmed')
+                        ->whereIn('status', ['confirmed', 'pending_payment'])
                         ->select('booking_date')
                         ->distinct()
                         ->orderBy('booking_date')
@@ -48,9 +49,10 @@ class InstructorDashboardController extends Controller
                         $occurrence->class_date = $date;
                         
                         // Load bookings for this specific date - try multiple strategies
+                        // Include both confirmed and pending_payment (pay on arrival) bookings
                         $bookings = Booking::where('fitness_class_id', $class->id)
                             ->where('booking_date', $date)
-                            ->where('status', 'confirmed')
+                            ->whereIn('status', ['confirmed', 'pending_payment'])
                             ->with('user')
                             ->get();
                         
@@ -58,7 +60,7 @@ class InstructorDashboardController extends Controller
                         if ($bookings->isEmpty()) {
                             $bookings = Booking::where('fitness_class_id', $class->id)
                                 ->whereDate('booking_date', $date)
-                                ->where('status', 'confirmed')
+                                ->whereIn('status', ['confirmed', 'pending_payment'])
                                 ->with('user')
                                 ->get();
                         }
@@ -93,8 +95,9 @@ class InstructorDashboardController extends Controller
                     // For non-recurring classes, show if the class date is in the future
                     if ($class->class_date >= now()->toDateString()) {
                         // Load bookings for this class
+                        // Include both confirmed and pending_payment (pay on arrival) bookings
                         $bookings = Booking::where('fitness_class_id', $class->id)
-                            ->where('status', 'confirmed')
+                            ->whereIn('status', ['confirmed', 'pending_payment'])
                             ->with('user')
                             ->get();
                         
@@ -245,10 +248,11 @@ class InstructorDashboardController extends Controller
         }
 
         // If a specific date is provided, filter by that date; otherwise show all
+        // Include both confirmed and pending_payment (pay on arrival) bookings
         if ($date) {
             // Filter by specific date
             $members = Booking::where('fitness_class_id', $class->id)
-                ->where('status', 'confirmed')
+                ->whereIn('status', ['confirmed', 'pending_payment'])
                 ->where('booking_date', $date)
                 ->with('user')
                 ->orderBy('booking_date')
@@ -257,7 +261,7 @@ class InstructorDashboardController extends Controller
             // Fallback: Try whereDate if exact match returns nothing
             if ($members->isEmpty()) {
                 $members = Booking::where('fitness_class_id', $class->id)
-                    ->where('status', 'confirmed')
+                    ->whereIn('status', ['confirmed', 'pending_payment'])
                     ->whereDate('booking_date', $date)
                     ->with('user')
                     ->orderBy('booking_date')
@@ -266,7 +270,7 @@ class InstructorDashboardController extends Controller
         } else {
             // Show ALL bookings for this class (across all dates), just like admin panel
             $members = Booking::where('fitness_class_id', $class->id)
-                ->where('status', 'confirmed')
+                ->whereIn('status', ['confirmed', 'pending_payment'])
                 ->with('user')
                 ->orderBy('booking_date')
                 ->get();

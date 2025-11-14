@@ -38,8 +38,9 @@ class InstructorClassRoster extends Mailable
         $this->class->loadMissing(['instructor']);
 
         // Compute attendees count for subject - filter by booking_date for recurring classes
+        // Include both confirmed and pending_payment (pay on arrival) bookings
         $attendeesCount = Booking::where('fitness_class_id', $this->class->id)
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['confirmed', 'pending_payment'])
             ->when($this->bookingDate, function ($query) {
                 $query->where('booking_date', $this->bookingDate);
             })
@@ -48,7 +49,7 @@ class InstructorClassRoster extends Mailable
         // Fallback: If no bookings found with exact date, try whereDate
         if ($attendeesCount === 0 && $this->bookingDate) {
             $attendeesCount = Booking::where('fitness_class_id', $this->class->id)
-                ->where('status', 'confirmed')
+                ->whereIn('status', ['confirmed', 'pending_payment'])
                 ->whereDate('booking_date', $this->bookingDate)
                 ->count();
         }
@@ -87,9 +88,10 @@ class InstructorClassRoster extends Mailable
         $this->class->loadMissing(['instructor']);
         
         // Load roster with users - filter by booking_date for recurring classes
+        // Include both confirmed and pending_payment (pay on arrival) bookings
         // Try multiple strategies to ensure we find bookings even with date format inconsistencies
         $attendees = Booking::where('fitness_class_id', $this->class->id)
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['confirmed', 'pending_payment'])
             ->when($this->bookingDate, function ($query) {
                 $query->where('booking_date', $this->bookingDate);
             })
@@ -99,7 +101,7 @@ class InstructorClassRoster extends Mailable
         // Fallback: If no bookings found and we have a booking date, try with whereDate
         if ($attendees->isEmpty() && $this->bookingDate) {
             $attendees = Booking::where('fitness_class_id', $this->class->id)
-                ->where('status', 'confirmed')
+                ->whereIn('status', ['confirmed', 'pending_payment'])
                 ->whereDate('booking_date', $this->bookingDate)
                 ->with('user')
                 ->get();
@@ -107,7 +109,7 @@ class InstructorClassRoster extends Mailable
         
         // Final fallback: Check if bookings exist for this class on ANY date (helps identify the issue)
         $totalBookingsAnyDate = Booking::where('fitness_class_id', $this->class->id)
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['confirmed', 'pending_payment'])
             ->count();
         
         $attendees = $attendees->sortBy('user.name');
