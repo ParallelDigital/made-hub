@@ -47,12 +47,21 @@ class InstructorDashboardController extends Controller
                         $occurrence->id = $class->id;
                         $occurrence->class_date = $date;
                         
-                        // Load bookings for this specific date
+                        // Load bookings for this specific date - try multiple strategies
                         $bookings = Booking::where('fitness_class_id', $class->id)
                             ->where('booking_date', $date)
                             ->where('status', 'confirmed')
                             ->with('user')
                             ->get();
+                        
+                        // Fallback: If no bookings found with exact date match, try date without time
+                        if ($bookings->isEmpty()) {
+                            $bookings = Booking::where('fitness_class_id', $class->id)
+                                ->whereDate('booking_date', $date)
+                                ->where('status', 'confirmed')
+                                ->with('user')
+                                ->get();
+                        }
                         
                         $occurrence->setRelation('bookings', $bookings);
                         $upcomingOccurrences->push($occurrence);
@@ -138,8 +147,19 @@ class InstructorDashboardController extends Controller
         // Debug: Log the results to help troubleshoot
         \Log::info('Instructor Dashboard Debug', [
             'instructor_id' => $user->instructor->id,
+            'instructor_name' => $user->instructor->name,
             'classes_count' => $upcomingOccurrences->count(),
             'total_bookings' => $upcomingOccurrences->sum(function($class) { return $class->bookings->count(); }),
+            'occurrences' => $upcomingOccurrences->map(function($class) {
+                return [
+                    'class_id' => $class->id,
+                    'name' => $class->name,
+                    'date' => $class->class_date,
+                    'time' => $class->start_time,
+                    'bookings_count' => $class->bookings->count(),
+                    'max_spots' => $class->max_spots,
+                ];
+            })->toArray(),
         ]);
 
         return view('instructor.dashboard', [
@@ -224,23 +244,46 @@ class InstructorDashboardController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Show ALL bookings for this class (across all dates), just like admin panel
-        $members = Booking::where('fitness_class_id', $class->id)
-            ->where('status', 'confirmed')
-            ->with('user')
-            ->orderBy('booking_date')
-            ->get();
+        // If a specific date is provided, filter by that date; otherwise show all
+        if ($date) {
+            // Filter by specific date
+            $members = Booking::where('fitness_class_id', $class->id)
+                ->where('status', 'confirmed')
+                ->where('booking_date', $date)
+                ->with('user')
+                ->orderBy('booking_date')
+                ->get();
+            
+            // Fallback: Try whereDate if exact match returns nothing
+            if ($members->isEmpty()) {
+                $members = Booking::where('fitness_class_id', $class->id)
+                    ->where('status', 'confirmed')
+                    ->whereDate('booking_date', $date)
+                    ->with('user')
+                    ->orderBy('booking_date')
+                    ->get();
+            }
+        } else {
+            // Show ALL bookings for this class (across all dates), just like admin panel
+            $members = Booking::where('fitness_class_id', $class->id)
+                ->where('status', 'confirmed')
+                ->with('user')
+                ->orderBy('booking_date')
+                ->get();
+        }
 
         // Debug logging
-        \Log::info('Instructor showMembers - All bookings', [
+        \Log::info('Instructor showMembers', [
             'class_id' => $class->id,
             'class_name' => $class->name,
+            'date_filter' => $date ?? 'all dates',
             'members_count' => $members->count(),
             'members_data' => $members->map(function($b) {
                 return [
                     'user' => $b->user->name ?? 'N/A',
                     'booking_date' => $b->booking_date,
-                    'status' => $b->status
+                    'status' => $b->status,
+                    'booking_id' => $b->id,
                 ];
             })->toArray()
         ]);
