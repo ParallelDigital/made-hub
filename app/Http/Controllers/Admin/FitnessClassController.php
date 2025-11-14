@@ -640,14 +640,11 @@ class FitnessClassController extends Controller
     {
         $request->validate([
             'date' => 'required|date',
+            'email' => 'required|email',
         ]);
 
         $bookingDate = $request->input('date');
-
-        // Check if class has an instructor
-        if (!$class->instructor || !$class->instructor->email) {
-            return back()->with('error', 'This class has no instructor assigned or instructor has no email.');
-        }
+        $recipientEmail = $request->input('email');
 
         // Count bookings for this date
         $bookingCount = \App\Models\Booking::where('fitness_class_id', $class->id)
@@ -656,15 +653,15 @@ class FitnessClassController extends Controller
             ->count();
 
         try {
-            // Send the roster email
-            \Illuminate\Support\Facades\Mail::to($class->instructor->email)
+            // Send the roster email to the specified address
+            \Illuminate\Support\Facades\Mail::to($recipientEmail)
                 ->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
 
             $dateFormatted = \Carbon\Carbon::parse($bookingDate)->format('l, F j, Y');
             
             return back()->with('success', sprintf(
                 'Roster email sent to %s for %s on %s (%d booking%s)',
-                $class->instructor->name,
+                $recipientEmail,
                 $class->name,
                 $dateFormatted,
                 $bookingCount,
@@ -674,6 +671,7 @@ class FitnessClassController extends Controller
             \Log::error('Failed to send roster email', [
                 'class_id' => $class->id,
                 'booking_date' => $bookingDate,
+                'recipient_email' => $recipientEmail,
                 'error' => $e->getMessage(),
             ]);
 

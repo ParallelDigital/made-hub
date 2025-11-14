@@ -355,12 +355,35 @@
                 @endif
             </div>
 
+            <div class="mb-4">
+                <label for="roster_email" class="block text-sm font-medium text-gray-300 mb-2">
+                    Send to Email Address
+                </label>
+                <input 
+                    type="email" 
+                    id="roster_email" 
+                    name="email"
+                    class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter email address"
+                    @if($class->instructor)
+                        value="{{ $class->instructor->email }}"
+                    @endif
+                >
+                <p class="mt-1 text-xs text-gray-400">
+                    @if($class->instructor)
+                        Defaults to instructor's email. You can change it to send to a different address.
+                    @else
+                        Enter the email address to send the roster to.
+                    @endif
+                </p>
+            </div>
+
             <div class="mb-4 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
                 <p class="text-sm text-blue-200">
                     <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    This will send the current class roster to the instructor via email.
+                    This will send the current class roster to the specified email address.
                 </p>
             </div>
 
@@ -424,6 +447,18 @@ function closeSendRosterModal() {
 }
 
 function submitSendRoster() {
+    const email = document.getElementById('roster_email').value;
+    
+    // Create hidden input for email if it doesn't exist
+    let emailInput = document.querySelector('#send-roster-form input[name="email"]');
+    if (!emailInput) {
+        emailInput = document.createElement('input');
+        emailInput.type = 'hidden';
+        emailInput.name = 'email';
+        document.getElementById('send-roster-form').appendChild(emailInput);
+    }
+    emailInput.value = email;
+    
     document.getElementById('send-roster-form').submit();
 }
 
