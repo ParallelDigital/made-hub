@@ -23,6 +23,7 @@ class InstructorDashboardController extends Controller
             // Get all instructor's classes (only parent classes, not child instances)
             $allClasses = $user->instructor->fitnessClasses()
                 ->whereNull('parent_class_id')
+                ->where('active', true)
                 ->orderBy('start_time')
                 ->get();
 
@@ -30,38 +31,67 @@ class InstructorDashboardController extends Controller
             $upcomingOccurrences = collect();
             
             foreach ($allClasses as $class) {
-                // Get all future booking dates for this class
-                $bookingDates = Booking::where('fitness_class_id', $class->id)
-                    ->where('booking_date', '>=', now()->toDateString())
-                    ->where('status', 'confirmed')
-                    ->select('booking_date')
-                    ->distinct()
-                    ->orderBy('booking_date')
-                    ->pluck('booking_date');
-                
-                // Create a separate occurrence for each booking date
-                foreach ($bookingDates as $date) {
-                    $occurrence = $class->replicate();
-                    $occurrence->id = $class->id;
-                    $occurrence->class_date = $date;
-                    
-                    // Load bookings for this specific date
-                    $bookings = Booking::where('fitness_class_id', $class->id)
-                        ->where('booking_date', $date)
+                if ($class->isRecurring()) {
+                    // For recurring classes, get all future booking dates
+                    $bookingDates = Booking::where('fitness_class_id', $class->id)
+                        ->where('booking_date', '>=', now()->toDateString())
                         ->where('status', 'confirmed')
-                        ->with('user')
-                        ->get();
+                        ->select('booking_date')
+                        ->distinct()
+                        ->orderBy('booking_date')
+                        ->pluck('booking_date');
                     
-                    $occurrence->setRelation('bookings', $bookings);
-                    $upcomingOccurrences->push($occurrence);
-                }
-                
-                // Also include if the class itself has a future date with no bookings yet
-                if ($class->class_date >= now()->toDateString() && !$bookingDates->contains($class->class_date)) {
-                    $occurrence = $class->replicate();
-                    $occurrence->id = $class->id;
-                    $occurrence->setRelation('bookings', collect());
-                    $upcomingOccurrences->push($occurrence);
+                    // Create a separate occurrence for each booking date
+                    foreach ($bookingDates as $date) {
+                        $occurrence = $class->replicate();
+                        $occurrence->id = $class->id;
+                        $occurrence->class_date = $date;
+                        
+                        // Load bookings for this specific date
+                        $bookings = Booking::where('fitness_class_id', $class->id)
+                            ->where('booking_date', $date)
+                            ->where('status', 'confirmed')
+                            ->with('user')
+                            ->get();
+                        
+                        $occurrence->setRelation('bookings', $bookings);
+                        $upcomingOccurrences->push($occurrence);
+                    }
+                    
+                    // For recurring classes, also show next 4 weeks even without bookings
+                    $today = now()->startOfDay();
+                    $endDate = now()->addWeeks(4)->endOfDay();
+                    $currentDate = $today->copy();
+                    
+                    while ($currentDate <= $endDate) {
+                        // Check if this day matches the recurring pattern
+                        $dayOfWeek = strtolower($currentDate->format('l'));
+                        if ($class->$dayOfWeek) {
+                            $dateString = $currentDate->toDateString();
+                            
+                            // Only add if we don't already have this date from bookings
+                            if (!$bookingDates->contains($dateString)) {
+                                $occurrence = $class->replicate();
+                                $occurrence->id = $class->id;
+                                $occurrence->class_date = $dateString;
+                                $occurrence->setRelation('bookings', collect());
+                                $upcomingOccurrences->push($occurrence);
+                            }
+                        }
+                        $currentDate->addDay();
+                    }
+                } else {
+                    // For non-recurring classes, show if the class date is in the future
+                    if ($class->class_date >= now()->toDateString()) {
+                        // Load bookings for this class
+                        $bookings = Booking::where('fitness_class_id', $class->id)
+                            ->where('status', 'confirmed')
+                            ->with('user')
+                            ->get();
+                        
+                        $class->setRelation('bookings', $bookings);
+                        $upcomingOccurrences->push($class);
+                    }
                 }
             }
 
