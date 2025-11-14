@@ -664,8 +664,9 @@ class FitnessClassController extends Controller
         ]);
 
         try {
-            // Send the roster email to the specified address
-            Mail::to($recipientEmail)->send(new InstructorClassRoster($class, 'booking_update', $bookingDate));
+            // Send the roster email to the specified address (force immediate send, don't queue)
+            $mailable = new InstructorClassRoster($class, 'booking_update', $bookingDate);
+            Mail::to($recipientEmail)->send($mailable);
 
             $dateFormatted = Carbon::parse($bookingDate)->format('l, F j, Y');
             
@@ -673,6 +674,7 @@ class FitnessClassController extends Controller
                 'recipient_email' => $recipientEmail,
                 'class_name' => $class->name,
                 'booking_date' => $bookingDate,
+                'mail_sent' => true,
             ]);
             
             return back()->with('success', sprintf(

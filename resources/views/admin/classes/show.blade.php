@@ -391,9 +391,10 @@
                 <button type="button" onclick="closeSendRosterModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
                     Cancel
                 </button>
-                <form id="send-roster-form" action="{{ route('admin.classes.send-roster', $class) }}" method="POST" class="inline">
+                <form id="send-roster-form" action="{{ route('admin.classes.send-roster', $class) }}" method="POST" class="inline" onsubmit="return addEmailToForm()">
                     @csrf
                     <input type="hidden" name="date" value="@if(isset($filterDate)){{ $filterDate }}@elseif($class->display_date ?? false){{ $class->display_date->format('Y-m-d') }}@else{{ $class->class_date->format('Y-m-d') }}@endif">
+                    <input type="hidden" name="email" id="hidden_roster_email" value="">
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors inline-flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
@@ -446,20 +447,20 @@ function closeSendRosterModal() {
     document.getElementById('sendRosterModal').style.display = 'none';
 }
 
-function submitSendRoster() {
+function addEmailToForm() {
     const email = document.getElementById('roster_email').value;
     
-    // Create hidden input for email if it doesn't exist
-    let emailInput = document.querySelector('#send-roster-form input[name="email"]');
-    if (!emailInput) {
-        emailInput = document.createElement('input');
-        emailInput.type = 'hidden';
-        emailInput.name = 'email';
-        document.getElementById('send-roster-form').appendChild(emailInput);
+    // Validate email is not empty
+    if (!email || email.trim() === '') {
+        alert('Please enter an email address');
+        return false;
     }
-    emailInput.value = email;
     
-    document.getElementById('send-roster-form').submit();
+    // Set the hidden input value
+    document.getElementById('hidden_roster_email').value = email;
+    
+    // Allow form to submit
+    return true;
 }
 
 document.getElementById('sendRosterModal').addEventListener('click', function(e) {
