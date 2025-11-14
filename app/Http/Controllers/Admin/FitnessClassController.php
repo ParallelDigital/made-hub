@@ -632,4 +632,52 @@ class FitnessClassController extends Controller
             FitnessClass::insert($instances);
         }
     }
+
+    /**
+     * Send roster email to instructor for a specific class occurrence
+     */
+    public function sendRosterEmail(Request $request, FitnessClass $class)
+    {
+        $request->validate([
+            'date' => 'required|date',
+        ]);
+
+        $bookingDate = $request->input('date');
+
+        // Check if class has an instructor
+        if (!$class->instructor || !$class->instructor->email) {
+            return back()->with('error', 'This class has no instructor assigned or instructor has no email.');
+        }
+
+        // Count bookings for this date
+        $bookingCount = \App\Models\Booking::where('fitness_class_id', $class->id)
+            ->where('booking_date', $bookingDate)
+            ->where('status', 'confirmed')
+            ->count();
+
+        try {
+            // Send the roster email
+            \Illuminate\Support\Facades\Mail::to($class->instructor->email)
+                ->send(new \App\Mail\InstructorClassRoster($class, 'booking_update', $bookingDate));
+
+            $dateFormatted = \Carbon\Carbon::parse($bookingDate)->format('l, F j, Y');
+            
+            return back()->with('success', sprintf(
+                'Roster email sent to %s for %s on %s (%d booking%s)',
+                $class->instructor->name,
+                $class->name,
+                $dateFormatted,
+                $bookingCount,
+                $bookingCount === 1 ? '' : 's'
+            ));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send roster email', [
+                'class_id' => $class->id,
+                'booking_date' => $bookingDate,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Failed to send roster email: ' . $e->getMessage());
+        }
+    }
 }

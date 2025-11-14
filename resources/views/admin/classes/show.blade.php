@@ -14,6 +14,12 @@
             <h1 class="text-2xl font-bold text-white">{{ $class->name }}</h1>
         </div>
         <div class="flex space-x-3">
+            <button type="button" onclick="showSendRosterModal()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors inline-flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                Send Roster Email
+            </button>
             <a href="{{ route('admin.classes.edit', $class) }}" 
                class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
                 Edit Class
@@ -320,6 +326,63 @@
     </div>
 </div>
 
+<!-- Send Roster Email Modal -->
+<div id="sendRosterModal" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;">
+    <div class="absolute inset-0 bg-black bg-opacity-60" onclick="closeSendRosterModal()"></div>
+    <div class="relative bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-gray-700">
+            <h3 class="text-lg font-semibold text-white">Send Roster Email</h3>
+            <button type="button" class="text-gray-400 hover:text-white" onclick="closeSendRosterModal()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-5">
+            <div class="mb-4">
+                <h4 class="text-white font-medium mb-2">{{ $class->name }}</h4>
+                <p class="text-gray-400 text-sm mb-3">
+                    @if(isset($filterDate))
+                        {{ \Carbon\Carbon::parse($filterDate)->format('l, F j, Y') }} at {{ $class->start_time }}
+                    @elseif($class->display_date ?? false)
+                        {{ $class->display_date->format('l, F j, Y') }} at {{ $class->start_time }}
+                    @else
+                        {{ $class->class_date->format('l, F j, Y') }} at {{ $class->start_time }}
+                    @endif
+                </p>
+                @if($class->instructor)
+                    <p class="text-gray-400 text-sm">
+                        Instructor: <span class="text-white">{{ $class->instructor->name }}</span> ({{ $class->instructor->email }})
+                    </p>
+                @endif
+            </div>
+
+            <div class="mb-4 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+                <p class="text-sm text-blue-200">
+                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    This will send the current class roster to the instructor via email.
+                </p>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeSendRosterModal()" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                    Cancel
+                </button>
+                <form id="send-roster-form" action="{{ route('admin.classes.send-roster', $class) }}" method="POST" class="inline">
+                    @csrf
+                    <input type="hidden" name="date" value="@if(isset($filterDate)){{ $filterDate }}@elseif($class->display_date ?? false){{ $class->display_date->format('Y-m-d') }}@else{{ $class->class_date->format('Y-m-d') }}@endif">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors inline-flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        Send Email
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function openBookingsModal() {
     document.getElementById('bookingsModal').style.display = 'flex';
@@ -348,6 +411,25 @@ function submitCancel() {
 document.getElementById('cancelModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeCancelModal();
+    }
+});
+
+// Send Roster Email Modal Functions
+function showSendRosterModal() {
+    document.getElementById('sendRosterModal').style.display = 'flex';
+}
+
+function closeSendRosterModal() {
+    document.getElementById('sendRosterModal').style.display = 'none';
+}
+
+function submitSendRoster() {
+    document.getElementById('send-roster-form').submit();
+}
+
+document.getElementById('sendRosterModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSendRosterModal();
     }
 });
 </script>
